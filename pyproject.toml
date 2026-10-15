@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "contextweave"
+version = "0.1.0"
+description = "Validity-checked planner research harness for modular KV-cache composition (Phase 0)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "ContextWeave" }]
+dependencies = [
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+]
+# Intentionally omitted: torch, vllm, lmcache, transformers.
+# Do NOT add a [gpu] extra that installs them into the laptop venv.
+# Install ML stacks only on a rented GPU host (Docs/local-safety.md).
+
+[project.scripts]
+cw-analyze-trace = "contextweave.cli.analyze_trace:main"
+cw-generate-workload = "contextweave.cli.generate_workload:main"
+cw-import-trace = "contextweave.cli.import_trace:main"
+cw-cost-model = "contextweave.cli.cost_model:main"
+cw-build-corpus-trace = "contextweave.cli.build_corpus_trace:main"
+cw-fingerprint-example = "contextweave.cli.fingerprint_example:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

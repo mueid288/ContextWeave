@@ -1,0 +1,14 @@
+# NOTE: This config is not yet consumed by any CLI entry point.
+# Intended for future use with cw-cost-model --config.
+# See MAJ-10 in the project review for details.
+# Matches PRD §7.5 worked example assumptions.
+name: dense-8b-gqa
+params: 8.0e9
+num_layers: 32
+d_model: 4096
+num_kv_heads: 8
+head_dim: 128
+bytes_per_scalar: 2.0
+effective_tflops: 450.0
+default_lengths: [10000, 32000, 100000]
+default_repair_fraction: 0.15

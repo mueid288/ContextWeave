@@ -1,0 +1,20 @@
+# Path C: corpus-backed replay (provisional G0).
+name: corpus_replay_default
+seed: 42
+num_requests: 300
+chars_per_token: 4.0
+
+chunk_chars_target: 3200
+chunk_chars_min: 2048
+chunk_chars_max: 8192
+
+synthesis_fraction: 0.45
+docs_per_request_min: 1
+docs_per_request_max: 4
+shared_prefix_fraction: 0.9
+prefix_token_count: 256
+query_tokens_min: 24
+query_tokens_max: 96
+popularity_alpha: 1.05
+reuse_distance_max: 40
+recursive: true

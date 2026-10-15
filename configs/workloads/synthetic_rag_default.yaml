@@ -1,0 +1,27 @@
+# Synthetic multi-document RAG workload for provisional Gate G0.
+# Documented recurrence stats — replace with a real serving trace when available.
+
+name: synthetic_rag_default
+seed: 42
+num_requests: 500
+corpus_size: 80
+
+chunk_len_min: 256
+chunk_len_max: 4096
+chunk_len_median_target: 768
+
+docs_per_request_min: 1
+docs_per_request_max: 4
+synthesis_fraction: 0.45
+
+system_prefix_tokens: 256
+shared_prefix_fraction: 0.85
+
+popularity_alpha: 1.1
+reuse_distance_max: 40
+
+query_tokens_min: 32
+query_tokens_max: 128
+
+vocab_size: 32000
+num_prefix_templates: 3

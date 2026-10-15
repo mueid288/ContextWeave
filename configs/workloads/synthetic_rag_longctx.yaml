@@ -1,0 +1,27 @@
+# Longer-context synthetic RAG — addresses default workload being ~99% <8k.
+# Still provisional for G0; use alongside synthetic_rag_default.
+
+name: synthetic_rag_longctx
+seed: 43
+num_requests: 300
+corpus_size: 60
+
+chunk_len_min: 1024
+chunk_len_max: 8192
+chunk_len_median_target: 3072
+
+docs_per_request_min: 2
+docs_per_request_max: 5
+synthesis_fraction: 0.55
+
+system_prefix_tokens: 512
+shared_prefix_fraction: 0.9
+
+popularity_alpha: 1.05
+reuse_distance_max: 35
+
+query_tokens_min: 48
+query_tokens_max: 160
+
+vocab_size: 32000
+num_prefix_templates: 3
