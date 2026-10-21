@@ -15,6 +15,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 PORT="${LMCACHE_MP_PORT:-5555}"
+# Colab often already binds 8080 — do not use the LMCache HTTP default.
+HTTP_PORT="${LMCACHE_HTTP_PORT:-18080}"
 LOG="${LMCACHE_MP_LOG:-/tmp/lmcache_blend_server.log}"
 
 cleanup() {
@@ -26,10 +28,12 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "=== starting lmcache server (engine-type=blend) on :$PORT ==="
+echo "=== starting lmcache server (engine-type=blend) req=:$PORT http=:$HTTP_PORT ==="
 lmcache server \
   --host 127.0.0.1 \
   --port "$PORT" \
+  --http-host 127.0.0.1 \
+  --http-port "$HTTP_PORT" \
   --l1-size-gb "${LMCACHE_L1_GB:-8}" \
   --eviction-policy LRU \
   --engine-type blend \
@@ -37,9 +41,19 @@ lmcache server \
   --supported-transfer-mode auto \
   >"$LOG" 2>&1 &
 SERVER_PID=$!
-sleep 3
+sleep 4
 if ! kill -0 "$SERVER_PID" 2>/dev/null; then
   echo "lmcache server failed to start. Log:"
+  cat "$LOG" || true
+  exit 2
+fi
+if grep -q "address already in use" "$LOG"; then
+  echo "lmcache server hit a port conflict. Log:"
+  cat "$LOG" || true
+  exit 2
+fi
+if ! grep -q "LMCache cache server is running" "$LOG"; then
+  echo "lmcache server did not report ready. Log:"
   cat "$LOG" || true
   exit 2
 fi

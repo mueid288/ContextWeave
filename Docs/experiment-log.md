@@ -134,9 +134,13 @@
 - Fail: first `generate` → `save_kv_layer` → `batched_from_gpu` →
   `IndexError: Dimension out of range (expected [-4, 3], but got 4)`
 - Interpretation: KV-layout / layerwise GPU connector mismatch vs vLLM 0.32 (not a ContextWeave bug)
-- Decision: **abort CacheBlend on this pin** (matches runbook stop condition). Keep G1 step 1.
-  Next session: try matched image (`lmcache/vllm-openai`) or older documented pair
-  (e.g. vLLM ~0.26 + LMCache 0.5.2), or MP `--engine-type blend` — 1-session time-box.
+- Decision: try MP `--engine-type blend` next; keep G1 step 1–2b.
+
+## 2026-10-21 — G1 CacheBlend MP hang (Colab port 8080)
+
+- `lmcache server` default HTTP bind on **8080** failed (`address already in use` on Colab)
+- Server then shut down; vLLM MP worker still started and hung on first generate (`mq_timeout=300`)
+- Fix: `g1_cacheblend_mp.sh` now uses `--http-port 18080` and refuses to continue if server dies
 
 ## Template for future entries
 
