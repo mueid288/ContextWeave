@@ -96,7 +96,18 @@ pip install lmcache --no-deps
 
 ## Step 4 — EPIC
 
-1-week time-box; document failure if pins break on vLLM 0.32.
+EPIC is a **vLLM ~0.7 fork**, not compatible with this Colab pin. Full procedure:
+[`Docs/g1-epic.md`](g1-epic.md).
+
+On the **current** session (bank documented BLOCK):
+
+```bash
+cd /content/ContextWeave && git pull
+python scripts/g1_epic_probe.py --json | tee g1_epic_probe.json
+```
+
+Expected: `epic_fork_detected: false`. Then stop Colab. Optional later: fresh session +
+`CONTEXTWEAVE_ALLOW_EPIC_REINSTALL=1 bash scripts/g1_epic_install.sh`.
 
 ## Stop
 

@@ -26,7 +26,7 @@ Updated: 2026-10-21
 - [x] G1 step 2: answer preservation — **PASS** (contains 1.0/1.0, agree 0.67, `pass_heuristic`)
 - [x] G1 step 2b: reorder gap — **PASS** (1.25× slower on reorder; answers OK)
 - [x] G1 step 3 CacheBlend MP — **provisional latency** (1.22× warm reorder) / **quality FAIL**; in-process still BLOCKED
-- [ ] G1 step 4: EPIC (or matched-image CacheBlend quality recheck)
+- [ ] G1 step 4: EPIC — probe on current pin (expect BLOCK); dedicated fork session optional (`Docs/g1-epic.md`)
 - [ ] Partner log optional (`docs/partner-ask.md`)
 
 ## Explicitly not started

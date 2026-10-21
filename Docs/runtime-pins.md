@@ -14,7 +14,7 @@ Status: **partially validated** — smoke + prefix TTFT OK on Colab; CacheBlend 
 | Smoke model (first) | `Qwen/Qwen3-8B` | Qwen license | Prefer for first cloud smoke (usually ungated) |
 | Primary serving model | `meta-llama/Llama-3.1-8B-Instruct` | Llama community license | HF gated — accept before Llama runs |
 | Secondary | `Qwen/Qwen3-8B` | Qwen license | Also used for unscaled-RoPE Case A/B later |
-| EPIC | https://github.com/DerekHJH/epic | **Apache-2.0** | Confirmed via GitHub license API; often older vLLM — 1-week time-box |
+| EPIC | https://github.com/DerekHJH/epic | **Apache-2.0** | **vLLM ~0.7 fork** (not a plugin); torch **2.5.1** build — dedicated session only (`Docs/g1-epic.md`) |
 
 ## Connector config (must set explicitly)
 

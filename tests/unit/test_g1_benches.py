@@ -157,3 +157,28 @@ def test_g1_reorder_docs_change_order():
     assert abc.index("Document Alpha") < abc.index("Document Beta")
     assert bca.index("Document Beta") < bca.index("Document Alpha")
     assert "ALPHA-9173" in abc and "ALPHA-9173" in bca
+
+
+def test_g1_epic_probe_help_and_no_crash_without_vllm():
+    result = subprocess.run(
+        [sys.executable, str(REPO / "scripts" / "g1_epic_probe.py"), "--help"],
+        capture_output=True,
+        text=True,
+        cwd=REPO,
+    )
+    assert result.returncode == 0
+    assert "EPIC" in result.stdout or "epic" in result.stdout.lower()
+
+
+def test_g1_epic_bench_refuses_without_allow(monkeypatch: pytest.MonkeyPatch):
+    mod = _load_script("g1_epic_bench.py")
+    monkeypatch.delenv("CONTEXTWEAVE_ALLOW_MODEL_LOAD", raising=False)
+    assert mod.main(["--json"]) == 1
+
+
+def test_g1_epic_docs_helper():
+    mod = _load_script("g1_epic_bench.py")
+    docs = mod._docs(filler_chars=40, order=("B", "C", "A"))
+    assert len(docs) == 3
+    assert "Karachi" in docs[0]
+    assert "ALPHA-9173" in docs[2]

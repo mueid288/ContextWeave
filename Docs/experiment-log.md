@@ -160,7 +160,15 @@
 - Interpretation: MP stack runs and shows a TTFT gap, but this is **not** a clean non-prefix
   reuse proof — could be warmup/noise, and blend may be corrupting decode on this pin
 - Decision: bank as **provisional latency**; do **not** claim G1 CacheBlend quality.
-  Next: stop Colab; EPIC or matched `lmcache/vllm-openai` + quality-gated blend bench
+
+## 2026-10-21 — G1 EPIC path = dedicated fork (not this Colab pin)
+
+- DerekHJH/epic is a **vLLM ~0.7 fork** (`torch==2.5.1`, `cache_fuse_metadata` / `hack_kv`)
+- Incompatible with working Colab pin (vLLM **0.32.0**); installing it would wipe smoke/TTFT stack
+- Harness: `scripts/g1_epic_probe.py` (pin check), `g1_epic_install.sh` + `g1_epic_bench.py`
+  (dedicated session only) — see `Docs/g1-epic.md`
+- Decision: bank **documented pin BLOCK** on current Colab via probe; optional EPIC rebuild
+  is a separate time-boxed session, not an in-place upgrade
 
 ## Template for future entries
 
