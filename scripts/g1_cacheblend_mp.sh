@@ -18,6 +18,7 @@ PORT="${LMCACHE_MP_PORT:-5555}"
 # Colab often already binds 8080 — do not use the LMCache HTTP default.
 HTTP_PORT="${LMCACHE_HTTP_PORT:-18080}"
 LOG="${LMCACHE_MP_LOG:-/tmp/lmcache_blend_server.log}"
+READY_TIMEOUT_S="${LMCACHE_READY_TIMEOUT_S:-90}"
 
 cleanup() {
   if [[ -n "${SERVER_PID:-}" ]] && kill -0 "$SERVER_PID" 2>/dev/null; then
@@ -28,6 +29,14 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Stale EngineCore / prior hung client holds GPU + confuses the new server.
+if pgrep -af 'g1_cacheblend|EngineCore|lmcache server' >/dev/null 2>&1; then
+  echo "=== leftover CacheBlend / vLLM / lmcache processes (kill before retry) ==="
+  pgrep -af 'g1_cacheblend|EngineCore|lmcache server' || true
+  echo "Tip: pkill -f 'g1_cacheblend|lmcache.server|EngineCore' && sleep 2"
+fi
+
+rm -f "$LOG"
 echo "=== starting lmcache server (engine-type=blend) req=:$PORT http=:$HTTP_PORT ==="
 lmcache server \
   --host 127.0.0.1 \
@@ -38,26 +47,42 @@ lmcache server \
   --eviction-policy LRU \
   --engine-type blend \
   --chunk-size 256 \
-  --supported-transfer-mode auto \
+  --supported-transfer-mode lmcache_driven \
   >"$LOG" 2>&1 &
 SERVER_PID=$!
-sleep 4
-if ! kill -0 "$SERVER_PID" 2>/dev/null; then
-  echo "lmcache server failed to start. Log:"
+
+ready=0
+deadline=$((SECONDS + READY_TIMEOUT_S))
+while (( SECONDS < deadline )); do
+  if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+    echo "lmcache server exited before ready. Log:"
+    cat "$LOG" || true
+    exit 2
+  fi
+  if grep -qE 'address already in use|Address already in use' "$LOG" 2>/dev/null; then
+    echo "lmcache server hit a port conflict. Log:"
+    cat "$LOG" || true
+    exit 2
+  fi
+  # Official ready lines (ZMQ bind first; final keep-alive second). Blend init can take >4s.
+  if grep -qE 'LMCache ZMQ cache server is running|LMCache cache server is running' "$LOG" 2>/dev/null; then
+    ready=1
+    break
+  fi
+  # HTTP healthcheck is optional but definitive when present.
+  if curl -fsS "http://127.0.0.1:${HTTP_PORT}/healthcheck" >/dev/null 2>&1; then
+    ready=1
+    break
+  fi
+  sleep 1
+done
+
+if [[ "$ready" -ne 1 ]]; then
+  echo "lmcache server not ready after ${READY_TIMEOUT_S}s. Log:"
   cat "$LOG" || true
   exit 2
 fi
-if grep -q "address already in use" "$LOG"; then
-  echo "lmcache server hit a port conflict. Log:"
-  cat "$LOG" || true
-  exit 2
-fi
-if ! grep -q "LMCache cache server is running" "$LOG"; then
-  echo "lmcache server did not report ready. Log:"
-  cat "$LOG" || true
-  exit 2
-fi
-echo "lmcache server pid=$SERVER_PID (log: $LOG)"
+echo "lmcache server pid=$SERVER_PID ready (log: $LOG)"
 
 export LMCACHE_MP_HOST="127.0.0.1"
 export LMCACHE_MP_PORT="$PORT"

@@ -142,6 +142,14 @@
 - Server then shut down; vLLM MP worker still started and hung on first generate (`mq_timeout=300`)
 - Fix: `g1_cacheblend_mp.sh` now uses `--http-port 18080` and refuses to continue if server dies
 
+## 2026-10-21 — G1 CacheBlend MP false-not-ready (Colab)
+
+- After 18080 fix, script killed a still-alive server at ~4s: ready string not yet logged
+  (blend CUDA init slower than prefix-only; ZMQ ready line is
+  `LMCache ZMQ cache server is running`)
+- Concurrently, prior hung client finally raised `ConnectionError` after `mq_timeout=300`
+- Fix: poll up to 90s for ZMQ/ready/healthcheck; use `--supported-transfer-mode lmcache_driven`
+
 ## Template for future entries
 
 ```
