@@ -83,6 +83,15 @@
 - Result: **SMOKE_PASS** (output contained `smoke-ok`; model load ~15.3 GiB, KV budget ~19.6 GiB)
 - Decision: open G1 step 1 (`scripts/g1_ttft_bench.py` — full vs prefix TTFT). CacheBlend deferred until step 1 saved.
 
+## 2026-10-21 — G1 step 1 TTFT (short prefix; provisional)
+
+- Command: `python scripts/g1_ttft_bench.py --json` (defaults: `--doc-chars 3500`, max_model_len 4096)
+- Shared prefix: **~1500 chars** (too short for a strong prefix-cache signal)
+- full_prefill p50: **443.6 ms** (n=3)
+- prefix_cache p50: **423.4 ms** (n=3)
+- Speedup: **1.05×** (noise-level; not evidence for or against G1)
+- Decision: re-run with longer docs (`--doc-chars 12000`, `--max-model-len 8192`) before interpreting; then CacheBlend
+
 ## Template for future entries
 
 ```

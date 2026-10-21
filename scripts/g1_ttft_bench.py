@@ -27,20 +27,28 @@ if str(SRC) not in sys.path:
 
 
 def _build_prompts(doc_chars: int = 3500) -> tuple[str, list[str]]:
-    """Shared system prefix + three docs; queries share the prefix."""
+    """Shared system prefix + three docs; queries share the prefix.
+
+    Pads each doc to roughly ``doc_chars`` so short Fact-* repeats do not
+    collapse the TTFT signal (default 3500 was only ~500 chars/doc).
+    """
     system = (
         "You are a careful assistant. Answer using only the documents below. "
         "If the answer is missing, say unknown.\n\n"
     )
     docs = []
     for i, name in enumerate(("Alpha", "Beta", "Gamma"), start=1):
-        body = (f"Document {name} (id={i}). " + f"Fact-{name} " * 40)[:doc_chars]
+        header = f"Document {name} (id={i}). "
+        # Repeat a fixed line until we hit the target size (stable tokenization).
+        line = f"Fact-{name} token-fill line for ContextWeave G1 TTFT bench. "
+        body = header + (line * max(1, (doc_chars // len(line)) + 1))
+        body = body[:doc_chars]
         docs.append(f"### Doc {name}\n{body}\n")
     prefix = system + "".join(docs)
     prompts = [
-        prefix + "Question: What is the id of Document Alpha? Answer briefly.",
-        prefix + "Question: What is the id of Document Beta? Answer briefly.",
-        prefix + "Question: What is the id of Document Gamma? Answer briefly.",
+        prefix + "Question: What is the id of Document Alpha? Answer with only the number.",
+        prefix + "Question: What is the id of Document Beta? Answer with only the number.",
+        prefix + "Question: What is the id of Document Gamma? Answer with only the number.",
     ]
     return prefix, prompts
 
