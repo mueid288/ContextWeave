@@ -45,6 +45,11 @@ python scripts/g1_cacheblend_bench.py --json | tee g1_cacheblend.json
 **Success:** `pass_heuristic: true` (warm reordered prompts ≥15% faster than cold A-B-C).  
 **Fail / abort:** times ≈ equal → #3238-class pin failure; log it, do not expand matrix yet.
 
+**Known pin friction (handled in the bench script):** stock vLLM never calls
+`VLLMModelTracker.register_model` (LMCache [#4131](https://github.com/LMCache/LMCache/issues/4131)).
+Our script monkeypatches `GPUModelRunner.load_model` and sets
+`VLLM_ENABLE_V1_MULTIPROCESSING=0` so blending can start.
+
 If `import lmcache` breaks CUDA symbols against the installed torch, try:
 
 ```bash
