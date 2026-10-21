@@ -30,7 +30,6 @@ import os
 import statistics
 import sys
 import time
-from dataclasses import asdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,16 +53,17 @@ def _setup_blend_env(*, blend_special_str: str, cpu_gb: float) -> None:
 def _build_llm(*, model: str, max_model_len: int, gpu_mem: float):
     from vllm import LLM
     from vllm.config import KVTransferConfig
-    from vllm.engine.arg_utils import EngineArgs
 
     from lmcache.integration.vllm.utils import ENGINE_NAME
     from lmcache.v1.cache_engine import LMCacheEngineBuilder
 
+    # Construct LLM with explicit kwargs — asdict(EngineArgs) breaks on vLLM 0.32
+    # (CompilationConfig.cudagraph_capture_sizes=None fails pydantic validation).
     ktc = KVTransferConfig(
         kv_connector="LMCacheConnectorV1",
         kv_role="kv_both",
     )
-    llm_args = EngineArgs(
+    llm = LLM(
         model=model,
         kv_transfer_config=ktc,
         max_model_len=max_model_len,
@@ -72,7 +72,6 @@ def _build_llm(*, model: str, max_model_len: int, gpu_mem: float):
         enforce_eager=True,
         trust_remote_code=True,
     )
-    llm = LLM(**asdict(llm_args))
     try:
         yield llm
     finally:
