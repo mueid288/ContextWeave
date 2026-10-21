@@ -25,7 +25,7 @@ Updated: 2026-10-21
 - [x] G1 step 1: full vs prefix TTFT — **2.57×** at 6k shared tokens (`g1_ttft_long.json`)
 - [x] G1 step 2: answer preservation — **PASS** (contains 1.0/1.0, agree 0.67, `pass_heuristic`)
 - [x] G1 step 2b: reorder gap — **PASS** (1.25× slower on reorder; answers OK)
-- [ ] G1 step 3 CacheBlend — **BLOCKED** on vLLM 0.32 + lmcache 0.5.6; retry matched pins later
+- [ ] G1 step 3 CacheBlend — in-process **BLOCKED**; try MP blend (`scripts/g1_cacheblend_mp.sh`) on live Colab
 - [ ] G1 step 4: EPIC
 - [ ] Partner log optional (`docs/partner-ask.md`)
 

@@ -67,10 +67,22 @@ python scripts/g1_cacheblend_bench.py --json | tee g1_cacheblend.json
 **Success:** `pass_heuristic: true` (warm reordered prompts ≥15% faster than cold A-B-C).  
 **Fail / abort:** times ≈ equal → #3238-class pin failure; log it, do not expand matrix yet.
 
-**2026-10-21 Colab result (vLLM 0.32.0 + lmcache 0.5.6):** **BLOCKED** after engine start —
-`IndexError` in `batched_from_gpu` / `single_layer_kv_transfer` (dim 4). Do **not** keep
-retrying this pair tonight. Next attempt: official `lmcache/vllm-openai` image or an older
-documented vLLM↔LMCache pair (see `Docs/runtime-pins.md`).
+**2026-10-21 Colab result (vLLM 0.32.0 + lmcache 0.5.6, in-process):** **BLOCKED** —
+`IndexError` in `batched_from_gpu` (dim 4).
+
+**Retry on same Colab (MP blend engine — preferred next try):**
+
+```bash
+cd /content/ContextWeave
+git fetch origin && git reset --hard origin/main
+chmod +x scripts/g1_cacheblend_mp.sh
+
+export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
+bash scripts/g1_cacheblend_mp.sh
+```
+
+If MP also fails → stop; use `lmcache/vllm-openai` image or older pins next session
+(see `Docs/runtime-pins.md`).
 
 **Known friction (handled in the bench script):** stock vLLM never calls
 `VLLMModelTracker.register_model` (LMCache [#4131](https://github.com/LMCache/LMCache/issues/4131)).
