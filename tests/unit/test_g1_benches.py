@@ -126,6 +126,9 @@ def test_g1_quality_scoring_and_docs():
     assert "2019" in docs
     sc = mod._score("The code is ALPHA-9173.\nOkay thinking", "ALPHA-9173")
     assert sc["contains"] is True
+    # Gold on a later line (Qwen-style) must still count.
+    sc2 = mod._score("The year is stated as:\n\n2019.\n\nWhat next?", "2019")
+    assert sc2["contains"] is True
     assert mod.main(["--json"]) == 1  # no allow flag
 
 

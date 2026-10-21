@@ -102,6 +102,13 @@
 - Speedup: **2.57×**
 - Decision: native prefix baseline is real on this stack. Next = LMCache CacheBlend (non-prefix) + answer-preservation slice.
 
+## 2026-10-21 — G1 quality slice (first run; scorer too strict)
+
+- Command: `python scripts/g1_quality_bench.py --json`
+- **modes_agree_rate: 1.0** (full vs prefix identical on all 3 cases) ← main preservation signal
+- contains_rate reported 0.33 because scorer only looked at the first line; gold `2019` appeared later in the output
+- Decision: treat agreement as provisional PASS for prefix answer preservation; fix scorer and re-score / re-run
+
 ## 2026-10-21 — G1 step 3 CacheBlend BLOCKED (pin)
 
 - Env: Colab A100-40GB, vLLM **0.32.0**, lmcache **0.5.6**, `Qwen/Qwen3-8B`

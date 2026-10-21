@@ -61,22 +61,25 @@ def _build_shared_docs(*, filler_chars: int) -> str:
 
 def _normalize(text: str) -> str:
     t = text.strip().lower()
-    # Drop common chatter / thinking tails for Qwen-style outputs.
-    t = re.split(r"\n+", t)[0]
     t = re.sub(r"[^a-z0-9\-]+", " ", t).strip()
     return t
 
 
 def _score(output: str, gold: str) -> dict:
+    """Score against the full output (Qwen often puts the answer mid-text)."""
     norm_out = _normalize(output)
     norm_gold = _normalize(gold)
-    exact = norm_out == norm_gold
-    contains = norm_gold in norm_out
+    # Also check raw case-insensitive containment for codes like ALPHA-9173.
+    raw_contains = gold.lower() in output.lower()
+    contains = (norm_gold in norm_out) or raw_contains
+    # Exact: first non-empty line equals gold after normalize.
+    first = next((ln.strip() for ln in output.splitlines() if ln.strip()), "")
+    exact = _normalize(first) == norm_gold or first.strip() == gold
     return {
         "exact": exact,
         "contains": contains,
         "output": output,
-        "normalized": norm_out,
+        "normalized": norm_out[:200],
     }
 
 
@@ -97,6 +100,7 @@ def _run_mode(
         trust_remote_code=True,
         enable_prefix_caching=enable_prefix_caching,
     )
+    # Keep answers short; Qwen3 often continues into thinking if max_tokens is large.
     params = SamplingParams(max_tokens=max_tokens, temperature=0.0)
     # Warm shared prefix once when caching is on.
     if enable_prefix_caching and prompts:
@@ -123,7 +127,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default=os.environ.get("SMOKE_MODEL", "Qwen/Qwen3-8B"))
     parser.add_argument("--max-model-len", type=int, default=8192)
-    parser.add_argument("--max-tokens", type=int, default=32)
+    parser.add_argument("--max-tokens", type=int, default=24)
     parser.add_argument("--filler-chars", type=int, default=2500)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
