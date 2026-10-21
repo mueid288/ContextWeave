@@ -1,10 +1,21 @@
 # Prior Art Matrix (Phase 0B desk work)
 
-Status: desk review updated 2026-10-11. Reported claims are authors' numbers, not reproductions.  
+Status: desk review updated 2026-10-20 (merged insights from `Docs/Research/`).  
+Reported claims are authors' numbers, **not** reproductions.  
 Verification policy: see PRD Appendix C.  
-Runtime pins: [runtime-pins.md](runtime-pins.md).
+Runtime pins: [runtime-pins.md](runtime-pins.md).  
+Candidate post-G1 mechanism: [Research/ResolventKV-adoption.md](Research/ResolventKV-adoption.md).
 
 **Tier 1 = must reproduce or adopt. Tier 2 = reproduce if code exists / time allows. Tier 3 = desk only.**
+
+### Evaluation contracts we adopt from recent PIC literature
+
+| Contract | Meaning for our G1/G2 runs |
+|---|---|
+| **Causal closure** (SAFE-KV) | Reusing composed chunk KV without repairing downstream history is not “full-prefill equivalent”; report **answer preservation** vs full prefill |
+| **Routing vs values** (ATTUNER) | Quality loss can be mostly attention routing; don’t stop at “cached values look sane” |
+| **Sink / first-chunk carve-out** (Irminsul) | Pin system preamble on exact prefix cache; only movable docs use non-prefix reuse |
+| **Receiver necessity** | Prefer multi-hop / doc-dependent tasks; parametric-only benchmarks understate cache value |
 
 ## Tier 1
 
@@ -18,6 +29,18 @@ Runtime pins: [runtime-pins.md](runtime-pins.md).
 | Independent CLC comparison | arXiv 2603.20218 | Eval + PSR combo | None (PSR) | Methodology reference | N/A | Evaluation protocol |
 | HijackKV | arXiv 2607.19957 | Build-context poisoning | n/a | Threat model for Phase 2 tests | N/A | Fingerprint / canonical build |
 
+## Tier 1.5 — must *desk-verify* before claiming a gap (quality contracts)
+
+| Work | Venue / ID | Why it matters to us | Action |
+|---|---|---|---|
+| **SAFE-KV** | arXiv 2610.15186 | Proves prefix-conditioned PIC fails multi-hop without causal suffix repair; suffix repair ≈ full prefill cost | Cite for G1 quality bar; optional reproduce after CacheBlend |
+| **ATTUNER** | arXiv 2609.36722 | PIC failure ≈ attention routing; LoRA on queries (training) | Desk + optional ablation; not MVP path (training) |
+| **Irminsul / Leyline** | arXiv 2605.05696 / 2606.01065 | Δ-RoPE + CDC for shifted agentic tokens; **no** causal-history repair | Use sink carve-out + position fix only; not sufficient alone |
+| **CacheTune** | arXiv 2605.24022 | Cross-chunk deps in low-frequency KV modes; still token recompute | Desk; informs spectral hypotheses later |
+| **SpecCache / ProphetKV** | ACL 2026 / OpenReview | Deep-layer / query-driven selectors beat shallow CacheBlend selectors | Desk when choosing recompute policy |
+| **EncBank / CoMem** | arXiv 2610.10058 | Depth split: lower = local encode, upper = integrate | Desk only until after G1 |
+| **KV Packet / CacheRepair / C2KV** | 2026 arXivs | Learned wrappers / repair nets | Out of MVP (training); Tier 3 for novelty review |
+
 ## Tier 2
 
 | Work | Venue / ID | Type | Notes |
@@ -27,10 +50,13 @@ Runtime pins: [runtime-pins.md](runtime-pins.md).
 | Cache-Craft | arXiv 2502.15734 | Chunk-cache management | Production workload claims |
 | ProphetKV | arXiv 2602.02579 | Query-driven selective recompute | Query-dependent cost |
 | RelaxKV | arXiv 2609.33503 | Joint repair allocation | Query-aware |
+| eOptShrinkQ / TurboQuant | arXiv 2605.02905 | Spiked SVD / KV compression | Desk; spectral basis for *later* ResolventKV only |
 
 ## Tier 3 (desk only for MVP)
 
-Block-Attention, TurboRAG, KVLink, KV Packet (first learned revisit), COMB, C²KV, ATTUNER, SemPIC, CacheClip, Droidspeak, CacheSlide, ReCache, RedKnot — see PRD §4.1.
+Block-Attention, TurboRAG, KVLink, COMB, SemPIC, CacheClip, Droidspeak, CacheSlide, ReCache, RedKnot, HeteroFold / CacheBridge / CacheLink (cross-family latent), Echo/SKA (Koopman) — see PRD §4.1 and Research kill-table.
+
+**Explicit non-wedges (killed for our core path):** MLA-only Δ-rotation as sufficient repair; ZK-LLM proving; constant-memory Koopman attention requiring new pretrain; cross-model latent KV handoff.
 
 ## Required questions per Tier 1/2 work
 

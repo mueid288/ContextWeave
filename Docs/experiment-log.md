@@ -66,6 +66,14 @@
   boundary token assembly; Mode A build-mode enforcement; block-size padding
 - Phase 0 GPU planning buffer raised to 350–400 hours in amendments
 
+## 2026-10-20 — Research brief ingested (ResolventKV)
+
+- Source: `Docs/Research/Foundational AI Technology Research.md`
+- Adoption map: `Docs/Research/ResolventKV-adoption.md` (insights now; kernels after G1 only)
+- Updated: `Docs/prior-art.md` (SAFE-KV / ATTUNER / Irminsul contracts), `Docs/assumptions.md`,
+  `Docs/architecture.md`, `Docs/gpu-runbook.md` Tier-1 quality slice
+- Decision: keep Phase 0 path = smoke → CacheBlend/EPIC; ResolventKV is post-G1 candidate
+
 ## Template for future entries
 
 ```

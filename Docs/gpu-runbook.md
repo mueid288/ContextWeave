@@ -58,10 +58,13 @@ Budget / decision owner: fill PRD §0.5 when known.
 
 | Order | Baseline | Success artifact |
 |---|---|---|
-| 1 | Full prefill | p50/p95 TTFT + quality |
-| 2 | Native prefix caching | Shared-prefix prompts |
+| 1 | Full prefill | p50/p95 TTFT + **answer preservation** reference |
+| 2 | Native prefix caching | Shared-prefix prompts; sink carve-out held |
 | 3 | LMCache + CacheBlend | Non-prefix hits verified (not just prefix) |
 | 4 | EPIC | Or documented failure in ≤1 week |
+| 5 | Quality slice | HotpotQA / 2Wiki-style multi-hop (or Path C docs) vs full prefill — **causal-closure contract** |
+
+Do **not** start ResolventKV kernels in this matrix. If CacheBlend+EPIC leave a clear quality/latency gap after G1, open `Docs/Research/ResolventKV-adoption.md`.
 
 ## Stop conditions
 

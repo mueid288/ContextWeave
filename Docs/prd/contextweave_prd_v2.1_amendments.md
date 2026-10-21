@@ -208,3 +208,13 @@ Canonical segments **append** `boundary_token_ids` **then** pad to `kv_block_siz
 - Remove any `allowed_noncanonical` reuse bypass; non-canonical builds always fail validation.
 - Phase 0/1 `rope_type` allowlist: `{"default", "llama3"}` only.
 - Example / runtime position storage default: **post-RoPE** (§E).
+
+---
+
+## Research ingest — causal-closure quality bar (2026-10-20)
+
+From desk review of SAFE-KV / ATTUNER / Irminsul (`Docs/Research/`). Binding for **G1 reporting**, not a new product module:
+
+1. **Answer preservation:** every non-prefix reuse baseline reports answer agreement (or equivalent task metric) **vs full prefill** on a multi-hop / doc-dependent slice — TTFT alone is insufficient.
+2. **Sink carve-out:** system / first-chunk preamble stays on exact prefix cache; chunk reuse applies only to movable non-prefix docs (aligns with Mode A + FR-02).
+3. **ResolventKV:** deferred spectral causal-closure candidate — open only if G1 shows a residual gap after CacheBlend/EPIC. See `Docs/Research/ResolventKV-adoption.md`.

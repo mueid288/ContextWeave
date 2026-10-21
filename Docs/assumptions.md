@@ -21,10 +21,15 @@ Source: Phase 0 Kickoff plan + [prd/contextweave_prd_v2.md](prd/contextweave_prd
 | Phase 0 GPU buffer | Plan **350–400** GPU-hours (was ~200) |
 | MVP training | Training-free |
 | Novelty claims | Forbidden without dedicated prior-art / legal review |
+| Quality contract (from Research) | G1 reports **answer preservation vs full prefill** on multi-hop (not TTFT alone) |
+| Sink / first-chunk policy | System preamble pinned to exact prefix cache; chunk cache = non-prefix docs only |
+| Post-G1 candidate | ResolventKV spectral causal closure — see `Docs/Research/ResolventKV-adoption.md` |
+| Smoke GPU class | 48 GB class (A6000 / L40S); Qwen3-8B first |
 
 ## Non-goals this week
 
 - Planner product implementation beyond stubs
 - RoPE CUDA/Triton kernels
+- ResolventKV / SCSP / resolvent sweep implementation
 - Distributed artifact store / multi-tenant API
 - Training or LoRA

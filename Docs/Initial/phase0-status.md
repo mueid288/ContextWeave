@@ -1,6 +1,6 @@
 # Phase 0 status
 
-Updated: 2026-10-15
+Updated: 2026-10-20
 
 ## Done (CPU week)
 
@@ -9,6 +9,7 @@ Updated: 2026-10-15
 - [x] Exact-prefix cache simulator + Section 2.2 / G0 metrics
 - [x] Prior-art desk matrix stub + model RoPE check notes
 - [x] GPU quote criteria + smoke-first runbook
+- [x] ResolventKV research brief ingested → adoption map + prior-art / G1 quality contracts
 
 ## Next
 
@@ -20,13 +21,13 @@ Updated: 2026-10-15
 - [x] Fingerprint + provenance schema (FR-01/13)
 - [x] Gemini review gaps → PRD v2.1 / v2.1.1 amendments + G0 LRU / cost roofline / Mode A
 - [x] `my_corpus` G0 with `--require-working-set` @ 128 GB: PASS (76.3% LRU hits; matched denom)
-- [ ] Send `docs/partner-ask.md` / get serving-log JSONL when possible
-- [ ] Obtain GPU quotes when budget exists (do not rent until rent-gate checklist)
-- [ ] Pin exact vLLM version on GPU day; accept model licenses then
+- [ ] HF token + RunPod A6000 smoke (`scripts/smoke_remote.sh`)
+- [ ] G1 baselines: full prefill / prefix / CacheBlend / EPIC + answer preservation
+- [ ] Partner log optional (`docs/partner-ask.md`)
 
 ## Explicitly not started
 
-Planner, repair product, API, distributed cache, RoPE kernels.
+Planner, ResolventKV kernels, repair product, API, distributed cache, RoPE CUDA.
 
 ## Laptop safety
 

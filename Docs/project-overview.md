@@ -154,8 +154,10 @@ Rules (FR-02 / v2.1.1):
 
 1. Treat provisional G0 (synthetic / corpus replay) as the demand signal for research.  
 2. Next milestone when budget allows: **GPU smoke + baseline reproduction (G1)** on a rented host.  
-3. Only then: Phase 1 rotation / oracle-selection studies (G2).  
-4. A real partner trace would upgrade G0 from provisional to final — nice, not required to *start* G1 as a solo researcher if results stay clearly labeled.
+3. Measure **answer preservation vs full prefill** on multi-hop tasks (causal-closure contract from recent PIC papers).  
+4. Only then: Phase 1 rotation / oracle-selection studies (G2).  
+5. If existing repairs still leave a gap → candidate mechanism **ResolventKV** (spectral causal closure); see [`Research/ResolventKV-adoption.md`](Research/ResolventKV-adoption.md).  
+6. A real partner trace would upgrade G0 from provisional to final — nice, not required to *start* G1 as a solo researcher if results stay clearly labeled.
 
 ### One-sentence summary (technical)
 
@@ -169,6 +171,7 @@ Rules (FR-02 / v2.1.1):
 |---|---|
 | Full research charter | [`Docs/prd/contextweave_prd_v2.md`](prd/contextweave_prd_v2.md) |
 | Binding fixes (working-set, Mode A, roofline) | [`Docs/prd/contextweave_prd_v2.1_amendments.md`](prd/contextweave_prd_v2.1_amendments.md) |
+| ResolventKV research → what we adopt | [`Docs/Research/ResolventKV-adoption.md`](Research/ResolventKV-adoption.md) |
 | Laptop / GPU safety | [`Docs/local-safety.md`](local-safety.md), [`Docs/cloud-gpu-rental.md`](cloud-gpu-rental.md) |
 | Latest provisional G0 numbers | [`Docs/g0-provisional-synthetic.md`](g0-provisional-synthetic.md), [`Docs/g0-provisional-corpus-replay.md`](g0-provisional-corpus-replay.md) |
 | Run CPU tools | [`README.md`](../README.md) |
