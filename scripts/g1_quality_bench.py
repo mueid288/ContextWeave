@@ -102,17 +102,18 @@ def _run_mode(
     )
     # Keep answers short; Qwen3 often continues into thinking if max_tokens is large.
     params = SamplingParams(max_tokens=max_tokens, temperature=0.0)
-    # Warm shared prefix once when caching is on.
-    if enable_prefix_caching and prompts:
-        llm.generate([prompts[0]], SamplingParams(max_tokens=1, temperature=0.0))
 
     times_ms: list[float] = []
     texts: list[str] = []
-    for prompt in prompts:
+    for i, prompt in enumerate(prompts):
+        print(f"  [{mode}] case {i + 1}/{len(prompts)} …", flush=True)
         t0 = time.perf_counter()
         outs = llm.generate([prompt], params)
-        times_ms.append((time.perf_counter() - t0) * 1000.0)
+        dt = (time.perf_counter() - t0) * 1000.0
+        times_ms.append(dt)
         texts.append(outs[0].outputs[0].text.strip())
+        print(f"  [{mode}] case {i + 1} done in {dt:.0f} ms", flush=True)
+    print(f"=== tearing down {mode} engine ===", flush=True)
     del llm
     return {
         "mode": mode,
