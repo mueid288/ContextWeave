@@ -1,6 +1,6 @@
 # Phase 0 status
 
-Updated: 2026-10-20
+Updated: 2026-10-21
 
 ## Done (CPU week)
 
@@ -21,8 +21,9 @@ Updated: 2026-10-20
 - [x] Fingerprint + provenance schema (FR-01/13)
 - [x] Gemini review gaps → PRD v2.1 / v2.1.1 amendments + G0 LRU / cost roofline / Mode A
 - [x] `my_corpus` G0 with `--require-working-set` @ 128 GB: PASS (76.3% LRU hits; matched denom)
-- [ ] HF token + RunPod A6000 smoke (`scripts/smoke_remote.sh`)
-- [ ] G1 baselines: full prefill / prefix / CacheBlend / EPIC + answer preservation
+- [x] HF token + **Colab A100-40GB smoke** (`scripts/smoke_remote.sh` → **SMOKE_PASS**)
+- [ ] G1 step 1: `scripts/g1_ttft_bench.py` (full vs prefix TTFT) — see `Docs/g1-colab.md`
+- [ ] G1 step 3–4: CacheBlend + EPIC + answer preservation
 - [ ] Partner log optional (`docs/partner-ask.md`)
 
 ## Explicitly not started

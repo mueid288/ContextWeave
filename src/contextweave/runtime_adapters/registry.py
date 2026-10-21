@@ -2,12 +2,38 @@
 
 from __future__ import annotations
 
+import os
+
 from contextweave.runtime_adapters.base import BaselineRunner, NotAvailableOnCpu
+
+
+def _gpu_allowed() -> bool:
+    return os.environ.get("CONTEXTWEAVE_ALLOW_MODEL_LOAD") == "1"
+
+
+def _try_vllm_runners() -> dict[str, BaselineRunner] | None:
+    """Return real vLLM runners when allow-flag is set and vllm imports."""
+    if not _gpu_allowed():
+        return None
+    try:
+        from contextweave.runtime_adapters import vllm_runners as vr
+    except Exception:
+        return None
+    try:
+        import vllm  # noqa: F401
+    except ImportError:
+        return None
+    return {
+        "full_prefill": vr.full_prefill_runner(),
+        "prefix_cache": vr.prefix_cache_runner(),
+        "smoke": vr.smoke_runner(),
+    }
 
 
 def get_runner(strategy: str) -> BaselineRunner:
     key = strategy.lower().replace("-", "_")
-    mapping: dict[str, BaselineRunner] = {
+    live = _try_vllm_runners() or {}
+    stubs: dict[str, BaselineRunner] = {
         "full_prefill": NotAvailableOnCpu(
             "full_prefill",
             "Implement via vLLM with prefix caching disabled.",
@@ -26,9 +52,10 @@ def get_runner(strategy: str) -> BaselineRunner:
         ),
         "smoke": NotAvailableOnCpu(
             "smoke",
-            "First paid job: load Llama-3.1-8B-Instruct + tiny CacheBlend prompt.",
+            "First paid job: load Qwen3-8B / Llama-3.1-8B + tiny generate.",
         ),
     }
+    mapping = {**stubs, **live}
     if key not in mapping:
         known = ", ".join(sorted(mapping))
         raise KeyError(f"Unknown strategy '{strategy}'. Known: {known}")

@@ -74,6 +74,15 @@
   `Docs/architecture.md`, `Docs/gpu-runbook.md` Tier-1 quality slice
 - Decision: keep Phase 0 path = smoke → CacheBlend/EPIC; ResolventKV is post-G1 candidate
 
+## 2026-10-21 — Colab A100 smoke PASS
+
+- Provider: Google Colab (Google AI Pro), session ephemeral
+- GPU: **NVIDIA A100-SXM4-40GB** (driver 580.82.07, CUDA 13.0)
+- Stack: vLLM **0.32.0**, torch 2.13.0, model `Qwen/Qwen3-8B`, max_model_len 4096
+- Command: `CONTEXTWEAVE_ALLOW_MODEL_LOAD=1 bash scripts/smoke_remote.sh`
+- Result: **SMOKE_PASS** (output contained `smoke-ok`; model load ~15.3 GiB, KV budget ~19.6 GiB)
+- Decision: open G1 step 1 (`scripts/g1_ttft_bench.py` — full vs prefix TTFT). CacheBlend deferred until step 1 saved.
+
 ## Template for future entries
 
 ```

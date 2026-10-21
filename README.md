@@ -67,6 +67,7 @@ python scripts/fingerprint_example.py --model-config configs/models/qwen3_8b.yam
 | [Docs/Reviews/Gemini_3.md](Docs/Reviews/Gemini_3.md) | Gemini Review Round 3 |
 | [Docs/Reviews/Gemini_3_response.md](Docs/Reviews/Gemini_3_response.md) | Review disposition (Round 3) |
 | [Docs/Initial/](Docs/Initial/) | Phase 0 working notes |
+| [Docs/g1-colab.md](Docs/g1-colab.md) | G1 on Colab after smoke (TTFT → CacheBlend) |
 | [Docs/Research/ResolventKV-adoption.md](Docs/Research/ResolventKV-adoption.md) | What we take from the ResolventKV research brief (post-G1 candidate) |
 | [Docs/Research/Foundational AI Technology Research.md](Docs/Research/Foundational%20AI%20Technology%20Research.md) | Full ResolventKV research brief (equations as images) |
 
