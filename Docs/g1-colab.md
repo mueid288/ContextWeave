@@ -34,6 +34,18 @@ python scripts/g1_quality_bench.py --json | tee g1_quality.json
 
 **Success:** `pass_heuristic: true` (full finds gold on ≥2/3 cases; prefix agrees with full on ≥2/3).
 
+## Step 2b — Reorder gap (no LMCache; run while CacheBlend is blocked)
+
+Shows that **reordered** docs stay correct under full compute but lose the warm
+prefix-cache TTFT win — the gap CacheBlend is supposed to close.
+
+```bash
+export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
+python scripts/g1_reorder_gap_bench.py --json | tee g1_reorder_gap.json
+```
+
+**Success:** `pass_heuristic: true` (both orders contain gold; BCA ≥15% slower than warm ABC).
+
 ## Step 3 — LMCache + CacheBlend (non-prefix)
 
 After Step 1 JSON is saved:

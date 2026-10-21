@@ -141,3 +141,19 @@ def test_g1_quality_help():
     )
     assert result.returncode == 0
     assert "answer preservation" in result.stdout.lower() or "quality" in result.stdout.lower()
+
+
+def test_g1_reorder_gap_refuses_without_allow(monkeypatch: pytest.MonkeyPatch):
+    mod = _load_script("g1_reorder_gap_bench.py")
+    monkeypatch.delenv("CONTEXTWEAVE_ALLOW_MODEL_LOAD", raising=False)
+    assert mod.main(["--json"]) == 1
+
+
+def test_g1_reorder_docs_change_order():
+    mod = _load_script("g1_reorder_gap_bench.py")
+    filler = "x" * 50
+    abc = mod._docs_in_order(filler, ("A", "B", "C"))
+    bca = mod._docs_in_order(filler, ("B", "C", "A"))
+    assert abc.index("Document Alpha") < abc.index("Document Beta")
+    assert bca.index("Document Beta") < bca.index("Document Alpha")
+    assert "ALPHA-9173" in abc and "ALPHA-9173" in bca
