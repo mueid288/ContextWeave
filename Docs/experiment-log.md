@@ -167,8 +167,14 @@
 - Incompatible with working Colab pin (vLLM **0.32.0**); installing it would wipe smoke/TTFT stack
 - Harness: `scripts/g1_epic_probe.py` (pin check), `g1_epic_install.sh` + `g1_epic_bench.py`
   (dedicated session only) — see `Docs/g1-epic.md`
-- Decision: bank **documented pin BLOCK** on current Colab via probe; optional EPIC rebuild
-  is a separate time-boxed session, not an in-place upgrade
+
+## 2026-10-21 — G1 EPIC probe BLOCKED (Colab vLLM 0.32)
+
+- Command: `python scripts/g1_epic_probe.py --json`
+- Env: Colab A100, vLLM **0.32.0** (`/usr/local/lib/python3.13/dist-packages/vllm`)
+- Result: `epic_fork_detected: false`; 2879 files scanned; no `cache_fuse_metadata` / `hack_kv`
+- Decision: **documented pin BLOCK** (runbook stop condition). Do not reinstall EPIC on this session.
+  Stop Colab. Optional later: fresh session per `Docs/g1-epic.md`.
 
 ## Template for future entries
 
