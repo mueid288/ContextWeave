@@ -14,6 +14,7 @@ Run:
 
   export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
   export PYTHONHASHSEED=0
+  export VLLM_WORKER_MULTIPROC_METHOD=spawn
   python scripts/g1_cacheblend_bench.py --json | tee g1_cacheblend.json
 
 Success signal: reordered-chunk (warm) p50 TTFT clearly below first-order (cold)
@@ -120,7 +121,23 @@ def _timed_generate(llm, prompt_ids: list[int], sampling) -> tuple[float, str]:
     return ms, text
 
 
+def _ensure_spawn() -> None:
+    """vLLM EngineCore forks; importing lmcache touches CUDA in the parent.
+
+    Force spawn so the child does not inherit an initialized CUDA context.
+    """
+    os.environ.setdefault("VLLM_WORKER_MULTIPROC_METHOD", "spawn")
+    import multiprocessing as mp
+
+    try:
+        mp.set_start_method("spawn", force=True)
+    except RuntimeError:
+        pass
+
+
 def main(argv: list[str] | None = None) -> int:
+    _ensure_spawn()
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default=os.environ.get("SMOKE_MODEL", "Qwen/Qwen3-8B"))
     parser.add_argument("--max-model-len", type=int, default=8192)
@@ -139,21 +156,12 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
-    try:
-        import lmcache  # noqa: F401
-    except ImportError as exc:
-        print(
-            "lmcache not importable. On the GPU host run: pip install lmcache\n"
-            f"Import error: {exc}",
-            file=sys.stderr,
-        )
-        return 2
-
     _setup_blend_env(
         blend_special_str=args.blend_special_str,
         cpu_gb=args.lmcache_cpu_gb,
     )
 
+    # Tokenize before importing lmcache (lmcache import initializes CUDA).
     from transformers import AutoTokenizer
     from vllm import SamplingParams
 
@@ -210,6 +218,16 @@ def main(argv: list[str] | None = None) -> int:
         f"cold_len={len(cold)} warm_len={len(warm)}",
         flush=True,
     )
+
+    try:
+        import lmcache  # noqa: F401
+    except ImportError as exc:
+        print(
+            "lmcache not importable. On the GPU host run: pip install lmcache\n"
+            f"Import error: {exc}",
+            file=sys.stderr,
+        )
+        return 2
 
     with _build_llm(
         model=args.model,

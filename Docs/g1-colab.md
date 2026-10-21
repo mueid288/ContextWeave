@@ -38,6 +38,7 @@ python -c "import lmcache; print('lmcache', lmcache.__version__)"
 
 export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
 export PYTHONHASHSEED=0
+export VLLM_WORKER_MULTIPROC_METHOD=spawn
 python scripts/g1_cacheblend_bench.py --json | tee g1_cacheblend.json
 ```
 
