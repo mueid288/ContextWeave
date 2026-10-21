@@ -20,9 +20,19 @@ python scripts/g1_ttft_bench.py --json | tee g1_ttft_qwen3.json
 
 Save `g1_ttft_qwen3.json` (download / Drive) before `colab stop`.
 
-## Step 2 — Quality slice (next session OK)
+## Step 2 — Quality slice (run on the working vLLM stack — no LMCache)
 
-Answer preservation vs full prefill on a multi-hop / Path C doc set. Not required to finish Step 1.
+After Step 1 (and while CacheBlend is blocked on this pin):
+
+```bash
+cd /content/ContextWeave
+git fetch origin && git reset --hard origin/main
+
+export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
+python scripts/g1_quality_bench.py --json | tee g1_quality.json
+```
+
+**Success:** `pass_heuristic: true` (full finds gold on ≥2/3 cases; prefix agrees with full on ≥2/3).
 
 ## Step 3 — LMCache + CacheBlend (non-prefix)
 

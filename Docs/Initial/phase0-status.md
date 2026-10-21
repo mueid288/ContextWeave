@@ -23,8 +23,9 @@ Updated: 2026-10-21
 - [x] `my_corpus` G0 with `--require-working-set` @ 128 GB: PASS (76.3% LRU hits; matched denom)
 - [x] HF token + **Colab A100-40GB smoke** (`scripts/smoke_remote.sh` → **SMOKE_PASS**)
 - [x] G1 step 1: full vs prefix TTFT — **2.57×** at 6k shared tokens (`g1_ttft_long.json`)
-- [ ] G1 step 3 CacheBlend — **BLOCKED** on vLLM 0.32 + lmcache 0.5.6 (KV dim IndexError); retry matched pins later
-- [ ] G1 step 4: EPIC + answer preservation
+- [ ] G1 step 2: answer preservation (`scripts/g1_quality_bench.py`) — run on live Colab (no LMCache)
+- [ ] G1 step 3 CacheBlend — **BLOCKED** on vLLM 0.32 + lmcache 0.5.6; retry matched pins later
+- [ ] G1 step 4: EPIC
 - [ ] Partner log optional (`docs/partner-ask.md`)
 
 ## Explicitly not started

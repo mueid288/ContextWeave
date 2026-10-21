@@ -116,3 +116,25 @@ def test_g1_cacheblend_ensure_spawn_sets_env(monkeypatch: pytest.MonkeyPatch):
 def test_g1_cacheblend_patch_helper_exists():
     mod = _load_script("g1_cacheblend_bench.py")
     assert callable(mod._patch_vllm_register_model_for_blend)
+
+
+def test_g1_quality_scoring_and_docs():
+    mod = _load_script("g1_quality_bench.py")
+    docs = mod._build_shared_docs(filler_chars=200)
+    assert "ALPHA-9173" in docs
+    assert "Karachi" in docs
+    assert "2019" in docs
+    sc = mod._score("The code is ALPHA-9173.\nOkay thinking", "ALPHA-9173")
+    assert sc["contains"] is True
+    assert mod.main(["--json"]) == 1  # no allow flag
+
+
+def test_g1_quality_help():
+    result = subprocess.run(
+        [sys.executable, str(REPO / "scripts" / "g1_quality_bench.py"), "--help"],
+        capture_output=True,
+        text=True,
+        cwd=REPO,
+    )
+    assert result.returncode == 0
+    assert "answer preservation" in result.stdout.lower() or "quality" in result.stdout.lower()
