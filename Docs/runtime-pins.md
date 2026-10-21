@@ -39,8 +39,9 @@ Issue [#3238](https://github.com/LMCache/LMCache/issues/3238) reported CacheBlen
 | Stack | Result |
 |---|---|
 | Colab A100-40GB, vLLM **0.32.0**, lmcache **0.5.6**, Qwen3-8B, in-process blend | Engine starts (after #4131 register_model patch); first generate dies in layerwise `batched_from_gpu` with `IndexError` dim 4 |
+| Same stack, MP `--engine-type blend` + `LMCacheMPConnector` | Runs; warm reorder **1.22×** vs cold (latency heuristic); **answers garbage** — not a quality baseline |
 
-**Do not** treat this pair as a CacheBlend baseline host. Prefer `lmcache/vllm-openai` image or re-pin to a pair LMCache documents for blending.
+**Do not** treat this pair as a CacheBlend quality baseline. Prefer `lmcache/vllm-openai` image or re-pin; require answer-gold checks, not latency alone.
 
 ## Install sketch (GPU box)
 

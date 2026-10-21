@@ -178,6 +178,13 @@ def main(argv: list[str] | None = None) -> int:
 
     del llm
     warm_p50 = statistics.median([warm_ms, warm2_ms])
+    latency_ok = warm_p50 < 0.85 * cold_ms
+    # Document ids are literal chunk names in the fill text (Alpha / Beta / Gamma).
+    quality_ok = (
+        "Alpha" in cold_text
+        and "Alpha" in warm_text
+        and "Beta" in warm2_text
+    )
     payload = {
         "gate": "G1-step3-cacheblend-mp",
         "model": args.model,
@@ -188,10 +195,12 @@ def main(argv: list[str] | None = None) -> int:
         "warm_p50_ms": warm_p50,
         "cold_vs_warm_p50_speedup": cold_ms / warm_p50 if warm_p50 > 0 else None,
         "outputs": {"cold": cold_text, "warm_bac": warm_text, "warm_cba": warm2_text},
-        "pass_heuristic": warm_p50 < 0.85 * cold_ms,
+        "latency_ok": latency_ok,
+        "quality_ok": quality_ok,
+        "pass_heuristic": latency_ok and quality_ok,
         "note": (
             "MP blend engine path. pass_heuristic True ⇒ reordered warm ≥15% faster "
-            "than cold — evidence of non-prefix reuse."
+            "than cold AND answers contain expected document ids."
         ),
     }
 

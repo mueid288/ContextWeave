@@ -150,6 +150,18 @@
 - Concurrently, prior hung client finally raised `ConnectionError` after `mq_timeout=300`
 - Fix: poll up to 90s for ZMQ/ready/healthcheck; use `--supported-transfer-mode lmcache_driven`
 
+## 2026-10-21 — G1 CacheBlend MP latency PASS / quality FAIL
+
+- Env: Colab A100-40GB, vLLM **0.32.0**, lmcache **0.5.6**, `Qwen/Qwen3-8B`
+- Path: `lmcache server --engine-type blend` + `LMCacheMPConnector` (`g1_cacheblend_mp.sh`)
+- cold ABC **1005 ms**; warm BAC **825** / CBA **817**; warm p50 **821**; speedup **1.22×**
+- Latency `pass_heuristic: true` (≥15% faster on reorder)
+- **Quality fail:** outputs do not answer with document ids (echo/`# #` garbage; cold invents questions)
+- Interpretation: MP stack runs and shows a TTFT gap, but this is **not** a clean non-prefix
+  reuse proof — could be warmup/noise, and blend may be corrupting decode on this pin
+- Decision: bank as **provisional latency**; do **not** claim G1 CacheBlend quality.
+  Next: stop Colab; EPIC or matched `lmcache/vllm-openai` + quality-gated blend bench
+
 ## Template for future entries
 
 ```

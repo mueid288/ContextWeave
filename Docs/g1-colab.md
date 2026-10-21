@@ -70,19 +70,17 @@ python scripts/g1_cacheblend_bench.py --json | tee g1_cacheblend.json
 **2026-10-21 Colab result (vLLM 0.32.0 + lmcache 0.5.6, in-process):** **BLOCKED** —
 `IndexError` in `batched_from_gpu` (dim 4).
 
-**Retry on same Colab (MP blend engine — preferred next try):**
+**2026-10-21 Colab result (same pins, MP blend):** **provisional latency / quality FAIL** —
+cold 1005 ms → warm p50 821 ms (**1.22×**); outputs wrong / separator echo. Do not expand matrix on this.
 
 ```bash
-cd /content/ContextWeave
-git fetch origin && git reset --hard origin/main
-chmod +x scripts/g1_cacheblend_mp.sh
-
+# Already run; only re-run after pin change
 export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
 bash scripts/g1_cacheblend_mp.sh
 ```
 
-If MP also fails → stop; use `lmcache/vllm-openai` image or older pins next session
-(see `Docs/runtime-pins.md`).
+Next session: EPIC, or matched `lmcache/vllm-openai` image for a quality-gated CacheBlend check
+(see `Docs/runtime-pins.md`). Stop idle Colab: `colab stop -s cw-smoke`.
 
 **Known friction (handled in the bench script):** stock vLLM never calls
 `VLLMModelTracker.register_model` (LMCache [#4131](https://github.com/LMCache/LMCache/issues/4131)).

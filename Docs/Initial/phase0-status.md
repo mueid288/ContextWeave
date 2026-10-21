@@ -25,8 +25,8 @@ Updated: 2026-10-21
 - [x] G1 step 1: full vs prefix TTFT — **2.57×** at 6k shared tokens (`g1_ttft_long.json`)
 - [x] G1 step 2: answer preservation — **PASS** (contains 1.0/1.0, agree 0.67, `pass_heuristic`)
 - [x] G1 step 2b: reorder gap — **PASS** (1.25× slower on reorder; answers OK)
-- [ ] G1 step 3 CacheBlend — in-process **BLOCKED**; try MP blend (`scripts/g1_cacheblend_mp.sh`) on live Colab
-- [ ] G1 step 4: EPIC
+- [x] G1 step 3 CacheBlend MP — **provisional latency** (1.22× warm reorder) / **quality FAIL**; in-process still BLOCKED
+- [ ] G1 step 4: EPIC (or matched-image CacheBlend quality recheck)
 - [ ] Partner log optional (`docs/partner-ask.md`)
 
 ## Explicitly not started
