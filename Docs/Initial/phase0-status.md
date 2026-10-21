@@ -24,7 +24,7 @@ Updated: 2026-10-21
 - [x] HF token + **Colab A100-40GB smoke** (`scripts/smoke_remote.sh` → **SMOKE_PASS**)
 - [x] G1 step 1: full vs prefix TTFT — **2.57×** at 6k shared tokens (`g1_ttft_long.json`)
 - [x] G1 step 2: answer preservation — **PASS** (contains 1.0/1.0, agree 0.67, `pass_heuristic`)
-- [ ] G1 step 2b: reorder gap bench (`scripts/g1_reorder_gap_bench.py`) — run on live Colab
+- [x] G1 step 2b: reorder gap — **PASS** (1.25× slower on reorder; answers OK)
 - [ ] G1 step 3 CacheBlend — **BLOCKED** on vLLM 0.32 + lmcache 0.5.6; retry matched pins later
 - [ ] G1 step 4: EPIC
 - [ ] Partner log optional (`docs/partner-ask.md`)

@@ -118,6 +118,14 @@
 - **pass_heuristic: true**
 - Decision: prefix reuse preserves planted-fact answers on this stack. CacheBlend still blocked on pin.
 
+## 2026-10-21 — G1 reorder gap PASS
+
+- Command: `python scripts/g1_reorder_gap_bench.py --json`
+- ABC warm (prefix hit): **330 ms**; BCA reorder: **412 ms**; slowdown **1.25×**
+- Both orders contain gold `Karachi`
+- **pass_heuristic: true** — non-prefix reorder costs latency under native prefix cache while answers stay correct
+- Decision: gap that CacheBlend/EPIC target is real on this workload; unblock those on a matched pin next
+
 ## 2026-10-21 — G1 step 3 CacheBlend BLOCKED (pin)
 
 - Env: Colab A100-40GB, vLLM **0.32.0**, lmcache **0.5.6**, `Qwen/Qwen3-8B`
