@@ -176,6 +176,26 @@
 - Decision: **documented pin BLOCK** (runbook stop condition). Do not reinstall EPIC on this session.
   Stop Colab. Optional later: fresh session per `Docs/g1-epic.md`.
 
+## 2026-10-21 — G1 Colab pin closeout (`cw-smoke` stopped)
+
+**Stack:** Colab A100-40GB, vLLM **0.32.0**, lmcache **0.5.6**, `Qwen/Qwen3-8B`
+
+| Step | Result |
+|---|---|
+| Smoke | **PASS** |
+| Full vs prefix TTFT | **PASS** — **2.57×** @ ~6k shared tokens |
+| Answer preservation | **PASS** |
+| Reorder gap (native prefix) | **PASS** — **1.25×** slower on reorder; answers OK |
+| CacheBlend in-process | **BLOCKED** — `IndexError` dim 4 in `batched_from_gpu` |
+| CacheBlend MP blend | **Provisional** — **1.22×** warm reorder TTFT; **quality FAIL** |
+| EPIC | **BLOCKED** — stock vLLM, no LegoLink fork markers |
+
+**Residual:** Non-prefix repair is **not** cleanly reproduced on this pin. That is a *pin/environment* gap, not proof that CacheBlend/EPIC fail after a fair run — do **not** open ResolventKV kernels yet.
+
+**Next GPU (one session, pick one):** matched `lmcache/vllm-openai` quality-gated CacheBlend, **or** dedicated DerekHJH/epic install (`Docs/g1-epic.md`).
+
+**Session:** `cw-smoke` stopped 2026-10-21; VM wiped — artifacts live in git + any downloaded JSON.
+
 ## Template for future entries
 
 ```
