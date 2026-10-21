@@ -90,7 +90,17 @@
 - full_prefill p50: **443.6 ms** (n=3)
 - prefix_cache p50: **423.4 ms** (n=3)
 - Speedup: **1.05×** (noise-level; not evidence for or against G1)
-- Decision: re-run with longer docs (`--doc-chars 12000`, `--max-model-len 8192`) before interpreting; then CacheBlend
+- Decision: re-run with token-budget sizing before interpreting; then CacheBlend
+
+## 2026-10-21 — G1 step 1 TTFT (6k shared prefix) PASS
+
+- Env: Colab A100-40GB, vLLM 0.32.0, `Qwen/Qwen3-8B`, max_model_len 8192
+- Command: `python scripts/g1_ttft_bench.py --target-prefix-tokens 6000 --max-model-len 8192 --json`
+- Shared prefix: **6000 tokens** (~22007 chars)
+- full_prefill p50: **638.7 ms** (n=3)
+- prefix_cache p50: **248.9 ms** (n=3)
+- Speedup: **2.57×**
+- Decision: native prefix baseline is real on this stack. Next = LMCache CacheBlend (non-prefix) + answer-preservation slice.
 
 ## Template for future entries
 

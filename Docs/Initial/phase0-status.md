@@ -22,7 +22,7 @@ Updated: 2026-10-21
 - [x] Gemini review gaps → PRD v2.1 / v2.1.1 amendments + G0 LRU / cost roofline / Mode A
 - [x] `my_corpus` G0 with `--require-working-set` @ 128 GB: PASS (76.3% LRU hits; matched denom)
 - [x] HF token + **Colab A100-40GB smoke** (`scripts/smoke_remote.sh` → **SMOKE_PASS**)
-- [ ] G1 step 1: `scripts/g1_ttft_bench.py` (full vs prefix TTFT) — see `Docs/g1-colab.md`
+- [x] G1 step 1: full vs prefix TTFT — **2.57×** at 6k shared tokens (`g1_ttft_long.json`)
 - [ ] G1 step 3–4: CacheBlend + EPIC + answer preservation
 - [ ] Partner log optional (`docs/partner-ask.md`)
 
