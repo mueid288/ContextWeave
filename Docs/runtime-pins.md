@@ -1,7 +1,7 @@
 # Runtime pins (Phase 0B candidate)
 
 Date: 2026-10-11  
-Status: **candidate** — smoke-test on GPU before treating as final.
+Status: **partially validated** — smoke + prefix TTFT OK on Colab; CacheBlend **blocked** on vLLM 0.32.0 + lmcache 0.5.6 (2026-10-21).
 
 ## Recommended stack for first smoke
 
@@ -33,6 +33,14 @@ Source: [LMCache compatibility docs](https://docs.lmcache.ai/getting_started/com
 ## Known risk: CacheBlend non-prefix matching
 
 Issue [#3238](https://github.com/LMCache/LMCache/issues/3238) reported CacheBlend non-prefix reuse broken with older vLLM V1 connector paths (scheduler only did prefix match). Smoke test **must** verify non-prefix document reuse, not only shared-prefix hits. Prefer LMCache ≥ 0.5.2 + documented CacheBlend/HMA path; abort matrix if non-prefix hits stay zero.
+
+### Observed block (2026-10-21)
+
+| Stack | Result |
+|---|---|
+| Colab A100-40GB, vLLM **0.32.0**, lmcache **0.5.6**, Qwen3-8B, in-process blend | Engine starts (after #4131 register_model patch); first generate dies in layerwise `batched_from_gpu` with `IndexError` dim 4 |
+
+**Do not** treat this pair as a CacheBlend baseline host. Prefer `lmcache/vllm-openai` image or re-pin to a pair LMCache documents for blending.
 
 ## Install sketch (GPU box)
 

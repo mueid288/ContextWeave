@@ -45,7 +45,12 @@ python scripts/g1_cacheblend_bench.py --json | tee g1_cacheblend.json
 **Success:** `pass_heuristic: true` (warm reordered prompts ≥15% faster than cold A-B-C).  
 **Fail / abort:** times ≈ equal → #3238-class pin failure; log it, do not expand matrix yet.
 
-**Known pin friction (handled in the bench script):** stock vLLM never calls
+**2026-10-21 Colab result (vLLM 0.32.0 + lmcache 0.5.6):** **BLOCKED** after engine start —
+`IndexError` in `batched_from_gpu` / `single_layer_kv_transfer` (dim 4). Do **not** keep
+retrying this pair tonight. Next attempt: official `lmcache/vllm-openai` image or an older
+documented vLLM↔LMCache pair (see `Docs/runtime-pins.md`).
+
+**Known friction (handled in the bench script):** stock vLLM never calls
 `VLLMModelTracker.register_model` (LMCache [#4131](https://github.com/LMCache/LMCache/issues/4131)).
 Our script monkeypatches `GPUModelRunner.load_model` and sets
 `VLLM_ENABLE_V1_MULTIPROCESSING=0` so blending can start.

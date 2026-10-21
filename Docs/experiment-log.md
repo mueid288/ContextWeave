@@ -102,6 +102,18 @@
 - Speedup: **2.57×**
 - Decision: native prefix baseline is real on this stack. Next = LMCache CacheBlend (non-prefix) + answer-preservation slice.
 
+## 2026-10-21 — G1 step 3 CacheBlend BLOCKED (pin)
+
+- Env: Colab A100-40GB, vLLM **0.32.0**, lmcache **0.5.6**, `Qwen/Qwen3-8B`
+- Path: in-process `LMCacheConnectorV1` + `LMCACHE_ENABLE_BLENDING` / layerwise
+- Got past: CUDA spawn, `VLLMModelTracker.register_model` monkeypatch (LMCache #4131)
+- Fail: first `generate` → `save_kv_layer` → `batched_from_gpu` →
+  `IndexError: Dimension out of range (expected [-4, 3], but got 4)`
+- Interpretation: KV-layout / layerwise GPU connector mismatch vs vLLM 0.32 (not a ContextWeave bug)
+- Decision: **abort CacheBlend on this pin** (matches runbook stop condition). Keep G1 step 1.
+  Next session: try matched image (`lmcache/vllm-openai`) or older documented pair
+  (e.g. vLLM ~0.26 + LMCache 0.5.2), or MP `--engine-type blend` — 1-session time-box.
+
 ## Template for future entries
 
 ```
