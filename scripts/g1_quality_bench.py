@@ -152,7 +152,11 @@ def main(argv: list[str] | None = None) -> int:
         ("full_prefill", False),
         ("prefix_cache", True),
     ):
-        print(f"=== {mode} ===", flush=True)
+        print(
+            f"=== {mode} (prefix_caching={enable}) — loading model "
+            f"(~30–60s between modes) ===",
+            flush=True,
+        )
         results.append(
             _run_mode(
                 mode=mode,
