@@ -111,3 +111,8 @@ def test_g1_cacheblend_ensure_spawn_sets_env(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.delenv("VLLM_WORKER_MULTIPROC_METHOD", raising=False)
     mod._ensure_spawn()
     assert os.environ.get("VLLM_WORKER_MULTIPROC_METHOD") == "spawn"
+
+
+def test_g1_cacheblend_patch_helper_exists():
+    mod = _load_script("g1_cacheblend_bench.py")
+    assert callable(mod._patch_vllm_register_model_for_blend)
