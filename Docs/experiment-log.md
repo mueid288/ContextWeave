@@ -109,6 +109,15 @@
 - contains_rate reported 0.33 because scorer only looked at the first line; gold `2019` appeared later in the output
 - Decision: treat agreement as provisional PASS for prefix answer preservation; fix scorer and re-score / re-run
 
+## 2026-10-21 — G1 quality slice PASS
+
+- Command: `python scripts/g1_quality_bench.py --json` (fixed scorer)
+- Env: Colab A100-40GB, vLLM 0.32.0, Qwen3-8B
+- full_contains_rate: **1.0** / prefix_contains_rate: **1.0**
+- modes_agree_rate: **0.67** (gamma both contain `2019` but normalized strings differ slightly)
+- **pass_heuristic: true**
+- Decision: prefix reuse preserves planted-fact answers on this stack. CacheBlend still blocked on pin.
+
 ## 2026-10-21 — G1 step 3 CacheBlend BLOCKED (pin)
 
 - Env: Colab A100-40GB, vLLM **0.32.0**, lmcache **0.5.6**, `Qwen/Qwen3-8B`
