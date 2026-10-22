@@ -176,6 +176,15 @@
 - Decision: **documented pin BLOCK** (runbook stop condition). Do not reinstall EPIC on this session.
   Stop Colab. Optional later: fresh session per `Docs/g1-epic.md`.
 
+## 2026-10-22 — G1 matched-pin Gate C FAIL (control quality)
+
+- Env recorded: vLLM **0.32.0**, lmcache **0.5.3**, torch **2.13.0+cu130** (install did **not** downgrade vLLM — not a true matched pin)
+- Gate B: assumed run (smoke); Gate C control: `contains_rate=0.42`, `garbage_rate=0.00`, `pass=False`
+- Stopped before Gate D (runbook)
+- Interpretation: control path fails answer preservation → **pin/config/bench issue**, not a CacheBlend quality verdict
+- Next on session: dump `g1_matched_control.json` cases; run `--mode native` once to isolate LMCache vs prompt/Qwen3
+- Pip dependency warnings (google-colab/requests etc.) are noise — ignore
+
 ## 2026-10-22 — G1 matched-pin CacheBlend pre-registration (before GPU)
 
 - Host: **fresh Colab** (pip-match to `lmcache/vllm-openai:v0.5.3` era — not Docker digest)
