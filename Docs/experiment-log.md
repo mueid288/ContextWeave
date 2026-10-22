@@ -254,6 +254,13 @@
 
 **Session:** `cw-smoke` stopped 2026-10-21; VM wiped — artifacts live in git + any downloaded JSON.
 
+
+## 2026-10-22 — Native TTFT: prefix works; reorder median was polluted
+
+- At ~6000 tokens: `cold_vs_warm≈2.59×` (prefix caching real); `reorder_vs_warm≈1.00` false
+- Cause: after first BAC measure, trials 2..N were **BAC self-hits**; p50 hid the miss (p90 was higher)
+- Fix: `reset_prefix_cache` → seed ABC → measure reorder, each trial
+
 ## Template for future entries
 
 ```
