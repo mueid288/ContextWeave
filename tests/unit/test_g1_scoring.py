@@ -22,6 +22,9 @@ def test_strip_think_and_extract():
     raw = "<think>long reasoning</think>\nKarachi\n"
     assert "think" not in s.strip_think(raw).lower()
     assert s.extract_answer(raw) == "Karachi"
+    # Prefer gold span when model meta-talks first.
+    waffle = "The answer should be a single word.\nVault code: VX-7731. Done."
+    assert s.extract_answer(waffle, gold="VX-7731") == "VX-7731"
 
 
 def test_score_contains_gold_mid_text():

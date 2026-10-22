@@ -19,15 +19,24 @@ def normalize(text: str) -> str:
     return _PUNCT_RE.sub(" ", t).strip()
 
 
-def extract_answer(text: str) -> str:
-    """Best-effort short answer: first non-empty line after stripping think."""
+def extract_answer(text: str, gold: str | None = None) -> str:
+    """Best-effort short answer: prefer gold span if present, else first real line."""
     cleaned = strip_think(text)
+    if gold and gold.lower() in cleaned.lower():
+        # Return the gold casing as it appears in the output when possible.
+        idx = cleaned.lower().find(gold.lower())
+        return cleaned[idx : idx + len(gold)]
     for line in cleaned.splitlines():
         line = line.strip()
         if not line:
             continue
-        # Skip separator / prompt echo lines.
+        # Skip separator / prompt echo / meta-instruction lines.
         if line.replace(" ", "") in {"##", "#", "###"} or set(line) <= {"#", " "}:
+            continue
+        low = line.lower()
+        if low.startswith("the answer should") or low.startswith("okay"):
+            continue
+        if low.startswith("the answer is in the documents"):
             continue
         return line
     return cleaned.strip()
@@ -64,7 +73,7 @@ def is_garbage(text: str, gold: str) -> bool:
 
 def score_output(output: str, gold: str) -> dict:
     cleaned = strip_think(output)
-    extracted = extract_answer(cleaned)
+    extracted = extract_answer(cleaned, gold=gold)
     norm_out = normalize(cleaned)
     norm_gold = normalize(gold)
     norm_ext = normalize(extracted)

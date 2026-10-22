@@ -74,12 +74,15 @@ def build_prompt(
     order: tuple[str, ...],
     question: str,
 ) -> str:
+    # Qwen3 often burns max_tokens on meta-reasoning; keep the contract brutal.
     head = (
-        "You are a careful assistant. Use only the documents. "
-        "Prefer a short answer with only the requested value.\n\n"
+        "You are a careful assistant. Use only the documents below.\n"
+        "Rules: reply with ONLY the requested value on the first line. "
+        "No preamble, no format discussion, no reasoning.\n\n"
     )
     body = "\n".join(corpus[d] for d in order if d in corpus)
-    return head + body + "\n" + question
+    # /no_think disables Qwen3 thinking mode when the template honors it.
+    return head + body + "\n" + question + "\n/no_think"
 
 
 def _kv_transfer_config(host: str, port: int):
@@ -103,7 +106,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--mode", choices=("native", "control", "blend"), required=True)
     parser.add_argument("--order", choices=tuple(ORDERS), default="abc")
     parser.add_argument("--max-model-len", type=int, default=8192)
-    parser.add_argument("--max-tokens", type=int, default=32)
+    parser.add_argument(
+        "--max-tokens",
+        type=int,
+        default=96,
+        help="Qwen3 needs headroom; 32 was truncating before gold (Gate C false fail).",
+    )
     parser.add_argument("--filler-chars", type=int, default=400)
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.75)
     parser.add_argument("--control-json", type=Path, default=None, help="Prior control JSON for agree_with_control")
@@ -146,7 +154,12 @@ def main(argv: list[str] | None = None) -> int:
         flush=True,
     )
     llm = LLM(**kwargs)
-    params = SamplingParams(temperature=0.0, max_tokens=args.max_tokens)
+    # Prefer disabling thinking when the installed vLLM supports it.
+    sp_kwargs: dict = {"temperature": 0.0, "max_tokens": args.max_tokens}
+    try:
+        params = SamplingParams(**sp_kwargs, extra_args={"enable_thinking": False})
+    except TypeError:
+        params = SamplingParams(**sp_kwargs)
 
     times_ms: list[float] = []
     texts: list[str] = []
