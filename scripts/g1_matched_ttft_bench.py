@@ -77,6 +77,33 @@ def _ttft_ms(llm, prompt: str, sampling) -> tuple[float, str, str]:
     return wall, text, "wall_clock_generate"
 
 
+def _reset_prefix_cache(llm) -> bool:
+    """Clear automatic prefix cache so the next reorder is a real miss."""
+    fn = getattr(llm, "reset_prefix_cache", None)
+    if callable(fn):
+        try:
+            fn()
+            return True
+        except TypeError:
+            try:
+                fn(reset_running_requests=True)
+                return True
+            except Exception:  # noqa: BLE001
+                pass
+        except Exception:  # noqa: BLE001
+            pass
+    engine = getattr(llm, "llm_engine", None)
+    if engine is not None:
+        fn2 = getattr(engine, "reset_prefix_cache", None)
+        if callable(fn2):
+            try:
+                fn2()
+                return True
+            except Exception:  # noqa: BLE001
+                pass
+    return False
+
+
 def _measure(llm, prompt: str, sampling, *, n: int, label: str) -> tuple[dict, str]:
     samples: list[float] = []
     last_text = ""
@@ -93,6 +120,42 @@ def _measure(llm, prompt: str, sampling, *, n: int, label: str) -> tuple[dict, s
         "samples_ms": samples,
         "last_output": last_text,
     }, method
+
+
+def _measure_reorder_after_abc(
+    llm,
+    *,
+    abc_prompt: str,
+    reorder_prompt: str,
+    sampling,
+    n: int,
+    label: str,
+) -> tuple[dict, str, bool]:
+    """Each trial: clear cache → seed ABC → measure reorder once (true miss)."""
+    samples: list[float] = []
+    last_text = ""
+    method = "unknown"
+    cleared = True
+    for i in range(n):
+        if not _reset_prefix_cache(llm):
+            cleared = False
+        # Repopulate ABC so we measure "reorder after prefix-hot ABC".
+        _ttft_ms(llm, abc_prompt, sampling)
+        ms, text, method = _ttft_ms(llm, reorder_prompt, sampling)
+        samples.append(ms)
+        last_text = text
+        print(f"  {label} {i + 1}/{n} {ms:.0f} ms", flush=True)
+    return (
+        {
+            "n": len(samples),
+            "p50_ms": statistics.median(samples),
+            "p90_ms": _percentile(samples, 0.9),
+            "samples_ms": samples,
+            "last_output": last_text,
+        },
+        method,
+        cleared,
+    )
 
 
 def _size_fillers(
@@ -236,19 +299,38 @@ def main(argv: list[str] | None = None) -> int:
     )
     results["warm_abc"] = warm_abc
 
-    warm_bac, ttft_method = _measure(
-        llm, prompts["bac"], sampling, n=args.runs, label="warm_bac"
+    # Critical: do NOT measure bac×N without clearing — trial 2..N become BAC self-hits
+    # (previous false harness_ok=False with warm≈reorder while cold_vs_warm≈2.5×).
+    warm_bac, ttft_method, cleared_bac = _measure_reorder_after_abc(
+        llm,
+        abc_prompt=prompts["abc"],
+        reorder_prompt=prompts["bac"],
+        sampling=sampling,
+        n=args.runs,
+        label="warm_bac",
     )
     results["warm_bac"] = warm_bac
 
-    warm_cba, ttft_method = _measure(
-        llm, prompts["cba"], sampling, n=args.runs, label="warm_cba"
+    warm_cba, ttft_method, cleared_cba = _measure_reorder_after_abc(
+        llm,
+        abc_prompt=prompts["abc"],
+        reorder_prompt=prompts["cba"],
+        sampling=sampling,
+        n=args.runs,
+        label="warm_cba",
     )
     results["warm_cba"] = warm_cba
+    prefix_cache_reset_ok = cleared_bac and cleared_cba
+    if not prefix_cache_reset_ok:
+        print(
+            "WARN: reset_prefix_cache unavailable/failed — reorder samples may be polluted",
+            flush=True,
+        )
 
     cold_samples: list[float] = []
     cold_text = ""
     for i in range(args.runs):
+        _reset_prefix_cache(llm)
         cold_prompt = f"[cold-nonce-{i}-{time.time_ns()}]\n" + prompts["abc"]
         ms, text, ttft_method = _ttft_ms(llm, cold_prompt, sampling)
         cold_samples.append(ms)
@@ -283,15 +365,17 @@ def main(argv: list[str] | None = None) -> int:
         "abc_prompt_tokens": prompt_tokens,
         "ttft_method": ttft_method,
         "protocol": (
-            "seed_abc → warm_abc×N → warm_bac×N (no seed) → "
-            "warm_cba×N → cold_abc×N (leading nonce)"
+            "seed_abc → warm_abc×N → "
+            "for reorder: reset_prefix_cache → seed abc → measure bac/cba ×N → "
+            "cold_abc×N (reset + leading nonce)"
         ),
+        "prefix_cache_reset_ok": prefix_cache_reset_ok,
         "scenarios": results,
         "warm_abc_p50_ms": warm_abc_p50,
         "warm_reorder_p50_ms": warm_reorder_p50,
         "reorder_vs_warm_abc": reorder_gap,
         "cold_vs_warm_abc": cold_vs_warm,
-        "harness_reorder_gap_ok": harness_reorder_gap_ok,
+        "harness_reorder_gap_ok": harness_reorder_gap_ok and prefix_cache_reset_ok,
         "note": (
             "harness_reorder_gap_ok requires reorder ≥1.15× warm ABC at ~6k tokens. "
             "Gate E: blend warm_reorder ≤ 0.85 × native warm_reorder."

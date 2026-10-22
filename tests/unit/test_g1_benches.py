@@ -211,5 +211,7 @@ def test_g1_matched_ttft_scenarios(monkeypatch: pytest.MonkeyPatch):
     bac = mod._docs(("B", "A", "C"), fillers=fillers, head="H\n")
     assert abc.index("Document Alpha") < abc.index("Document Beta")
     assert bac.index("Document Beta") < bac.index("Document Alpha")
+    assert callable(mod._reset_prefix_cache)
+    assert callable(mod._measure_reorder_after_abc)
     monkeypatch.delenv("CONTEXTWEAVE_ALLOW_MODEL_LOAD", raising=False)
     assert mod.main(["--backend", "native_prefix", "--json"]) == 1
