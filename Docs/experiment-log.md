@@ -217,6 +217,8 @@
   **without** seeding → cold with **leading** nonce; distinct per-doc fillers;
   report `harness_reorder_gap_ok` (reorder ≥1.15× warm ABC)
 - Next GPU: native_prefix only until `harness_reorder_gap_ok`, then blend Gate E
+- **Session policy:** reuse existing Colab session by default; `colab new` only on
+  user request, dead session, or incompatible stack (EPIC)
 
 ## 2026-10-22 — G1 matched-pin CacheBlend pre-registration (before GPU)
 

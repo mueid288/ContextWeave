@@ -5,7 +5,23 @@
 Full agent law: [`Docs/Reviews/claude_g1_cacheblend_matched_image_runbook.md`](Reviews/claude_g1_cacheblend_matched_image_runbook.md)  
 Design: [`Docs/plans/2026-10-22-g1-matched-cacheblend-design.md`](plans/2026-10-22-g1-matched-cacheblend-design.md)
 
-## Fresh session (≤90 min GPU)
+## Session policy (default)
+
+**Reuse the same Colab session** whenever possible. Creating a new VM forces a full
+`pip`/model reinstall. Only call `colab new` when the user asks, the old session is
+gone/`not found`, or the requirement forces a different stack (e.g. EPIC fork).
+
+```bash
+colab sessions                    # see what is alive
+colab console -s cw-matched       # reconnect (name may differ)
+cd /content/ContextWeave && git pull
+# skip g1_matched_install.sh if vllm/lmcache already match g1_matched_env.json
+```
+
+Stop only when idle for a long break or switching to an incompatible pin:
+`colab stop -s <session>`.
+
+## Fresh session (only if needed; ≤90 min GPU)
 
 ```bash
 cd /content && git clone https://github.com/mueid288/ContextWeave.git
