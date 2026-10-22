@@ -176,6 +176,20 @@
 - Decision: **documented pin BLOCK** (runbook stop condition). Do not reinstall EPIC on this session.
   Stop Colab. Optional later: fresh session per `Docs/g1-epic.md`.
 
+## 2026-10-22 — G1 matched-pin CacheBlend pre-registration (before GPU)
+
+- Host: **fresh Colab** (pip-match to `lmcache/vllm-openai:v0.5.3` era — not Docker digest)
+- Model: `Qwen/Qwen3-8B`
+- Path: MP `lmcache server` + `LMCacheMPConnector`; control=`--engine-type default`, blend=`blend`
+- Flags: `--http-port 18080`, `--supported-transfer-mode lmcache_driven`, ready ≤90s
+- Harness: `Docs/g1-matched-colab.md` + runbook in `Docs/Reviews/claude_g1_cacheblend_matched_image_runbook.md`
+- **Pre-registered outcomes:**
+  - Gate C fail → pin/config BLOCK; stop; do not conclude CacheBlend quality
+  - Gate D fail (C ok) → **real quality negative** on this pin; no param rescue this session
+  - Gate D pass + Gate E fail → quality OK, no ≥15% reorder TTFT win at this scale
+  - Both D+E pass → G1 CacheBlend provisional PASS
+- Void: prior 1.22× MP latency (quality fail) — do not cite
+
 ## 2026-10-21 — G1 Colab pin closeout (`cw-smoke` stopped)
 
 **Stack:** Colab A100-40GB, vLLM **0.32.0**, lmcache **0.5.6**, `Qwen/Qwen3-8B`

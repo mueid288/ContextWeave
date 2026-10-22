@@ -28,8 +28,9 @@ Updated: 2026-10-21
 - [x] G1 step 3 CacheBlend MP — **provisional latency** (1.22× warm reorder) / **quality FAIL**; in-process still BLOCKED
 - [x] G1 step 4: EPIC — **documented pin BLOCK** on Colab vLLM 0.32 (`g1_epic_probe.json`); dedicated fork session optional
 - [x] G1 Colab pin closeout — `cw-smoke` stopped; residual = pin gap (see experiment-log)
+- [x] G1 matched-pin Stage A harness — benches/scripts/pre-reg (`Docs/g1-matched-colab.md`)
+- [ ] G1 matched-pin Stage B–F on fresh Colab (`lmcache==0.5.3` era)
 - [ ] Partner log optional (`docs/partner-ask.md`)
-- [ ] Next GPU: matched LMCache image **or** EPIC fork session (not this pin)
 
 ## Explicitly not started
 

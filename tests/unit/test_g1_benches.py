@@ -182,3 +182,28 @@ def test_g1_epic_docs_helper():
     assert len(docs) == 3
     assert "Karachi" in docs[0]
     assert "ALPHA-9173" in docs[2]
+
+
+def test_g1_matched_quality_has_enough_cases():
+    mod = _load_script("g1_matched_quality_bench.py")
+    assert len(mod.CASES) >= 10
+    corpus = mod.build_corpus(filler_chars=20)
+    assert "DOC-A7" in corpus
+    prompt = mod.build_prompt(
+        corpus=corpus, order=mod.ORDERS["bac"], question=mod.CASES[0]["q"]
+    )
+    assert "DOC-B3" in prompt
+
+
+def test_g1_matched_quality_refuses_without_allow(monkeypatch: pytest.MonkeyPatch):
+    mod = _load_script("g1_matched_quality_bench.py")
+    monkeypatch.delenv("CONTEXTWEAVE_ALLOW_MODEL_LOAD", raising=False)
+    assert mod.main(["--mode", "native", "--json"]) == 1
+
+
+def test_g1_matched_ttft_scenarios(monkeypatch: pytest.MonkeyPatch):
+    mod = _load_script("g1_matched_ttft_bench.py")
+    assert "cold_abc" in mod.SCENARIOS
+    assert mod._percentile([1.0, 2.0, 3.0, 4.0, 5.0], 0.5) == 3.0
+    monkeypatch.delenv("CONTEXTWEAVE_ALLOW_MODEL_LOAD", raising=False)
+    assert mod.main(["--backend", "native_prefix", "--json"]) == 1
