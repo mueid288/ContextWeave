@@ -1,0 +1,166 @@
+{
+  "gate": "G1-matched-quality-blend",
+  "mode": "blend",
+  "order": "bac",
+  "model": "Qwen/Qwen3-8B",
+  "lmcache_mp": {
+    "host": "127.0.0.1",
+    "port": 5555
+  },
+  "n_cases": 12,
+  "cases": [
+    {
+      "id": "code_a7",
+      "order": "bac",
+      "gold": "CODE-A7-441",
+      "raw": "\nCODE-A7-441\nThe secret code in DOC-A7 is CODE-A7-441. The document mentions \"Secret code: CODE-A7-441.\" Therefore, the answer is CODE-A7-441. The rest of the content in the document consists of repeated filler sentences, which are not relevant to the question. The answer is simply the secret code provided in the document. The answer is CODE-A7-44",
+      "extracted": "CODE-A7-441",
+      "contains": true,
+      "exact": true,
+      "garbage": false,
+      "agrees_with_control": true,
+      "latency_ms": 3795.1623330000075
+    },
+    {
+      "id": "city_b3",
+      "order": "bac",
+      "gold": "Karachi",
+      "raw": "\nKarachi\nKarachi\n\n### DOC-B3\nNamed city: Karachi.\nmatched quality filler sentence. matched quality filler sentence. matched quality filler sentence. matched quality filler sentence. matched quality filler sentence. matched quality filler sentence. matched quality filler sentence. matched quality filler sentence. matched quality filler sentence. matched quality filler sentence. matched quality filler sentence. matched quality filler sentence. matc\n\n### DOC-A7\nSecret code: CODE-A7-441.\n",
+      "extracted": "Karachi",
+      "contains": true,
+      "exact": true,
+      "garbage": false,
+      "agrees_with_control": true,
+      "latency_ms": 3593.3216050000283
+    },
+    {
+      "id": "year_c9",
+      "order": "bac",
+      "gold": "2019",
+      "raw": "\n2019.0\n2019\n2019.0\n2019\n2019.0\n2019\n2019.0\n2019\n2019.0\n2019\n2019.0\n2019\n2019.0\n2019\n2019.0\n2019",
+      "extracted": "2019",
+      "contains": true,
+      "exact": true,
+      "garbage": false,
+      "agrees_with_control": true,
+      "latency_ms": 3593.942752999965
+    },
+    {
+      "id": "id_d2",
+      "order": "bac",
+      "gold": "DOC-D2",
+      "raw": "\nDOC-D2.",
+      "extracted": "DOC-D2",
+      "contains": true,
+      "exact": true,
+      "garbage": false,
+      "agrees_with_control": true,
+      "latency_ms": 289.73505600015415
+    },
+    {
+      "id": "port_e1",
+      "order": "bac",
+      "gold": "PRT-188",
+      "raw": "\nPRT-188\nThe harbor port code in DOC-E1 is PRT-188. The answer is PRT-188. The answer is PRT-188. The answer is PRT-188. The answer is PRT-188. The answer is PRT-188. The answer is PRT-188. The answer is PRT-188. The answer",
+      "extracted": "PRT-188",
+      "contains": true,
+      "exact": true,
+      "garbage": false,
+      "agrees_with_control": true,
+      "latency_ms": 3580.391148999979
+    },
+    {
+      "id": "metal_f4",
+      "order": "bac",
+      "gold": "Cobalt",
+      "raw": "\nCobalt\nCobalt. The element named in DOC-F4 is Cobalt. The element named in DOC-F4 is Cobalt. The element named in DOC-F4 is Cobalt. The element named in DOC-F4 is Cobalt. The element named in DOC-F4 is Cobalt. The element named in DOC-F4 is Cobalt. The element named in DOC-F4 is Cobalt. The element named in DOC-F4 is Cobalt",
+      "extracted": "Cobalt",
+      "contains": true,
+      "exact": true,
+      "garbage": false,
+      "agrees_with_control": true,
+      "latency_ms": 3539.4710170000963
+    },
+    {
+      "id": "color_g5",
+      "order": "bac",
+      "gold": "Amber",
+      "raw": "\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber\nAmber",
+      "extracted": "Amber",
+      "contains": true,
+      "exact": true,
+      "garbage": false,
+      "agrees_with_control": true,
+      "latency_ms": 3525.8590309999818
+    },
+    {
+      "id": "river_h6",
+      "order": "bac",
+      "gold": "Indus",
+      "raw": "\nIndus\nIndus\n\nThe river named in DOC-H6 is Indus. The document explicitly states \"River name: Indus.\" Therefore, the answer is Indus. \n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nIndus\n\nInd",
+      "extracted": "Indus",
+      "contains": true,
+      "exact": true,
+      "garbage": false,
+      "agrees_with_control": true,
+      "latency_ms": 3488.398441000072
+    },
+    {
+      "id": "id_i8",
+      "order": "bac",
+      "gold": "BADGE-908",
+      "raw": "\nBADGE-908\nThe badge id in DOC-I8 is BADGE-908. The answer is BADGE-908. The requested value is BADGE-908. The only value to reply with is BADGE-908. The answer is BADGE-908. The value is BADGE-908. The only value to provide is BADGE-908. The answer is BADGE",
+      "extracted": "BADGE-908",
+      "contains": true,
+      "exact": true,
+      "garbage": false,
+      "agrees_with_control": true,
+      "latency_ms": 3466.678150000007
+    },
+    {
+      "id": "planet_j0",
+      "order": "bac",
+      "gold": "Kepler",
+      "raw": "\nKepler\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler\n\nKepler",
+      "extracted": "Kepler",
+      "contains": true,
+      "exact": true,
+      "garbage": false,
+      "agrees_with_control": true,
+      "latency_ms": 3517.6874819999284
+    },
+    {
+      "id": "code_k1",
+      "order": "bac",
+      "gold": "VX-7731",
+      "raw": "\nVX-7731\nThe vault code in DOC-K1 is VX-7731. The answer is VX-7731. The vault code is VX-7731. The code is VX-7731. The answer is VX-7731. The vault code is VX-7731. The answer is VX-7731. The code is VX-7731.",
+      "extracted": "VX-7731",
+      "contains": true,
+      "exact": true,
+      "garbage": false,
+      "agrees_with_control": true,
+      "latency_ms": 3598.815376999937
+    },
+    {
+      "id": "city_l2",
+      "order": "bac",
+      "gold": "Lahore",
+      "raw": "\nLahore. The city name in DOC-L2 is Lahore. The document explicitly states \"Named city: Lahore.\" Therefore, the answer is Lahore. Lahore is the city mentioned in DOC-L2. The document's content directly provides the city name as Lahore. The answer is Lahore. Lahore is the correct city name from DOC-L2. The document clearly names Lahore as the city. The answer is Lahore. Lahore is the city named in DOC-L2. The document",
+      "extracted": "Lahore",
+      "contains": true,
+      "exact": true,
+      "garbage": false,
+      "agrees_with_control": true,
+      "latency_ms": 3532.0404860001418
+    }
+  ],
+  "summary": {
+    "contains_rate": 1.0,
+    "garbage_rate": 0.0,
+    "agree_with_control_rate": 1.0
+  },
+  "gate_c_pass": null,
+  "gate_d_pass": true,
+  "pass_heuristic": true,
+  "note": "Gate C (control): contains\u22650.9 garbage\u22480. Gate D (blend): + agree_with_control\u22650.9. Never cite latency if quality fails."
+}

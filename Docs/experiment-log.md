@@ -206,6 +206,7 @@
 - Blend warm_reorder p50 **362 ms** (slower than native; ratio 0.85 the wrong way)
 - **Gate E FAIL** again. Caveat: without a native reorder penalty, Gate E is not a fair “close the gap” test — TTFT harness may not be producing prefix hits
 - Decision: **stop `cw-matched`**. Offline: fix TTFT bench so native warm_abc ≪ warm_bac before another GPU latency run; else EPIC session. ResolventKV still deferred.
+- Artifacts checked in: `artifacts/g1-matched-2026-10-22/`
 
 ## 2026-10-22 — G1 matched-pin CacheBlend pre-registration (before GPU)
 
