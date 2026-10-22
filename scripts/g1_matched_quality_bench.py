@@ -196,26 +196,33 @@ def _reset_prefix_cache(llm) -> None:
 
 
 def _kv_transfer_config(host: str, port: int):
+    import importlib.util
+
     from vllm.config import KVTransferConfig
 
     # heartbeat_interval also caps PING wait; 10s falsely marks busy blend servers
     # unhealthy → KV load failure_policy=fail (empty 6ms cases).
-    return KVTransferConfig(
-        kv_connector="LMCacheMPConnector",
-        kv_connector_module_path="lmcache.integration.vllm.lmcache_mp_connector",
-        kv_role="kv_both",
-        kv_connector_extra_config={
-            "lmcache.mp.host": f"tcp://{host}",
-            "lmcache.mp.port": port,
-            "lmcache.mp.mq_timeout": float(os.environ.get("LMCACHE_MP_MQ_TIMEOUT", "300")),
-            "lmcache.mp.heartbeat_interval": float(
-                os.environ.get("LMCACHE_MP_HEARTBEAT_INTERVAL", "60")
-            ),
-            "lmcache.mp.mp_transfer_mode": os.environ.get(
-                "LMCACHE_MP_TRANSFER_MODE", "lmcache_driven"
-            ),
-        },
-    )
+    # lmcache 0.4.x has no lmcache_mp_connector — omit path so vLLM uses built-in.
+    extra = {
+        "lmcache.mp.host": f"tcp://{host}",
+        "lmcache.mp.port": port,
+        "lmcache.mp.mq_timeout": float(os.environ.get("LMCACHE_MP_MQ_TIMEOUT", "300")),
+        "lmcache.mp.heartbeat_interval": float(
+            os.environ.get("LMCACHE_MP_HEARTBEAT_INTERVAL", "60")
+        ),
+        "lmcache.mp.mp_transfer_mode": os.environ.get(
+            "LMCACHE_MP_TRANSFER_MODE", "lmcache_driven"
+        ),
+    }
+    kwargs: dict = {
+        "kv_connector": "LMCacheMPConnector",
+        "kv_role": "kv_both",
+        "kv_connector_extra_config": extra,
+    }
+    mp_mod = "lmcache.integration.vllm.lmcache_mp_connector"
+    if importlib.util.find_spec(mp_mod) is not None:
+        kwargs["kv_connector_module_path"] = mp_mod
+    return KVTransferConfig(**kwargs)
 
 
 def main(argv: list[str] | None = None) -> int:

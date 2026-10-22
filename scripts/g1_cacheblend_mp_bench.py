@@ -139,15 +139,20 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Prompt {name} too long ({len(ids)} tokens).", file=sys.stderr)
             return 3
 
-    ktc = KVTransferConfig(
-        kv_connector="LMCacheMPConnector",
-        kv_connector_module_path="lmcache.integration.vllm.lmcache_mp_connector",
-        kv_role="kv_both",
-        kv_connector_extra_config={
+    import importlib.util
+
+    ktc_kwargs: dict = {
+        "kv_connector": "LMCacheMPConnector",
+        "kv_role": "kv_both",
+        "kv_connector_extra_config": {
             "lmcache.mp.host": f"tcp://{host}",
             "lmcache.mp.port": port,
         },
-    )
+    }
+    mp_mod = "lmcache.integration.vllm.lmcache_mp_connector"
+    if importlib.util.find_spec(mp_mod) is not None:
+        ktc_kwargs["kv_connector_module_path"] = mp_mod
+    ktc = KVTransferConfig(**ktc_kwargs)
 
     print(
         f"MP CacheBlend bench model={args.model} server={host}:{port} "

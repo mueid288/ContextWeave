@@ -434,24 +434,28 @@ def main(argv: list[str] | None = None) -> int:
         host = os.environ.get("LMCACHE_MP_HOST", "127.0.0.1")
         port = int(os.environ.get("LMCACHE_MP_PORT", "5555"))
         kwargs["enable_prefix_caching"] = False
-        kwargs["kv_transfer_config"] = KVTransferConfig(
-            kv_connector="LMCacheMPConnector",
-            kv_connector_module_path="lmcache.integration.vllm.lmcache_mp_connector",
-            kv_role="kv_both",
-            kv_connector_extra_config={
-                "lmcache.mp.host": f"tcp://{host}",
-                "lmcache.mp.port": port,
-                "lmcache.mp.mq_timeout": float(
-                    os.environ.get("LMCACHE_MP_MQ_TIMEOUT", "300")
-                ),
-                "lmcache.mp.heartbeat_interval": float(
-                    os.environ.get("LMCACHE_MP_HEARTBEAT_INTERVAL", "60")
-                ),
-                "lmcache.mp.mp_transfer_mode": os.environ.get(
-                    "LMCACHE_MP_TRANSFER_MODE", "lmcache_driven"
-                ),
-            },
-        )
+        import importlib.util
+
+        extra = {
+            "lmcache.mp.host": f"tcp://{host}",
+            "lmcache.mp.port": port,
+            "lmcache.mp.mq_timeout": float(os.environ.get("LMCACHE_MP_MQ_TIMEOUT", "300")),
+            "lmcache.mp.heartbeat_interval": float(
+                os.environ.get("LMCACHE_MP_HEARTBEAT_INTERVAL", "60")
+            ),
+            "lmcache.mp.mp_transfer_mode": os.environ.get(
+                "LMCACHE_MP_TRANSFER_MODE", "lmcache_driven"
+            ),
+        }
+        ktc_kwargs: dict = {
+            "kv_connector": "LMCacheMPConnector",
+            "kv_role": "kv_both",
+            "kv_connector_extra_config": extra,
+        }
+        mp_mod = "lmcache.integration.vllm.lmcache_mp_connector"
+        if importlib.util.find_spec(mp_mod) is not None:
+            ktc_kwargs["kv_connector_module_path"] = mp_mod
+        kwargs["kv_transfer_config"] = KVTransferConfig(**ktc_kwargs)
 
     print(
         f"matched TTFT backend={args.backend} runs={args.runs} "
