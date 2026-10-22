@@ -1,0 +1,110 @@
+{
+  "gate": "G1-matched-ttft",
+  "backend": "blend",
+  "model": "Qwen/Qwen3-8B",
+  "runs": 10,
+  "prompt_format": "chunk_sep",
+  "blend_special_str": " # # ",
+  "chunk_tokens": 3840,
+  "chunk_tokens_aligned_256": true,
+  "target_prefix_tokens": 12000,
+  "abc_prompt_tokens": 11568,
+  "ttft_method": "wall_clock_generate_token_ids",
+  "max_tokens": 1,
+  "enforce_eager": true,
+  "blend_client_env": true,
+  "warm_abc_cv": 0.36987375724311017,
+  "warm_reorder_cv": 0.004958876062282305,
+  "protocol": "chunk_sep prompts \u2192 seed_abc \u2192 warm_abc\u00d7N \u2192 for reorder: reset_prefix_cache \u2192 seed abc \u2192 measure bac/cba \u00d7N (blend: unique chunk salt per trial) \u2192 cold_abc\u00d7N (reset + leading nonce tokens)",
+  "prefix_cache_reset_ok": true,
+  "reorder_series_polluted": false,
+  "scenarios": {
+    "warm_abc": {
+      "n": 10,
+      "p50_ms": 189.57847950014184,
+      "p90_ms": 225.6333141000595,
+      "cv": 0.36987375724311017,
+      "samples_ms": [
+        444.14426100001947,
+        201.35432000006404,
+        189.0314740003305,
+        188.93985100021382,
+        189.90762200019162,
+        189.14580099999512,
+        189.94761000021754,
+        189.24933700009205,
+        189.22486900009972,
+        194.098029000088
+      ],
+      "last_output": ""
+    },
+    "warm_bac": {
+      "n": 10,
+      "p50_ms": 945.4271970000718,
+      "p90_ms": 949.3868742998984,
+      "cv": 0.004881390170950392,
+      "first_ms": 936.4214080001148,
+      "samples_ms": [
+        936.4214080001148,
+        939.0714880000814,
+        943.2147389998136,
+        944.9070410000786,
+        942.4638629998299,
+        945.947353000065,
+        949.3307809998441,
+        949.1446150000229,
+        948.5293190000448,
+        949.8917140003869
+      ],
+      "series_polluted": false,
+      "last_output": ""
+    },
+    "warm_cba": {
+      "n": 10,
+      "p50_ms": 951.491193000038,
+      "p90_ms": 952.9681090001304,
+      "cv": 0.0018140806770919433,
+      "first_ms": 948.4405909997804,
+      "samples_ms": [
+        948.4405909997804,
+        948.7404380001863,
+        950.4861669997808,
+        950.5378849999033,
+        951.4951370001654,
+        951.9283689996882,
+        952.8829370001404,
+        951.4872489999107,
+        952.7001389997167,
+        953.7346570000409
+      ],
+      "series_polluted": false,
+      "last_output": ""
+    },
+    "cold_abc": {
+      "n": 10,
+      "p50_ms": 952.9124405000857,
+      "p90_ms": 953.5138084000209,
+      "cv": 0.0006045668028070014,
+      "samples_ms": [
+        952.6792789997671,
+        952.4085309999464,
+        952.6563959998384,
+        952.5542619999214,
+        953.089860000091,
+        952.8745060001711,
+        952.9503750000003,
+        954.4209489999957,
+        953.4130150000237,
+        952.953577000244
+      ],
+      "last_output": ""
+    }
+  },
+  "warm_abc_p50_ms": 189.57847950014184,
+  "warm_reorder_p50_ms": 948.4591950000549,
+  "warm_reorder_first_ms": 942.4309994999476,
+  "reorder_vs_warm_abc": 5.00298977764164,
+  "cold_vs_warm_abc": 5.026480025647493,
+  "harness_reorder_gap_ok": true,
+  "note": "prompt_format=chunk_sep required for CacheBlend chunk-id reuse. harness_reorder_gap_ok requires reorder \u22651.15\u00d7 warm ABC and no self-hit pollution. Gate E: blend warm_reorder \u2264 0.85 \u00d7 native warm_reorder. Do not cite gate_e if reorder_series_polluted."
+}
