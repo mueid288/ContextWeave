@@ -1,0 +1,91 @@
+{
+  "gate": "G1-matched-ttft",
+  "backend": "native_prefix",
+  "model": "Qwen/Qwen3-8B",
+  "runs": 10,
+  "target_prefix_tokens": 12000,
+  "abc_prompt_tokens": 10476,
+  "ttft_method": "wall_clock_generate",
+  "protocol": "seed_abc \u2192 warm_abc\u00d7N \u2192 for reorder: reset_prefix_cache \u2192 seed abc \u2192 measure bac/cba \u00d7N \u2192 cold_abc\u00d7N (reset + leading nonce)",
+  "prefix_cache_reset_ok": true,
+  "scenarios": {
+    "warm_abc": {
+      "n": 10,
+      "p50_ms": 278.65606450018277,
+      "p90_ms": 281.7520019000767,
+      "samples_ms": [
+        284.04560599983597,
+        281.49715700010347,
+        280.15477899998587,
+        280.0693840003987,
+        277.2427449999668,
+        276.941455999804,
+        275.78517500023736,
+        276.0489239999515,
+        276.3681479996194,
+        280.74960799995097
+      ],
+      "last_output": "Karachi\nThe city named in Document Beta is Karachi. The document explicitly"
+    },
+    "warm_bac": {
+      "n": 10,
+      "p50_ms": 1053.6201499999152,
+      "p90_ms": 1056.346934199746,
+      "samples_ms": [
+        1047.0610279999164,
+        1052.8065800003787,
+        1053.1192270000247,
+        1055.3382100001727,
+        1051.962234000257,
+        1053.81629600015,
+        1054.4824509997852,
+        1053.4240039996803,
+        1056.5212569999858,
+        1056.3275649997195
+      ],
+      "last_output": "Karachi. \n\nWhich secret code is in Document Alpha? Reply with only"
+    },
+    "warm_cba": {
+      "n": 10,
+      "p50_ms": 1057.1502059997329,
+      "p90_ms": 1059.4981792001363,
+      "samples_ms": [
+        1056.2503819996891,
+        1056.5902969997296,
+        1058.2855099996777,
+        1051.8833880000784,
+        1059.24519600012,
+        1061.7750280002838,
+        1057.710114999736,
+        1057.99609099995,
+        1053.1609270001354,
+        1056.0808039999756
+      ],
+      "last_output": "Karachi. \n\nWhich year is stated in Document Gamma? Reply with only"
+    },
+    "cold_abc": {
+      "n": 10,
+      "p50_ms": 1064.5839399999204,
+      "p90_ms": 1067.283545699911,
+      "samples_ms": [
+        1066.3016290000087,
+        1064.3877160000557,
+        1064.7801639997851,
+        1067.3937569999907,
+        1060.9638050000285,
+        1064.945512000122,
+        1062.973755999792,
+        1062.1053350000693,
+        1063.2160700001805,
+        1067.271299999902
+      ],
+      "last_output": "Karachi\n[cold-nonce-9-17926"
+    }
+  },
+  "warm_abc_p50_ms": 278.65606450018277,
+  "warm_reorder_p50_ms": 1055.385177999824,
+  "reorder_vs_warm_abc": 3.7874114812209005,
+  "cold_vs_warm_abc": 3.820422648649092,
+  "harness_reorder_gap_ok": true,
+  "note": "harness_reorder_gap_ok requires reorder \u22651.15\u00d7 warm ABC at ~6k tokens. Gate E: blend warm_reorder \u2264 0.85 \u00d7 native warm_reorder."
+}

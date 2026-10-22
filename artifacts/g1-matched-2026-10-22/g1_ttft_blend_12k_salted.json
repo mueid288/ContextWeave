@@ -1,0 +1,97 @@
+{
+  "gate": "G1-matched-ttft",
+  "backend": "blend",
+  "model": "Qwen/Qwen3-8B",
+  "runs": 10,
+  "target_prefix_tokens": 12000,
+  "abc_prompt_tokens": 10476,
+  "ttft_method": "wall_clock_generate",
+  "protocol": "seed_abc \u2192 warm_abc\u00d7N \u2192 for reorder: reset_prefix_cache \u2192 seed abc \u2192 measure bac/cba \u00d7N (blend: unique filler salt per trial) \u2192 cold_abc\u00d7N (reset + leading nonce)",
+  "prefix_cache_reset_ok": true,
+  "reorder_series_polluted": false,
+  "scenarios": {
+    "warm_abc": {
+      "n": 10,
+      "p50_ms": 800.5039130000569,
+      "p90_ms": 827.3465986001155,
+      "samples_ms": [
+        998.8364020000517,
+        808.2921760001227,
+        800.699171999895,
+        798.4566999998606,
+        803.2842659999915,
+        803.6844560001555,
+        800.3086540002187,
+        799.4663680001395,
+        792.4185370002306,
+        794.2601350000587
+      ],
+      "last_output": "Karachi\nOkay, so I need to figure out which city is named"
+    },
+    "warm_bac": {
+      "n": 10,
+      "p50_ms": 1389.9050240001998,
+      "p90_ms": 1394.9164866000956,
+      "first_ms": 1375.8256139999503,
+      "samples_ms": [
+        1375.8256139999503,
+        1392.5609329999133,
+        1394.6579170001314,
+        1388.1345279996822,
+        1381.1095269998077,
+        1389.3646800001989,
+        1392.7479879998828,
+        1386.0494350001318,
+        1390.4453680002007,
+        1397.2436129997732
+      ],
+      "series_polluted": false,
+      "last_output": "Karachi. \n\nWhich secret code is in Document Alpha? Reply with only"
+    },
+    "warm_cba": {
+      "n": 10,
+      "p50_ms": 1392.6776275000066,
+      "p90_ms": 1394.908910200229,
+      "first_ms": 1393.3538720002616,
+      "samples_ms": [
+        1393.3538720002616,
+        1393.0432959996324,
+        1392.3119590003807,
+        1385.9942090002733,
+        1394.767468000282,
+        1390.8570120001968,
+        1389.0918980000606,
+        1390.630744000191,
+        1396.1818899997525,
+        1393.1063680001898
+      ],
+      "series_polluted": false,
+      "last_output": "Karachi. The city named in Document Beta is Karachi. The answer is"
+    },
+    "cold_abc": {
+      "n": 10,
+      "p50_ms": 1414.7712830001637,
+      "p90_ms": 1426.8636527998751,
+      "samples_ms": [
+        1426.6939049998655,
+        1406.3209760001882,
+        1406.5812279995953,
+        1409.3470079997132,
+        1422.9897440000059,
+        1426.5607970000929,
+        1428.391382999962,
+        1409.3637330001911,
+        1415.6887330000245,
+        1413.853833000303
+      ],
+      "last_output": "Karachi\n[cold-nonce-9-17926"
+    }
+  },
+  "warm_abc_p50_ms": 800.5039130000569,
+  "warm_reorder_p50_ms": 1391.2913257501032,
+  "warm_reorder_first_ms": 1384.589743000106,
+  "reorder_vs_warm_abc": 1.738019393978908,
+  "cold_vs_warm_abc": 1.7673508649045957,
+  "harness_reorder_gap_ok": true,
+  "note": "harness_reorder_gap_ok requires reorder \u22651.15\u00d7 warm ABC and no self-hit pollution (first\u226blater). Gate E: blend warm_reorder \u2264 0.85 \u00d7 native warm_reorder. Do not cite gate_e if reorder_series_polluted."
+}
