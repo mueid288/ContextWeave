@@ -296,6 +296,13 @@
 - Prior markdown Gate E FAILs remain valid as no-reuse evidence; do not delete
 - Next: same-session `bash scripts/g1_matched_ttft_chunk_e.sh` → bank `*_12k_chunks.json`
 
+## 2026-10-22 — Gate E @12k chunk_sep FAIL (reuse still absent)
+
+- Native: warm **250** / reorder **1173** / cold **1175**; gap **4.68×**; harness_ok True; `chunk_tokens=3981`
+- Blend: warm **776** / reorder **1503** / cold **1507**; polluted False; reorder≈cold (**no CacheBlend hit**)
+- Gate E: blend 1503 vs native 1173 → **0.78×** (**FAIL**)
+- Conclusion on this pin: chunk+sep format did not unlock non-prefix reuse vs native; stop chasing E here; EPIC needs a **new** session
+
 ## Template for future entries
 
 ```

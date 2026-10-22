@@ -1,0 +1,101 @@
+{
+  "gate": "G1-matched-ttft",
+  "backend": "native_prefix",
+  "model": "Qwen/Qwen3-8B",
+  "runs": 10,
+  "prompt_format": "chunk_sep",
+  "blend_special_str": " # # ",
+  "chunk_tokens": 3981,
+  "target_prefix_tokens": 12000,
+  "abc_prompt_tokens": 11991,
+  "ttft_method": "wall_clock_generate_token_ids",
+  "enforce_eager": false,
+  "protocol": "chunk_sep prompts \u2192 seed_abc \u2192 warm_abc\u00d7N \u2192 for reorder: reset_prefix_cache \u2192 seed abc \u2192 measure bac/cba \u00d7N (blend: unique chunk salt per trial) \u2192 cold_abc\u00d7N (reset + leading nonce tokens)",
+  "prefix_cache_reset_ok": true,
+  "reorder_series_polluted": false,
+  "scenarios": {
+    "warm_abc": {
+      "n": 10,
+      "p50_ms": 250.4704395000772,
+      "p90_ms": 250.64620860011928,
+      "samples_ms": [
+        251.12926200017682,
+        250.57738299983612,
+        250.3127059999315,
+        250.48357900004703,
+        250.45730000010735,
+        250.5925360001129,
+        250.58338700000604,
+        250.10715899998104,
+        249.79723000024023,
+        249.92563700016035
+      ],
+      "last_output": "Karachi\nOkay, let's see. The user is asking which city"
+    },
+    "warm_bac": {
+      "n": 10,
+      "p50_ms": 1171.3658160003888,
+      "p90_ms": 1173.2937779000167,
+      "first_ms": 1169.0113049999127,
+      "samples_ms": [
+        1169.0113049999127,
+        1167.6471279997713,
+        1169.2405680000775,
+        1170.2720509997562,
+        1171.7306010000357,
+        1171.476774000439,
+        1171.2548580003386,
+        1171.855444999892,
+        1173.293412000021,
+        1173.297070999979
+      ],
+      "series_polluted": false,
+      "last_output": "Karachi\nOkay, so I need to figure out which city is named"
+    },
+    "warm_cba": {
+      "n": 10,
+      "p50_ms": 1174.38006149996,
+      "p90_ms": 1177.6268687996435,
+      "first_ms": 1172.2186960000727,
+      "samples_ms": [
+        1172.2186960000727,
+        1171.9115079999938,
+        1174.5704269997077,
+        1173.689380000269,
+        1174.5571149999705,
+        1174.03005999995,
+        1174.2030079999495,
+        1177.5764699996216,
+        1178.0804579998403,
+        1176.4832419999038
+      ],
+      "series_polluted": false,
+      "last_output": "Karachi\nOkay, so I need to figure out which city is named"
+    },
+    "cold_abc": {
+      "n": 10,
+      "p50_ms": 1174.6606309998242,
+      "p90_ms": 1175.150231099724,
+      "samples_ms": [
+        1173.4588170002098,
+        1174.3193410002277,
+        1174.7455649997391,
+        1174.5756969999093,
+        1175.4039779998493,
+        1173.813015000178,
+        1175.12203699971,
+        1175.0522580000506,
+        1173.82594899982,
+        1174.971732999893
+      ],
+      "last_output": "Karachi\n[cold-nonce-9-17926"
+    }
+  },
+  "warm_abc_p50_ms": 250.4704395000772,
+  "warm_reorder_p50_ms": 1172.8729387501744,
+  "warm_reorder_first_ms": 1170.6150004999927,
+  "reorder_vs_warm_abc": 4.6826800842892,
+  "cold_vs_warm_abc": 4.6898174225444365,
+  "harness_reorder_gap_ok": true,
+  "note": "prompt_format=chunk_sep required for CacheBlend chunk-id reuse. harness_reorder_gap_ok requires reorder \u22651.15\u00d7 warm ABC and no self-hit pollution. Gate E: blend warm_reorder \u2264 0.85 \u00d7 native warm_reorder. Do not cite gate_e if reorder_series_polluted."
+}
