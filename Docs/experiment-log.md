@@ -261,6 +261,12 @@
 - Cause: after first BAC measure, trials 2..N were **BAC self-hits**; p50 hid the miss (p90 was higher)
 - Fix: `reset_prefix_cache` → seed ABC → measure reorder, each trial
 
+## 2026-10-22 — Native TTFT harness PASS (~6k tokens)
+
+- `warm_abc` p50 **251 ms**; `warm_reorder` p50 **646–647 ms**; `cold` **658 ms**
+- `reorder_vs_warm_abc≈2.57×`; `cold_vs_warm≈2.62×`; `prefix_cache_reset_ok`; **harness_ok True**
+- Next: same-session blend Gate E vs this native reorder baseline
+
 ## Template for future entries
 
 ```
