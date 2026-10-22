@@ -106,25 +106,75 @@ export SETUPTOOLS_SCM_PRETEND_VERSION="${SETUPTOOLS_SCM_PRETEND_VERSION:-0.7.0}"
 export MAX_JOBS="${MAX_JOBS:-2}"
 export NVCC_THREADS="${NVCC_THREADS:-2}"
 
-# Colab / many images ship CUDA under /usr/local/cuda but leave CUDA_HOME unset.
-if [[ -z "${CUDA_HOME:-}" ]]; then
-  for cand in /usr/local/cuda /usr/local/cuda-12.4 /usr/local/cuda-12.1 /usr/local/cuda-12; do
+_find_cuda_home() {
+  if [[ -n "${CUDA_HOME:-}" && -x "${CUDA_HOME}/bin/nvcc" ]]; then
+    echo "$CUDA_HOME"
+    return 0
+  fi
+  local cand
+  for cand in /usr/local/cuda /usr/local/cuda-12.8 /usr/local/cuda-12.6 \
+    /usr/local/cuda-12.4 /usr/local/cuda-12.1 /usr/local/cuda-12; do
     if [[ -x "${cand}/bin/nvcc" ]]; then
-      export CUDA_HOME="$cand"
-      break
+      echo "$cand"
+      return 0
     fi
   done
-fi
-if [[ -z "${CUDA_HOME:-}" ]] && command -v nvcc >/dev/null 2>&1; then
-  export CUDA_HOME="$(dirname "$(dirname "$(command -v nvcc)")")"
-fi
-if [[ -z "${CUDA_HOME:-}" ]]; then
-  echo "BLOCK: CUDA_HOME unset and nvcc not found. Install CUDA toolkit or set CUDA_HOME."
+  if command -v nvcc >/dev/null 2>&1; then
+    dirname "$(dirname "$(command -v nvcc)")"
+    return 0
+  fi
+  # pip nvidia-cuda-nvcc-cu12 layout
+  local pip_nvcc
+  pip_nvcc="$("$EPIC_PYTHON" - <<'PY' 2>/dev/null || true
+import importlib.util, pathlib
+spec = importlib.util.find_spec("nvidia.cuda_nvcc")
+if not spec or not spec.submodule_search_locations:
+    raise SystemExit(1)
+root = pathlib.Path(list(spec.submodule_search_locations)[0])
+for p in (root, root / "bin", *root.glob("**/nvcc")):
+    pass
+nvcc = root / "bin" / "nvcc"
+if nvcc.is_file():
+    print(root)
+PY
+)"
+  if [[ -n "$pip_nvcc" && -x "${pip_nvcc}/bin/nvcc" ]]; then
+    echo "$pip_nvcc"
+    return 0
+  fi
+  return 1
+}
+
+ensure_cuda_home() {
+  local home=""
+  home="$(_find_cuda_home)" && export CUDA_HOME="$home" && return 0
+
+  echo "=== nvcc missing — installing CUDA 12.4 toolkit pieces (Colab often has drivers only) ==="
+  if command -v apt-get >/dev/null 2>&1; then
+    apt-get update -qq
+    # Prefer matching 12.4 (torch cu124). Fall back to generic toolkit meta-package.
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+      cuda-nvcc-12-4 cuda-cudart-dev-12-4 cuda-compiler-12-4 \
+      2>/dev/null \
+      || DEBIAN_FRONTEND=noninteractive apt-get install -y -qq nvidia-cuda-toolkit \
+      || true
+  fi
+  home="$(_find_cuda_home)" && export CUDA_HOME="$home" && return 0
+
+  echo "=== apt nvcc still missing — trying pip nvidia-cuda-nvcc-cu12 ==="
+  "$EPIC_PYTHON" -m pip install -q "nvidia-cuda-nvcc-cu12==12.4.*" "nvidia-cuda-runtime-cu12==12.4.*" || true
+  home="$(_find_cuda_home)" && export CUDA_HOME="$home" && return 0
+
+  echo "BLOCK: could not obtain nvcc / CUDA_HOME. GPU runtime present but no CUDA toolkit."
+  echo "Tried: /usr/local/cuda*, apt cuda-nvcc-12-4, pip nvidia-cuda-nvcc-cu12."
   exit 5
-fi
+}
+
+ensure_cuda_home
 export PATH="${CUDA_HOME}/bin:${PATH}"
-export LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${LD_LIBRARY_PATH:-}"
-echo "=== CUDA_HOME=${CUDA_HOME} nvcc=$(${CUDA_HOME}/bin/nvcc --version | tail -1) ==="
+export LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${CUDA_HOME}/lib:${LD_LIBRARY_PATH:-}"
+echo "=== CUDA_HOME=${CUDA_HOME} ==="
+"${CUDA_HOME}/bin/nvcc" --version | tail -1
 
 if [[ -f "$EPIC_DIR/requirements-build.txt" ]]; then
   "$EPIC_PYTHON" -m pip install -r "$EPIC_DIR/requirements-build.txt" || true
