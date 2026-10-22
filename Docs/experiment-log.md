@@ -199,6 +199,14 @@
 - Quality (D) PASS + latency (E) FAIL → non-prefix reuse not paying off at ~6k-ish filler scale on this pin
 - Decision: bank as **G1 CacheBlend quality OK / latency miss**. Next: longer context (more filler / 80GB) **or** EPIC session — not ResolventKV kernels yet. Collect artifacts + stop Colab.
 
+## 2026-10-22 — G1 matched-pin Gate E long FAIL (filler=4500)
+
+- Same pin; `--filler-chars 4500`, n=10
+- Native warm_abc p50 **311 ms**; warm_reorder p50 **309 ms** (ratio **0.99** — **no native reorder gap**)
+- Blend warm_reorder p50 **362 ms** (slower than native; ratio 0.85 the wrong way)
+- **Gate E FAIL** again. Caveat: without a native reorder penalty, Gate E is not a fair “close the gap” test — TTFT harness may not be producing prefix hits
+- Decision: **stop `cw-matched`**. Offline: fix TTFT bench so native warm_abc ≪ warm_bac before another GPU latency run; else EPIC session. ResolventKV still deferred.
+
 ## 2026-10-22 — G1 matched-pin CacheBlend pre-registration (before GPU)
 
 - Host: **fresh Colab** (pip-match to `lmcache/vllm-openai:v0.5.3` era — not Docker digest)
