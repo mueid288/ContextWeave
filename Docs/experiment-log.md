@@ -208,6 +208,16 @@
 - Decision: **stop `cw-matched`**. Offline: fix TTFT bench so native warm_abc ≪ warm_bac before another GPU latency run; else EPIC session. ResolventKV still deferred.
 - Artifacts checked in: `artifacts/g1-matched-2026-10-22/`
 
+## 2026-10-22 — Fix matched TTFT harness (offline)
+
+- Root cause of flat Gate E: bench **seeded each order before measuring it**, so
+  `warm_bac` was a self-hit, not a reorder miss; cold used a **trailing** nonce
+  (still a huge prefix hit)
+- Fix in `scripts/g1_matched_ttft_bench.py`: seed ABC once → warm_abc → bac/cba
+  **without** seeding → cold with **leading** nonce; distinct per-doc fillers;
+  report `harness_reorder_gap_ok` (reorder ≥1.15× warm ABC)
+- Next GPU: native_prefix only until `harness_reorder_gap_ok`, then blend Gate E
+
 ## 2026-10-22 — G1 matched-pin CacheBlend pre-registration (before GPU)
 
 - Host: **fresh Colab** (pip-match to `lmcache/vllm-openai:v0.5.3` era — not Docker digest)

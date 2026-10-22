@@ -203,7 +203,13 @@ def test_g1_matched_quality_refuses_without_allow(monkeypatch: pytest.MonkeyPatc
 
 def test_g1_matched_ttft_scenarios(monkeypatch: pytest.MonkeyPatch):
     mod = _load_script("g1_matched_ttft_bench.py")
-    assert "cold_abc" in mod.SCENARIOS
+    assert set(mod.ORDERS) == {"abc", "bac", "cba"}
     assert mod._percentile([1.0, 2.0, 3.0, 4.0, 5.0], 0.5) == 3.0
+    fillers = {"A": "aaa", "B": "bbb", "C": "ccc"}
+    abc = mod._docs(("A", "B", "C"), fillers=fillers, head="H\n")
+    bac = mod._docs(("B", "A", "C"), fillers=fillers, head="H\n")
+    assert abc.index("Document Alpha") < abc.index("Document Beta")
+    assert bac.index("Document Beta") < bac.index("Document Alpha")
+    assert "aaa" in abc and "bbb" in bac
     monkeypatch.delenv("CONTEXTWEAVE_ALLOW_MODEL_LOAD", raising=False)
     assert mod.main(["--backend", "native_prefix", "--json"]) == 1
