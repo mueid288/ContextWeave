@@ -41,24 +41,20 @@ start_server() {
   if [[ -z "$SERVER_PID" ]]; then
     echo "failed to start lmcache. Log:"; cat "$LOG" || true; exit 2
   fi
+  # Cold import (torch/TF) often takes 15–30s before Uvicorn binds.
   local ready=0
   local deadline=$((SECONDS + READY_TIMEOUT_S))
   while (( SECONDS < deadline )); do
     if ! kill -0 "$SERVER_PID" 2>/dev/null; then
-      echo "lmcache server exited. Log:"; cat "$LOG" || true; exit 2
+      echo "lmcache server exited (pid=$SERVER_PID). Log:"; cat "$LOG" || true; exit 2
     fi
-    if grep -qE 'address already in use|Address already in use|unrecognized arguments|error:' "$LOG" 2>/dev/null; then
-      # Allow brief race before usage error is fatal
-      if grep -qE 'unrecognized arguments|error:' "$LOG" 2>/dev/null; then
-        echo "lmcache server error. Log:"; cat "$LOG" || true; exit 2
-      fi
+    if grep -qiE 'unrecognized arguments|Address already in use|Traceback \(most recent call last\)' "$LOG" 2>/dev/null; then
+      echo "lmcache server error. Log:"; cat "$LOG" || true; exit 2
     fi
-    if grep -qE 'ZMQ cache server is running|cache server is running|Uvicorn running|Application startup complete' "$LOG" 2>/dev/null; then
+    if grep -qE 'ZMQ cache server is running|LMCache cache server is running|Uvicorn running|Application startup complete' "$LOG" 2>/dev/null; then
       ready=1; break
     fi
-    curl -fsS "http://127.0.0.1:${HTTP_PORT}/healthcheck" >/dev/null 2>&1 && ready=1 && break || true
-    # 0.4.x may have no HTTP — treat stable alive process after 5s + no error as ready
-    if (( SECONDS > 5 )) && ! grep -qiE 'error|traceback|unrecognized' "$LOG" 2>/dev/null; then
+    if curl -fsS "http://127.0.0.1:${HTTP_PORT}/healthcheck" >/dev/null 2>&1; then
       ready=1; break
     fi
     sleep 1
@@ -68,6 +64,10 @@ start_server() {
   fi
   echo "lmcache server ready pid=$SERVER_PID eng=$eng"
 }
+
+# Clear orphans from prior failed starts (wrong PID capture / manual sanity checks).
+pkill -f 'lmcache.v1.multiprocess' 2>/dev/null || true
+sleep 2
 
 # --- Gate C: control (default engine, no blend module) ---
 start_server default

@@ -43,15 +43,15 @@ ready=0
 deadline=$((SECONDS + READY_TIMEOUT_S))
 while (( SECONDS < deadline )); do
   if ! kill -0 "$SERVER_PID" 2>/dev/null; then
-    echo "lmcache server exited:"; cat "$LOG" || true; exit 2
+    echo "lmcache server exited (pid=$SERVER_PID):"; cat "$LOG" || true; exit 2
   fi
-  if grep -qiE 'unrecognized arguments|traceback' "$LOG" 2>/dev/null; then
+  if grep -qiE 'unrecognized arguments|Address already in use|Traceback \(most recent call last\)' "$LOG" 2>/dev/null; then
     echo "lmcache server error:"; cat "$LOG" || true; exit 2
   fi
-  if grep -qE 'ZMQ cache server is running|cache server is running|Uvicorn running|Application startup complete' "$LOG" 2>/dev/null; then
+  if grep -qE 'ZMQ cache server is running|LMCache cache server is running|Uvicorn running|Application startup complete' "$LOG" 2>/dev/null; then
     ready=1; break
   fi
-  if (( SECONDS > 5 )) && ! grep -qiE 'error|traceback|unrecognized' "$LOG" 2>/dev/null; then
+  if curl -fsS "http://127.0.0.1:${HTTP_PORT}/healthcheck" >/dev/null 2>&1; then
     ready=1; break
   fi
   sleep 1

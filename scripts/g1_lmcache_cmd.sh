@@ -45,7 +45,8 @@ start_lmcache_server() {
   # shellcheck disable=SC2086
   help="$(${prefix} -h 2>&1 || true)"
 
-  echo "=== lmcache via: ${prefix} eng=${eng} ==="
+  # Status must go to stderr — callers capture stdout as PID only.
+  echo "=== lmcache via: ${prefix} eng=${eng} ===" >&2
 
   local -a cmd=()
   # Split prefix into array safely for common cases.
@@ -71,5 +72,7 @@ start_lmcache_server() {
   fi
 
   "${cmd[@]}" >"$log" 2>&1 &
-  echo $!
+  local pid=$!
+  echo "lmcache pid=$pid log=$log" >&2
+  echo "$pid"
 }
