@@ -106,6 +106,26 @@ export SETUPTOOLS_SCM_PRETEND_VERSION="${SETUPTOOLS_SCM_PRETEND_VERSION:-0.7.0}"
 export MAX_JOBS="${MAX_JOBS:-2}"
 export NVCC_THREADS="${NVCC_THREADS:-2}"
 
+# Colab / many images ship CUDA under /usr/local/cuda but leave CUDA_HOME unset.
+if [[ -z "${CUDA_HOME:-}" ]]; then
+  for cand in /usr/local/cuda /usr/local/cuda-12.4 /usr/local/cuda-12.1 /usr/local/cuda-12; do
+    if [[ -x "${cand}/bin/nvcc" ]]; then
+      export CUDA_HOME="$cand"
+      break
+    fi
+  done
+fi
+if [[ -z "${CUDA_HOME:-}" ]] && command -v nvcc >/dev/null 2>&1; then
+  export CUDA_HOME="$(dirname "$(dirname "$(command -v nvcc)")")"
+fi
+if [[ -z "${CUDA_HOME:-}" ]]; then
+  echo "BLOCK: CUDA_HOME unset and nvcc not found. Install CUDA toolkit or set CUDA_HOME."
+  exit 5
+fi
+export PATH="${CUDA_HOME}/bin:${PATH}"
+export LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${LD_LIBRARY_PATH:-}"
+echo "=== CUDA_HOME=${CUDA_HOME} nvcc=$(${CUDA_HOME}/bin/nvcc --version | tail -1) ==="
+
 if [[ -f "$EPIC_DIR/requirements-build.txt" ]]; then
   "$EPIC_PYTHON" -m pip install -r "$EPIC_DIR/requirements-build.txt" || true
 fi
