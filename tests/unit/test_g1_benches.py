@@ -207,6 +207,11 @@ def test_g1_matched_ttft_scenarios(monkeypatch: pytest.MonkeyPatch):
     assert mod._percentile([1.0, 2.0, 3.0, 4.0, 5.0], 0.5) == 3.0
     fillers = mod._fillers_for_chars(40)
     assert "alpha-only" in fillers["A"] and "beta-unique" in fillers["B"]
+    salted = mod._fillers_for_chars(40, salt="t0-bac-")
+    assert salted["A"].startswith("t0-bac-")
+    assert salted["A"] != fillers["A"]
+    assert mod._reorder_series_polluted([1400.0, 800.0, 801.0, 799.0, 802.0])
+    assert not mod._reorder_series_polluted([1050.0, 1054.0, 1052.0, 1056.0])
     abc = mod._docs(("A", "B", "C"), fillers=fillers, head="H\n")
     bac = mod._docs(("B", "A", "C"), fillers=fillers, head="H\n")
     assert abc.index("Document Alpha") < abc.index("Document Beta")

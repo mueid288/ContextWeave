@@ -46,12 +46,23 @@ def _docs(order: tuple[str, ...], *, fillers: dict[str, str], head: str) -> str:
     return head + "\n".join(blocks[k] for k in order)
 
 
-def _fillers_for_chars(n: int) -> dict[str, str]:
+def _fillers_for_chars(n: int, *, salt: str = "") -> dict[str, str]:
+    """Build per-doc fillers. ``salt`` makes LMCache chunk ids unique across trials."""
+    prefix = f"{salt}" if salt else ""
     return {
-        "A": ("alpha-only filler sentence for prefix bench. " * 400)[:n],
-        "B": ("beta-unique filler sentence for prefix bench. " * 400)[:n],
-        "C": ("gamma-unique filler sentence for prefix bench. " * 400)[:n],
+        "A": (prefix + "alpha-only filler sentence for prefix bench. " * 400)[:n],
+        "B": (prefix + "beta-unique filler sentence for prefix bench. " * 400)[:n],
+        "C": (prefix + "gamma-unique filler sentence for prefix bench. " * 400)[:n],
     }
+
+
+def _reorder_series_polluted(samples: list[float]) -> bool:
+    """True when trial-1 looks like a miss but p50 collapsed to later self-hits."""
+    if len(samples) < 3:
+        return False
+    first = samples[0]
+    rest_p50 = statistics.median(samples[1:])
+    return first >= 1.15 * rest_p50
 
 
 def _percentile(xs: list[float], p: float) -> float:
@@ -130,31 +141,50 @@ def _measure_reorder_after_abc(
     sampling,
     n: int,
     label: str,
+    prompt_pair_fn=None,
 ) -> tuple[dict, str, bool]:
-    """Each trial: clear cache → seed ABC → measure reorder once (true miss)."""
+    """Each trial: clear cache → seed ABC → measure reorder once (true miss).
+
+    For blend/LMCache, pass ``prompt_pair_fn(i) -> (abc, reorder)`` with a unique
+    filler salt each trial so prior BAC/CBA entries cannot self-hit (vLLM
+    ``reset_prefix_cache`` often fails while LMCache still holds blocks).
+    """
     samples: list[float] = []
     last_text = ""
     method = "unknown"
     cleared = True
     for i in range(n):
+        if prompt_pair_fn is not None:
+            abc_i, reorder_i = prompt_pair_fn(i)
+        else:
+            abc_i, reorder_i = abc_prompt, reorder_prompt
         if not _reset_prefix_cache(llm):
             cleared = False
         # Repopulate ABC so we measure "reorder after prefix-hot ABC".
-        _ttft_ms(llm, abc_prompt, sampling)
-        ms, text, method = _ttft_ms(llm, reorder_prompt, sampling)
+        _ttft_ms(llm, abc_i, sampling)
+        ms, text, method = _ttft_ms(llm, reorder_i, sampling)
         samples.append(ms)
         last_text = text
         print(f"  {label} {i + 1}/{n} {ms:.0f} ms", flush=True)
+    polluted = _reorder_series_polluted(samples)
+    if polluted:
+        print(
+            f"  WARN {label}: first={samples[0]:.0f} ms vs later p50="
+            f"{statistics.median(samples[1:]):.0f} ms — self-hit pollution",
+            flush=True,
+        )
     return (
         {
             "n": len(samples),
             "p50_ms": statistics.median(samples),
             "p90_ms": _percentile(samples, 0.9),
+            "first_ms": samples[0] if samples else float("nan"),
             "samples_ms": samples,
+            "series_polluted": polluted,
             "last_output": last_text,
         },
         method,
-        cleared,
+        cleared and not polluted,
     )
 
 
@@ -239,6 +269,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.filler_chars is not None:
         fillers = _fillers_for_chars(args.filler_chars)
         prompt_tokens = None
+        filler_chars = args.filler_chars
     else:
         fillers, prompt_tokens, _ = _size_fillers(
             model=args.model,
@@ -248,11 +279,23 @@ def main(argv: list[str] | None = None) -> int:
             head=head,
             question=question,
         )
+        filler_chars = len(fillers["A"])
 
     prompts = {
         key: _docs(order, fillers=fillers, head=head) + question
         for key, order in ORDERS.items()
     }
+
+    def _blend_prompt_pair(order_key: str):
+        """Unique filler salt per trial so LMCache cannot BAC/CBA self-hit."""
+
+        def _fn(i: int) -> tuple[str, str]:
+            salted = _fillers_for_chars(filler_chars, salt=f"t{i}-{order_key}-")
+            abc = _docs(ORDERS["abc"], fillers=salted, head=head) + question
+            reo = _docs(ORDERS[order_key], fillers=salted, head=head) + question
+            return abc, reo
+
+        return _fn
 
     kwargs: dict = {
         "model": args.model,
@@ -301,6 +344,8 @@ def main(argv: list[str] | None = None) -> int:
 
     # Critical: do NOT measure bac×N without clearing — trial 2..N become BAC self-hits
     # (previous false harness_ok=False with warm≈reorder while cold_vs_warm≈2.5×).
+    # Blend: also salt fillers per trial — LMCache ignores failed reset_prefix_cache.
+    blend_pairs = args.backend == "blend"
     warm_bac, ttft_method, cleared_bac = _measure_reorder_after_abc(
         llm,
         abc_prompt=prompts["abc"],
@@ -308,6 +353,7 @@ def main(argv: list[str] | None = None) -> int:
         sampling=sampling,
         n=args.runs,
         label="warm_bac",
+        prompt_pair_fn=_blend_prompt_pair("bac") if blend_pairs else None,
     )
     results["warm_bac"] = warm_bac
 
@@ -318,12 +364,18 @@ def main(argv: list[str] | None = None) -> int:
         sampling=sampling,
         n=args.runs,
         label="warm_cba",
+        prompt_pair_fn=_blend_prompt_pair("cba") if blend_pairs else None,
     )
     results["warm_cba"] = warm_cba
-    prefix_cache_reset_ok = cleared_bac and cleared_cba
+    reorder_polluted = bool(
+        results["warm_bac"].get("series_polluted")
+        or results["warm_cba"].get("series_polluted")
+    )
+    prefix_cache_reset_ok = cleared_bac and cleared_cba and not reorder_polluted
     if not prefix_cache_reset_ok:
         print(
-            "WARN: reset_prefix_cache unavailable/failed — reorder samples may be polluted",
+            "WARN: reorder series may be polluted "
+            "(reset failed and/or first≫later p50 self-hits)",
             flush=True,
         )
 
@@ -366,19 +418,29 @@ def main(argv: list[str] | None = None) -> int:
         "ttft_method": ttft_method,
         "protocol": (
             "seed_abc → warm_abc×N → "
-            "for reorder: reset_prefix_cache → seed abc → measure bac/cba ×N → "
+            "for reorder: reset_prefix_cache → seed abc → measure bac/cba ×N "
+            "(blend: unique filler salt per trial) → "
             "cold_abc×N (reset + leading nonce)"
         ),
         "prefix_cache_reset_ok": prefix_cache_reset_ok,
+        "reorder_series_polluted": reorder_polluted,
         "scenarios": results,
         "warm_abc_p50_ms": warm_abc_p50,
         "warm_reorder_p50_ms": warm_reorder_p50,
+        "warm_reorder_first_ms": statistics.median(
+            [
+                results["warm_bac"].get("first_ms", float("nan")),
+                results["warm_cba"].get("first_ms", float("nan")),
+            ]
+        ),
         "reorder_vs_warm_abc": reorder_gap,
         "cold_vs_warm_abc": cold_vs_warm,
         "harness_reorder_gap_ok": harness_reorder_gap_ok and prefix_cache_reset_ok,
         "note": (
-            "harness_reorder_gap_ok requires reorder ≥1.15× warm ABC at ~6k tokens. "
-            "Gate E: blend warm_reorder ≤ 0.85 × native warm_reorder."
+            "harness_reorder_gap_ok requires reorder ≥1.15× warm ABC and no "
+            "self-hit pollution (first≫later). "
+            "Gate E: blend warm_reorder ≤ 0.85 × native warm_reorder. "
+            "Do not cite gate_e if reorder_series_polluted."
         ),
     }
     if args.out:

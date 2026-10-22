@@ -275,6 +275,13 @@
 - Runbook path: D✓ E✗ at this scale on A100-40 / vLLM 0.32 / lmcache MP blend — longer context needs ~80GB; do not open ResolventKV
 - Matched CacheBlend G1 branch **closed** at ~6k; same-session follow-up: longer-context Gate E (~12k) before concluding scale
 
+## 2026-10-22 — Gate E @12k false PASS voided (blend self-hits)
+
+- Native @12k: warm **279** / reorder **~1055** / cold **1065**; gap **3.79×**; harness_ok True
+- Blend reported gate_e True (801 vs 1055, 1.32×) but **polluted**: bac/cba trial1 **~1400** (≈cold), trials 2–10 **~800**; `reset_prefix_cache` failed (blocks not freed)
+- Fair first-sample reorder **~1401** vs native **1055** → **slower**; do not cite 1.32×
+- Fix: blend reorder trials use unique filler salt so LMCache cannot BAC self-hit; re-run blend @12k
+
 ## Template for future entries
 
 ```
