@@ -37,6 +37,8 @@ fi
 echo "=== python=${PY_MINOR} installing vllm==${VLLM_PIN} lmcache==${LMCACHE_PIN} ==="
 pip install -U pip
 pip install "vllm==${VLLM_PIN}" "lmcache==${LMCACHE_PIN}"
+# Ensure console script is present (some installs omit it from PATH).
+pip install --force-reinstall --no-deps "lmcache==${LMCACHE_PIN}" >/dev/null 2>&1 || true
 
 OUT="${G1_MATCHED_ENV_JSON:-g1_matched_env.json}"
 python - <<'PY' >"$OUT"

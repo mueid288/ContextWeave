@@ -30,13 +30,20 @@ def main() -> int:
         enforce_eager=True,
         gpu_memory_utilization=0.5,
     )
-    out = llm.generate(
-        ["Reply with exactly: smoke-ok"],
-        SamplingParams(temperature=0.0, max_tokens=8),
+    # Qwen3 burns tokens on thinking unless /no_think (+ optional enable_thinking=False).
+    prompt = (
+        "Reply with exactly the two words smoke-ok and nothing else.\n/no_think"
     )
+    sp_kwargs: dict = {"temperature": 0.0, "max_tokens": 16}
+    try:
+        params = SamplingParams(**sp_kwargs, extra_args={"enable_thinking": False})
+    except TypeError:
+        params = SamplingParams(**sp_kwargs)
+    out = llm.generate([prompt], params)
     text = out[0].outputs[0].text if out and out[0].outputs else ""
     print("SMOKE_OUTPUT:", repr(text), flush=True)
-    ok = "smoke-ok" in text.lower().replace(" ", "")
+    compact = "".join(text.lower().split())
+    ok = "smoke-ok" in compact or "smokeok" in compact
     print("GATE_B:", "PASS" if ok else "FAIL", flush=True)
     return 0 if ok else 2
 

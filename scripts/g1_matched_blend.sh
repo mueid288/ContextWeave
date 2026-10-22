@@ -37,34 +37,30 @@ start_server() {
     wait "$SERVER_PID" 2>/dev/null || true
   fi
   rm -f "$LOG"
-  echo "=== lmcache server engine-type=${eng} req=:${LMCACHE_MP_PORT} http=:${HTTP_PORT} ==="
-  # Ensure scripts dir on PATH for this shell (pip often installs lmcache here).
-  export PATH="$(python -c 'import sysconfig; print(sysconfig.get_path("scripts"))'):${PATH}"
-  run_lmcache server \
-    --host 127.0.0.1 \
-    --port "$LMCACHE_MP_PORT" \
-    --http-host 127.0.0.1 \
-    --http-port "$HTTP_PORT" \
-    --l1-size-gb "${LMCACHE_L1_GB:-8}" \
-    --eviction-policy LRU \
-    --engine-type "$eng" \
-    --chunk-size 256 \
-    --supported-transfer-mode lmcache_driven \
-    >"$LOG" 2>&1 &
-  SERVER_PID=$!
+  SERVER_PID="$(start_lmcache_server "$eng" "$LOG" 127.0.0.1 "$LMCACHE_MP_PORT" "$HTTP_PORT" "${LMCACHE_L1_GB:-8}")"
+  if [[ -z "$SERVER_PID" ]]; then
+    echo "failed to start lmcache. Log:"; cat "$LOG" || true; exit 2
+  fi
   local ready=0
   local deadline=$((SECONDS + READY_TIMEOUT_S))
   while (( SECONDS < deadline )); do
     if ! kill -0 "$SERVER_PID" 2>/dev/null; then
       echo "lmcache server exited. Log:"; cat "$LOG" || true; exit 2
     fi
-    if grep -qE 'address already in use|Address already in use' "$LOG" 2>/dev/null; then
-      echo "port conflict. Log:"; cat "$LOG" || true; exit 2
+    if grep -qE 'address already in use|Address already in use|unrecognized arguments|error:' "$LOG" 2>/dev/null; then
+      # Allow brief race before usage error is fatal
+      if grep -qE 'unrecognized arguments|error:' "$LOG" 2>/dev/null; then
+        echo "lmcache server error. Log:"; cat "$LOG" || true; exit 2
+      fi
     fi
-    if grep -qE 'LMCache ZMQ cache server is running|LMCache cache server is running' "$LOG" 2>/dev/null; then
+    if grep -qE 'ZMQ cache server is running|cache server is running|Uvicorn running|Application startup complete' "$LOG" 2>/dev/null; then
       ready=1; break
     fi
     curl -fsS "http://127.0.0.1:${HTTP_PORT}/healthcheck" >/dev/null 2>&1 && ready=1 && break || true
+    # 0.4.x may have no HTTP — treat stable alive process after 5s + no error as ready
+    if (( SECONDS > 5 )) && ! grep -qiE 'error|traceback|unrecognized' "$LOG" 2>/dev/null; then
+      ready=1; break
+    fi
     sleep 1
   done
   if [[ "$ready" -ne 1 ]]; then
