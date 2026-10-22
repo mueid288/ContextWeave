@@ -25,6 +25,11 @@ def test_strip_think_and_extract():
     # Prefer gold span when model meta-talks first.
     waffle = "The answer should be a single word.\nVault code: VX-7731. Done."
     assert s.extract_answer(waffle, gold="VX-7731") == "VX-7731"
+    thinking = "<thinking>\nOkay, let me try...\nKarachi"
+    assert "thinking" not in s.strip_think(thinking).lower() or "Karachi" in s.strip_think(
+        thinking
+    )
+    assert s.extract_answer(thinking, gold="Karachi") == "Karachi"
 
 
 def test_score_contains_gold_mid_text():
@@ -32,6 +37,11 @@ def test_score_contains_gold_mid_text():
     sc = s.score_output("The year is stated as:\n\n2019.\n\nok", "2019")
     assert sc["contains"] is True
     assert sc["garbage"] is False
+    # Substring inside a larger token must not count.
+    sc2 = s.score_output("code 20190 only", "2019")
+    assert sc2["contains"] is False
+    # Negation must not extract gold as the answer.
+    assert s.extract_answer("It is NOT Karachi, it is Lahore", gold="Karachi") != "Karachi"
 
 
 def test_garbage_empty_and_hash_echo():

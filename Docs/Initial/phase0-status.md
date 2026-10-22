@@ -29,7 +29,8 @@ Updated: 2026-10-21
 - [x] G1 step 4: EPIC — **documented pin BLOCK** on Colab vLLM 0.32 (`g1_epic_probe.json`); dedicated fork session optional
 - [x] G1 Colab pin closeout — `cw-smoke` stopped; residual = pin gap (see experiment-log)
 - [x] G1 matched-pin Stage A harness — benches/scripts/pre-reg (`Docs/g1-matched-colab.md`)
-- [x] G1 matched-pin B–E — Gate C/D **PASS**; Gate E **FAIL** @6k/@12k markdown and @12k `chunk_sep` (blend reorder≈cold; no non-prefix reuse on this pin)
+- [x] G1 matched-pin B–E — prior runs **CONFOUNDED** (antigravity Round-2); harness remediation landed; GPU re-run pending on true `VLLM_PIN` match
+
 
 - [ ] Partner log optional (`docs/partner-ask.md`)
 

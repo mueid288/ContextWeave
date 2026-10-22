@@ -19,7 +19,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Run a Tier-1 baseline. Blocked on laptops by default "
-            "(docs/local-safety.md). GPU rental only."
+            "(Docs/local-safety.md). GPU rental only."
         )
     )
     parser.add_argument(
@@ -51,7 +51,7 @@ def main(argv: list[str] | None = None) -> int:
             "status": "blocked_local",
             "error": str(exc),
             "next": (
-                "Do not run models on the laptop. Rent a GPU per docs/gpu-runbook.md; "
+                "Do not run models on the laptop. Rent a GPU per Docs/gpu-runbook.md; "
                 "set CONTEXTWEAVE_ALLOW_MODEL_LOAD=1 only on that host."
             ),
         }

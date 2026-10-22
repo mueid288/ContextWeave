@@ -5,13 +5,34 @@ from __future__ import annotations
 import re
 
 
-_THINK_RE = re.compile(r"<think>[\s\S]*?</think>", re.IGNORECASE)
+_THINK_CLOSED_RE = re.compile(
+    r"<think(?:ing)?>[\s\S]*?</think(?:ing)?>",
+    re.IGNORECASE,
+)
+_THINK_OPEN_RE = re.compile(r"<think(?:ing)?>", re.IGNORECASE)
 _PUNCT_RE = re.compile(r"[^a-z0-9\-]+")
 
 
 def strip_think(text: str) -> str:
-    """Remove Qwen-style thinking blocks before scoring."""
-    return _THINK_RE.sub("", text or "").strip()
+    """Remove Qwen-style thinking blocks (incl. <thinking> / unclosed) before scoring."""
+    t = _THINK_CLOSED_RE.sub("", text or "")
+    if not _THINK_OPEN_RE.search(t):
+        return t.strip()
+    parts = _THINK_OPEN_RE.split(t, maxsplit=1)
+    head = parts[0]
+    rest = parts[1] if len(parts) > 1 else ""
+    keep: list[str] = []
+    for ln in rest.splitlines():
+        s = ln.strip()
+        if not s:
+            continue
+        low = s.lower()
+        if low.startswith(("okay", "ok,", "let me", "i need", "first,", "wait,")):
+            continue
+        if s.startswith("<"):
+            continue
+        keep.append(s)
+    return (head + "\n" + "\n".join(keep)).strip()
 
 
 def normalize(text: str) -> str:
@@ -19,13 +40,30 @@ def normalize(text: str) -> str:
     return _PUNCT_RE.sub(" ", t).strip()
 
 
+def _gold_as_word(text: str, gold: str) -> bool:
+    """True if gold appears as a whole token/span, not a substring of a larger token."""
+    if not gold:
+        return False
+    return re.search(rf"(?<![\w]){re.escape(gold)}(?![\w])", text, re.IGNORECASE) is not None
+
+
+def _gold_negated(text: str, gold: str) -> bool:
+    g = re.escape(gold)
+    return (
+        re.search(rf"\b(not|never|no)\b.{{0,40}}(?<![\w]){g}(?![\w])", text, re.IGNORECASE)
+        is not None
+        or re.search(rf"(?<![\w]){g}(?![\w]).{{0,40}}\b(not|never)\b", text, re.IGNORECASE)
+        is not None
+    )
+
+
 def extract_answer(text: str, gold: str | None = None) -> str:
     """Best-effort short answer: prefer gold span if present, else first real line."""
     cleaned = strip_think(text)
-    if gold and gold.lower() in cleaned.lower():
-        # Return the gold casing as it appears in the output when possible.
-        idx = cleaned.lower().find(gold.lower())
-        return cleaned[idx : idx + len(gold)]
+    if gold and _gold_as_word(cleaned, gold) and not _gold_negated(cleaned, gold):
+        m = re.search(rf"(?<![\w]){re.escape(gold)}(?![\w])", cleaned, re.IGNORECASE)
+        if m:
+            return cleaned[m.start() : m.end()]
     for line in cleaned.splitlines():
         line = line.strip()
         if not line:
@@ -60,7 +98,7 @@ def is_garbage(text: str, gold: str) -> bool:
         # Only accept if extracted answer is exactly the gold (not a longer echo line).
         if normalize(extracted) != normalize(gold):
             return True
-    if gold.lower() in low:
+    if _gold_as_word(cleaned, gold):
         return False
     extracted = extract_answer(cleaned)
     if not extracted or set(extracted.replace(" ", "")) <= {"#"}:
@@ -77,8 +115,13 @@ def score_output(output: str, gold: str) -> dict:
     norm_out = normalize(cleaned)
     norm_gold = normalize(gold)
     norm_ext = normalize(extracted)
-    raw_contains = gold.lower() in cleaned.lower()
-    contains = (norm_gold in norm_out) or raw_contains
+    raw_contains = _gold_as_word(cleaned, gold)
+    contains = (norm_gold in norm_out.split()) or raw_contains
+    # Word-boundary contains: avoid "2019" matching inside "20190".
+    if not contains and re.search(
+        rf"(?<![\w]){re.escape(norm_gold)}(?![\w])", norm_out
+    ):
+        contains = True
     exact = norm_ext == norm_gold or extracted.strip() == gold
     garbage = is_garbage(cleaned, gold)
     return {

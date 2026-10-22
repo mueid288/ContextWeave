@@ -26,7 +26,10 @@ Pin `revision` to a real commit before any GPU artifact is stored.
 
 ## Build context (HijackKV) — Mode A only (v2.1)
 
-`BuildContextFingerprint.build_context_hash` covers prefix + chunk tokens + sink/adapter counts + mask id.  
+`BuildContextFingerprint.build_context_hash` covers **build policy** only: prefix tokens +
+sink/adapter counts + mask id. Chunk body tokens are **not** in this hash (they live on
+`ContentIdentity.token_ids_hash`) so `fingerprints_compatible` can allow cross-chunk reuse
+when model/rope/tokenizer/build policy match.  
 Non-canonical builds are **always** rejected (Mode A / v2.1 §F). There is no `allowed_noncanonical` bypass.
 
 **Normative:** non-prefix artifacts are created only via **isolated canonical prefills**  

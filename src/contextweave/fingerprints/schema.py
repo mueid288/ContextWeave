@@ -285,14 +285,20 @@ def hash_token_ids(token_ids: list[int]) -> str:
 def hash_build_context(
     *,
     prefix_token_ids: list[int],
-    chunk_token_ids: list[int],
+    chunk_token_ids: list[int] | None = None,
     sink_prefix_token_count: int = 0,
     adapter_token_ids: list[int] | None = None,
     mask_id: str = "causal",
 ) -> str:
+    """Hash of build *policy* (prefix/sink/adapter/mask), not chunk body.
+
+    Chunk token identity belongs on ``ContentIdentity.token_ids_hash`` so
+    ``fingerprints_compatible`` can allow cross-chunk reuse when policy matches.
+    ``chunk_token_ids`` is accepted for call-site compatibility but ignored.
+    """
+    del chunk_token_ids  # content identity is separate; see docstring
     payload = {
         "prefix": prefix_token_ids,
-        "chunk": chunk_token_ids,
         "sink_prefix_token_count": sink_prefix_token_count,
         "adapter": adapter_token_ids or [],
         "mask": mask_id,

@@ -39,7 +39,7 @@ lmcache server \
   --port "$LMCACHE_MP_PORT" \
   --http-host 127.0.0.1 \
   --http-port "$HTTP_PORT" \
-  --l1-size-gb "${LMCACHE_L1_GB:-8}" \
+  --l1-size-gb "${LMCACHE_L1_GB:-32}" \
   --eviction-policy LRU \
   --engine-type blend \
   --chunk-size 256 \

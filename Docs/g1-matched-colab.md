@@ -46,11 +46,18 @@ bash scripts/g1_collect_artifacts.sh
 colab stop -s <session>
 ```
 
-## Stage E prompt format
+## Stage E / D prompt format (post antigravity Round-2)
 
-`g1_matched_ttft_bench.py` builds **fixed token chunks** joined by `" # # "` (same as
-`g1_cacheblend_mp_bench.py`). Markdown-only docs do not preserve LMCache chunk ids
-under reorder — those runs stay on record as no-reuse FAILs, not as Gate E evidence.
+- Quality + TTFT use **fixed token chunks** joined by `" # # "`, with
+  `LMCACHE_ENABLE_BLENDING` / `LMCACHE_BLEND_SPECIAL_STR` on the **client** for blend.
+- Chunk lengths are multiples of **256**. TTFT defaults to `--max-tokens 1` and the
+  same `--enforce-eager` on both native and blend arms.
+- Quality: each case does `reset → seed ABC → measure order+question` (no shared-body
+  prefix hits across cases). Includes multi-hop cases.
+- Install: `VLLM_PIN` is required (default `0.6.6.post1` with `lmcache==0.5.3`); do not
+  leave Colab’s stock `vllm==0.32`.
+- Pre-remediation artifacts under `artifacts/g1-matched-2026-10-22/` are **confounded** —
+  re-run Gates C–E after `git pull` on a fresh matched install before citing results.
 
 ## Gates
 

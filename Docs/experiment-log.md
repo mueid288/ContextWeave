@@ -303,6 +303,13 @@
 - Gate E: blend 1503 vs native 1173 → **0.78×** (**FAIL**)
 - Conclusion on this pin: chunk+sep format did not unlock non-prefix reuse vs native; stop chasing E here; EPIC needs a **new** session
 
+## 2026-10-22 — Antigravity Round-2 remediation (CPU)
+
+- Review: `Docs/Reviews/antigravity_contextweave-deep-review-v2.md` — prior Gate D/E **confounded**
+- Fixed: CRIT-5 `hash_build_context` (no chunk body); CRIT-4 blend.sh `--control-json`; CRIT-3 TTFT `max_tokens=1` + matched `enforce_eager` + CV; CRIT-2 blend client env + 256-aligned chunks; CRIT-1 quality `chunk_sep` + per-case ABC seed + multi-hop; MAJ-2 cold nonce after BOS; MAJ-4 scoring `<thinking>`/word-boundary; MAJ-6 install requires `VLLM_PIN`; MAJ-7/8 smoke+collect; MIN-1/5 hygiene
+- **Status:** CacheBlend G1 evidence remains **CONFOUNDED** until a new GPU session re-runs fixed C/D/E on a true matched `VLLM_PIN`+blend stack
+- Do not cite pre-remediation Gate D PASS / Gate E FAIL as algorithm verdicts
+
 ## Template for future entries
 
 ```

@@ -31,9 +31,14 @@ from contextweave.provenance.trust import (
 )
 
 
-def _fp(*, canonical: bool = True, repo: str = "Qwen/Qwen3-8B") -> ArtifactFingerprint:
-    chunk = [1, 2, 3, 4]
-    prefix = [9, 9]
+def _fp(
+    *,
+    canonical: bool = True,
+    repo: str = "Qwen/Qwen3-8B",
+    chunk: list[int] | None = None,
+) -> ArtifactFingerprint:
+    chunk = list(chunk) if chunk is not None else list(range(16))
+    prefix = list(range(8))
     return ArtifactFingerprint(
         model=ModelFingerprint(
             hf_repo=repo,
@@ -67,7 +72,7 @@ def _fp(*, canonical: bool = True, repo: str = "Qwen/Qwen3-8B") -> ArtifactFinge
             document_id="d1",
             content_hash="sha256:x",
             token_ids_hash=hash_token_ids(chunk),
-            token_count=16,
+            token_count=len(chunk),
             chunking_config_id="test",
             kv_block_size=16,
             padded_to_block=True,
@@ -119,6 +124,33 @@ def test_noncanonical_build_context_rejected():
 def test_compatible_same_fingerprints():
     a = _fp()
     b = _fp()
+    result = fingerprints_compatible(a, b)
+    assert result.ok
+
+
+def test_compatible_different_chunk_same_build_policy():
+    """Cross-chunk reuse: content may differ; build-policy hash must still match."""
+    from dataclasses import replace
+
+    a = _fp(chunk=list(range(16)))
+    other_chunk = list(range(100, 116))
+    b = replace(
+        a,
+        content=replace(
+            a.content,
+            token_ids_hash=hash_token_ids(other_chunk),
+            token_count=len(other_chunk),
+        ),
+        # Same prefix → same build_context_hash (chunk body excluded from hash).
+        build_context=replace(
+            a.build_context,
+            build_context_hash=hash_build_context(
+                prefix_token_ids=list(range(8)),
+                chunk_token_ids=other_chunk,
+            ),
+        ),
+    )
+    assert a.build_context.build_context_hash == b.build_context.build_context_hash
     result = fingerprints_compatible(a, b)
     assert result.ok
 

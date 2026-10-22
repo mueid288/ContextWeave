@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fresh Colab: pip-match to lmcache/vllm-openai:v0.5.3 era (NOT Docker).
+# Fresh Colab: pip-match lmcache + a pinned sibling vLLM (NOT leave Colab's 0.32).
 # Destructive — only on a new session you are willing to reinstall.
 set -euo pipefail
 
@@ -13,23 +13,17 @@ if [[ "${CONTEXTWEAVE_ALLOW_MATCHED_REINSTALL:-}" != "1" ]]; then
 fi
 
 LMCACHE_PIN="${LMCACHE_PIN:-0.5.3}"
-# Sibling vLLM: leave empty to let lmcache's install pull a compatible wheel,
-# or set e.g. VLLM_PIN=0.28.0 if docs for the image tag specify one.
-VLLM_PIN="${VLLM_PIN:-}"
+# Required: do not silently keep Colab's vllm 0.32 against lmcache 0.5.3.
+# Override when docs for your image specify a different pair.
+VLLM_PIN="${VLLM_PIN:-0.6.6.post1}"
 
-echo "=== installing lmcache==${LMCACHE_PIN} (matched-pin Colab) ==="
+echo "=== installing vllm==${VLLM_PIN} lmcache==${LMCACHE_PIN} (matched-pin Colab) ==="
 pip install -U pip
-if [[ -n "$VLLM_PIN" ]]; then
-  pip install "vllm==${VLLM_PIN}" "lmcache==${LMCACHE_PIN}"
-else
-  pip install "lmcache==${LMCACHE_PIN}"
-  # Ensure vLLM present; do not upgrade past what lmcache 0.5.3 expects if already ok.
-  python -c "import vllm" 2>/dev/null || pip install "vllm"
-fi
+pip install "vllm==${VLLM_PIN}" "lmcache==${LMCACHE_PIN}"
 
 OUT="${G1_MATCHED_ENV_JSON:-g1_matched_env.json}"
 python - <<'PY' >"$OUT"
-import json, importlib.util
+import json
 payload = {}
 for name in ("vllm", "lmcache", "torch"):
     try:

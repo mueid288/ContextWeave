@@ -77,7 +77,9 @@ python -c "import json,sys; p=json.load(open('g1_matched_control.json')); sys.ex
 
 # --- Gate D: blend engine + reorder ---
 start_server blend
+# Pass --control-json on abc too so set -e does not treat missing agree_rate as fail.
 python scripts/g1_matched_quality_bench.py --mode blend --order abc \
+  --control-json g1_matched_control.json \
   --out g1_matched_blend_abc.json
 python scripts/g1_matched_quality_bench.py --mode blend --order bac \
   --control-json g1_matched_control.json \
@@ -85,13 +87,9 @@ python scripts/g1_matched_quality_bench.py --mode blend --order bac \
 python -c "import json,sys; p=json.load(open('g1_matched_blend_bac.json')); ok=p.get('gate_d_pass') or p.get('pass_heuristic'); print('GATE_D:', 'PASS' if ok else 'FAIL'); sys.exit(0 if ok else 4)"
 
 if [[ "${RUN_TTFT:-0}" != "1" ]]; then
-  echo "Gate D passed. Set RUN_TTFT=1 for Stage E, or run g1_matched_ttft_bench.py manually."
+  echo "Gate D passed. Set RUN_TTFT=1 for Stage E, or run g1_matched_ttft_chunk_e.sh."
   exit 0
 fi
 
-echo "=== Stage E TTFT (native_prefix then blend) ==="
-python scripts/g1_matched_ttft_bench.py --backend native_prefix --runs "${TTFT_RUNS:-10}" \
-  --out g1_matched_ttft_native.json
-python scripts/g1_matched_ttft_bench.py --backend blend --runs "${TTFT_RUNS:-10}" \
-  --out g1_matched_ttft_blend.json
-echo "Compare warm_reorder_p50: blend vs native (Gate E ≥15% faster)."
+echo "=== Stage E TTFT (chunk_sep; see g1_matched_ttft_chunk_e.sh) ==="
+bash scripts/g1_matched_ttft_chunk_e.sh

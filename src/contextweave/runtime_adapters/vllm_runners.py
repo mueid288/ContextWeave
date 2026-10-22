@@ -40,7 +40,7 @@ class VllmEngineRunner(BaselineRunner):
         enable_prefix_caching: bool,
         model: str | None = None,
         max_model_len: int = 4096,
-        max_tokens: int = 32,
+        max_tokens: int = 1,
     ) -> None:
         self.name = name
         self.enable_prefix_caching = enable_prefix_caching
@@ -73,7 +73,7 @@ class VllmEngineRunner(BaselineRunner):
         return BaselineResult(
             request_id=request.request_id,
             strategy=self.name,
-            ttft_ms=elapsed_ms,  # end-to-end generate; decode short → ≈ TTFT+tiny
+            ttft_ms=elapsed_ms,  # max_tokens=1 → wall-clock ≈ TTFT
             prefill_ms=elapsed_ms,
             output_text=text,
             extras={

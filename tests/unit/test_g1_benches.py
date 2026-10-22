@@ -24,12 +24,12 @@ def _load_script(name: str):
 
 
 class _FakeTok:
-    """Whitespace tokenizer stand-in — no transformers dependency."""
+    """Deterministic tokenizer stand-in — no transformers dependency."""
 
     bos_token_id = 1
 
-    def encode(self, text: str, add_special_tokens: bool = True):
-        ids = [hash(t) % 10_000 for t in text.split() if t]
+    def encode(self, text: str, add_special_tokens: bool = False):
+        ids = [ord(c) % 97 + 2 for c in text]
         if add_special_tokens:
             return [self.bos_token_id, *ids]
         return ids
@@ -187,29 +187,23 @@ def test_g1_epic_docs_helper():
 def test_g1_matched_quality_has_enough_cases():
     mod = _load_script("g1_matched_quality_bench.py")
     assert len(mod.CASES) >= 10
-    corpus = mod.build_corpus(filler_chars=20)
-    assert "DOC-A7" in corpus
-    prompt = mod.build_prompt(
-        corpus=corpus, order=mod.ORDERS["bac"], question=mod.CASES[0]["q"]
-    )
-    assert "DOC-B3" in prompt
+    assert "DOC-A7" in mod.DOC_ORDER_KEYS
+    assert "DOC-B3" in mod.ORDERS["bac"]
+    assert any(c.get("hop") == 2 for c in mod.CASES)
+    tok = _FakeTok()
+    sep = mod._sep_ids(tok, " # # ")
+    ch = mod._fill_doc_chunk(tok, "DOC-A7", "Secret code: CODE-A7-441.", 256)
+    assert len(ch) == 256
+    system = tok.encode("sys", add_special_tokens=True)
+    q = tok.encode("q?", add_special_tokens=False)
+    ids = mod._join(system=system, chunks=[ch, ch], question_ids=q, sep=sep)
+    assert sep[0] in ids
 
 
 def test_g1_matched_quality_refuses_without_allow(monkeypatch: pytest.MonkeyPatch):
     mod = _load_script("g1_matched_quality_bench.py")
     monkeypatch.delenv("CONTEXTWEAVE_ALLOW_MODEL_LOAD", raising=False)
     assert mod.main(["--mode", "native", "--json"]) == 1
-
-
-class _FakeTok:
-    bos_token_id = 1
-
-    def encode(self, text: str, add_special_tokens: bool = False):
-        # Deterministic fake ids from character codes (stable for order/salt tests).
-        ids = [ord(c) % 97 + 2 for c in text]
-        if add_special_tokens:
-            return [self.bos_token_id, *ids]
-        return ids
 
 
 def test_g1_matched_ttft_scenarios(monkeypatch: pytest.MonkeyPatch):
@@ -222,11 +216,11 @@ def test_g1_matched_ttft_scenarios(monkeypatch: pytest.MonkeyPatch):
     tok = _FakeTok()
     sep = mod._sep_ids(tok, " # # ")
     assert sep  # non-empty separator token ids
-    a = mod._fill_chunk(tok, "A", 32)
-    b = mod._fill_chunk(tok, "B", 32)
-    c = mod._fill_chunk(tok, "C", 32)
-    assert len(a) == len(b) == len(c) == 32
-    a_salt = mod._fill_chunk(tok, "A", 32, salt="t0-bac-")
+    a = mod._fill_chunk(tok, "A", 256)
+    b = mod._fill_chunk(tok, "B", 256)
+    c = mod._fill_chunk(tok, "C", 256)
+    assert len(a) == len(b) == len(c) == 256
+    a_salt = mod._fill_chunk(tok, "A", 256, salt="t0-bac-")
     assert a_salt != a
 
     system = tok.encode("sys", add_special_tokens=True)
@@ -238,22 +232,30 @@ def test_g1_matched_ttft_scenarios(monkeypatch: pytest.MonkeyPatch):
     bac = mod._prompt_for_order(
         ("B", "A", "C"), chunk_map=cmap, system=system, question_ids=q, sep=sep
     )
-    # Same multiset of chunk bytes, different order: BAC starts with B after first sep.
     assert abc != bac
     assert len(abc) == len(bac)
-    # Separator appears between chunks.
     assert sep[0] in abc
     ct = mod._chunk_tokens_for_target(
         target_prefix_tokens=6000,
         max_model_len=8192,
-        max_tokens=16,
+        max_tokens=1,
         system_len=10,
         question_len=20,
         sep_len=3,
     )
-    assert ct >= 256
+    assert ct >= 256 and ct % 256 == 0
+    assert mod._align_down(3981, 256) == 3840
 
     assert callable(mod._reset_prefix_cache)
     assert callable(mod._measure_reorder_after_abc)
     monkeypatch.delenv("CONTEXTWEAVE_ALLOW_MODEL_LOAD", raising=False)
     assert mod.main(["--backend", "native_prefix", "--json"]) == 1
+
+
+def test_g1_matched_quality_helpers(monkeypatch: pytest.MonkeyPatch):
+    mod = _load_script("g1_matched_quality_bench.py")
+    assert mod._align_chunk_tokens(500) == 256
+    assert mod._align_chunk_tokens(512) == 512
+    assert any(c.get("hop") == 2 for c in mod.CASES)
+    monkeypatch.delenv("CONTEXTWEAVE_ALLOW_MODEL_LOAD", raising=False)
+    assert mod.main(["--mode", "control", "--json"]) == 1

@@ -68,6 +68,11 @@ python scripts/fingerprint_example.py --model-config configs/models/qwen3_8b.yam
 | [Docs/Reviews/Gemini_3_response.md](Docs/Reviews/Gemini_3_response.md) | Review disposition (Round 3) |
 | [Docs/Initial/](Docs/Initial/) | Phase 0 working notes |
 | [Docs/g1-colab.md](Docs/g1-colab.md) | G1 on Colab after smoke (TTFT → CacheBlend) |
+| [Docs/g1-matched-colab.md](Docs/g1-matched-colab.md) | Matched-pin CacheBlend Gates B–E (post Round-2 harness) |
+| [Docs/g1-epic.md](Docs/g1-epic.md) | EPIC / LegoLink dedicated-session procedure |
+| [Docs/Reviews/claude_g1_cacheblend_matched_image_runbook.md](Docs/Reviews/claude_g1_cacheblend_matched_image_runbook.md) | Quality-gated CacheBlend runbook |
+| [Docs/Reviews/antigravity_contextweave-deep-review-v2.md](Docs/Reviews/antigravity_contextweave-deep-review-v2.md) | Round-2 G1 harness audit |
+| [artifacts/g1-matched-2026-10-22/](artifacts/g1-matched-2026-10-22/) | Checked-in Colab A100 matched-pin JSONs |
 | [scripts/g1_cacheblend_bench.py](scripts/g1_cacheblend_bench.py) | G1 step 3 non-prefix CacheBlend TTFT bench |
 | [Docs/Research/ResolventKV-adoption.md](Docs/Research/ResolventKV-adoption.md) | What we take from the ResolventKV research brief (post-G1 candidate) |
 | [Docs/Research/Foundational AI Technology Research.md](Docs/Research/Foundational%20AI%20Technology%20Research.md) | Full ResolventKV research brief (equations as images) |

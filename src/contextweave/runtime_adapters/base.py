@@ -69,7 +69,7 @@ class NotAvailableOnCpu(BaselineRunner):
     def _setup_impl(self) -> None:
         raise RuntimeError(
             f"Baseline '{self.name}' has no local implementation. {self.hint} "
-            "See docs/gpu-runbook.md, docs/runtime-pins.md, docs/local-safety.md."
+            "See Docs/gpu-runbook.md, Docs/runtime-pins.md, Docs/local-safety.md."
         )
 
     def run_one(self, request: BaselineRequest) -> BaselineResult:

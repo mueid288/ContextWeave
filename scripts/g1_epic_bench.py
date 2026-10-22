@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import statistics
 import sys
 import time
 from pathlib import Path
@@ -68,7 +69,8 @@ def _collect_and_link(
     system_ids = tokenizer.encode(system, add_special_tokens=True)
     if tokenizer.eos_token_id is not None and system_ids and system_ids[-1] == tokenizer.eos_token_id:
         system_ids = system_ids[:-1]
-    doc_ids = [tokenizer.encode(d, add_special_tokens=True) for d in docs]
+    # Docs must not each start with BOS (would diverge from full-prefill concat).
+    doc_ids = [tokenizer.encode(d, add_special_tokens=False) for d in docs]
     q_ids = tokenizer.encode(question, add_special_tokens=False)
     if tokenizer.eos_token_id is not None:
         q_ids = q_ids + [tokenizer.eos_token_id]
@@ -142,6 +144,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--filler-chars", type=int, default=2000)
     parser.add_argument("--max-tokens", type=int, default=24)
     parser.add_argument("--recomp-num", type=int, default=8, help="LegoLink-N")
+    parser.add_argument("--runs", type=int, default=5, help="Timed runs after 1 warmup (PRD G1).")
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.80)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -209,23 +212,36 @@ def main(argv: list[str] | None = None) -> int:
     if hasattr(llm, "set_tokenizer"):
         llm.set_tokenizer(tokenizer)
 
-    print("  [full prefill BCA] …", flush=True)
-    fr_ms, fr_text = _full_prefill(llm, full_prompt, max_tokens=args.max_tokens)
-    print(f"  [full prefill BCA] {fr_ms:.0f} ms", flush=True)
+    print("  [warmup full prefill] discarded", flush=True)
+    _full_prefill(llm, full_prompt, max_tokens=args.max_tokens)
 
-    print(f"  [kvlink-{args.recomp_num} BCA] …", flush=True)
-    link_ms, link_text = _collect_and_link(
-        llm,
-        tokenizer,
-        system=system,
-        docs=docs_bca,
-        question=question,
-        recomp_num=args.recomp_num,
-        max_tokens=args.max_tokens,
-    )
-    print(f"  [kvlink-{args.recomp_num} BCA] {link_ms:.0f} ms", flush=True)
+    fr_samples: list[float] = []
+    fr_text = ""
+    for i in range(args.runs):
+        print(f"  [full prefill BCA] {i + 1}/{args.runs} …", flush=True)
+        fr_ms, fr_text = _full_prefill(llm, full_prompt, max_tokens=args.max_tokens)
+        fr_samples.append(fr_ms)
+        print(f"  [full prefill BCA] {fr_ms:.0f} ms", flush=True)
+
+    link_samples: list[float] = []
+    link_text = ""
+    for i in range(args.runs):
+        print(f"  [kvlink-{args.recomp_num} BCA] {i + 1}/{args.runs} …", flush=True)
+        link_ms, link_text = _collect_and_link(
+            llm,
+            tokenizer,
+            system=system,
+            docs=docs_bca,
+            question=question,
+            recomp_num=args.recomp_num,
+            max_tokens=args.max_tokens,
+        )
+        link_samples.append(link_ms)
+        print(f"  [kvlink-{args.recomp_num} BCA] {link_ms:.0f} ms", flush=True)
 
     del llm
+    fr_ms = statistics.median(fr_samples)
+    link_ms = statistics.median(link_samples)
     quality_ok = gold.lower() in fr_text.lower() and gold.lower() in link_text.lower()
     # Link should beat full prefill on TTFT for this PIC workload (paper claim).
     latency_ok = link_ms < 0.85 * fr_ms
@@ -233,8 +249,11 @@ def main(argv: list[str] | None = None) -> int:
         "gate": "G1-step4-epic",
         "model": args.model,
         "recomp_num": args.recomp_num,
+        "runs": args.runs,
         "full_prefill_ms": fr_ms,
         "kvlink_ms": link_ms,
+        "full_prefill_samples_ms": fr_samples,
+        "kvlink_samples_ms": link_samples,
         "full_vs_kvlink_speedup": fr_ms / link_ms if link_ms > 0 else None,
         "outputs": {"full_prefill": fr_text, "kvlink": link_text},
         "gold": gold,

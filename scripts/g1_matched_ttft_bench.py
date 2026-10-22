@@ -116,6 +116,10 @@ def _prompt_for_order(
     )
 
 
+def _align_down(n: int, block: int = 256) -> int:
+    return max(block, (n // block) * block)
+
+
 def _chunk_tokens_for_target(
     *,
     target_prefix_tokens: int,
@@ -125,7 +129,7 @@ def _chunk_tokens_for_target(
     question_len: int,
     sep_len: int,
 ) -> int:
-    """Per-chunk size so ABC prompt ≈ target (3 chunks + 4 seps + system + q)."""
+    """Per-chunk size so ABC ≈ target; each chunk length is a multiple of 256."""
     overhead = system_len + question_len + 4 * sep_len + 8
     prefix_cap = max_model_len - max_tokens - 8
     want = min(target_prefix_tokens, prefix_cap)
@@ -135,7 +139,26 @@ def _chunk_tokens_for_target(
             f"target/max_model_len too small for 3 chunks "
             f"(want={want}, overhead={overhead})"
         )
-    return usable // 3
+    return _align_down(usable // 3, 256)
+
+
+def _setup_blend_client_env(*, blend_special_str: str) -> None:
+    """Activate in-worker blending hooks expected by LMCache CacheBlend."""
+    os.environ.setdefault("LMCACHE_CHUNK_SIZE", "256")
+    os.environ["LMCACHE_ENABLE_BLENDING"] = "True"
+    os.environ["LMCACHE_BLEND_SPECIAL_STR"] = blend_special_str
+    os.environ.setdefault("LMCACHE_USE_LAYERWISE", "True")
+    os.environ.setdefault("LMCACHE_BLEND_CHECK_LAYERS", "1")
+    os.environ.setdefault("LMCACHE_BLEND_RECOMPUTE_RATIOS", "0.15")
+
+
+def _cv(samples: list[float]) -> float | None:
+    if len(samples) < 2:
+        return None
+    mu = statistics.mean(samples)
+    if mu <= 0:
+        return None
+    return statistics.stdev(samples) / mu
 
 
 def _reorder_series_polluted(samples: list[float]) -> bool:
@@ -214,6 +237,7 @@ def _measure(llm, prompt_ids: list[int], sampling, *, n: int, label: str) -> tup
         "n": len(samples),
         "p50_ms": statistics.median(samples),
         "p90_ms": _percentile(samples, 0.9),
+        "cv": _cv(samples),
         "samples_ms": samples,
         "last_output": last_text,
     }, method
@@ -258,6 +282,7 @@ def _measure_reorder_after_abc(
             "n": len(samples),
             "p50_ms": statistics.median(samples),
             "p90_ms": _percentile(samples, 0.9),
+            "cv": _cv(samples),
             "first_ms": samples[0] if samples else float("nan"),
             "samples_ms": samples,
             "series_polluted": polluted,
@@ -274,7 +299,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--backend", choices=("native_prefix", "blend"), required=True)
     parser.add_argument("--runs", type=int, default=10)
     parser.add_argument("--max-model-len", type=int, default=8192)
-    parser.add_argument("--max-tokens", type=int, default=16)
+    parser.add_argument(
+        "--max-tokens",
+        type=int,
+        default=1,
+        help="TTFT: use 1 (wall-clock ≈ first token). Avoid decode contamination.",
+    )
     parser.add_argument(
         "--target-prefix-tokens",
         type=int,
@@ -297,7 +327,7 @@ def main(argv: list[str] | None = None) -> int:
         "--enforce-eager",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="Blend path: eager by default (stability). Try --no-enforce-eager for latency.",
+        help="Applied to BOTH backends so Gate E is apples-to-apples (default True).",
     )
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--json", action="store_true")
@@ -310,6 +340,9 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
+    if args.backend == "blend":
+        _setup_blend_client_env(blend_special_str=args.blend_special_str)
+
     from transformers import AutoTokenizer
     from vllm import LLM, SamplingParams
 
@@ -319,7 +352,7 @@ def main(argv: list[str] | None = None) -> int:
     question_ids = tokenizer.encode(QUESTION, add_special_tokens=False)
 
     if args.chunk_tokens is not None:
-        chunk_tokens = args.chunk_tokens
+        chunk_tokens = _align_down(args.chunk_tokens, 256)
     else:
         chunk_tokens = _chunk_tokens_for_target(
             target_prefix_tokens=args.target_prefix_tokens,
@@ -329,6 +362,8 @@ def main(argv: list[str] | None = None) -> int:
             question_len=len(question_ids),
             sep_len=len(sep),
         )
+    if chunk_tokens % 256 != 0:
+        raise SystemExit(f"chunk_tokens={chunk_tokens} must be a multiple of 256")
 
     chunk_map = {
         k: _fill_chunk(tokenizer, k, chunk_tokens) for k in ("A", "B", "C")
@@ -387,8 +422,10 @@ def main(argv: list[str] | None = None) -> int:
         "max_model_len": args.max_model_len,
         "gpu_memory_utilization": args.gpu_memory_utilization,
         "trust_remote_code": True,
+        # Same eager setting on both arms (CRIT-3 asymmetry fix).
+        "enforce_eager": bool(args.enforce_eager),
     }
-    enforce_eager_used = False
+    enforce_eager_used = bool(args.enforce_eager)
     if args.backend == "native_prefix":
         kwargs["enable_prefix_caching"] = True
     else:
@@ -397,9 +434,6 @@ def main(argv: list[str] | None = None) -> int:
         host = os.environ.get("LMCACHE_MP_HOST", "127.0.0.1")
         port = int(os.environ.get("LMCACHE_MP_PORT", "5555"))
         kwargs["enable_prefix_caching"] = False
-        if args.enforce_eager:
-            kwargs["enforce_eager"] = True
-            enforce_eager_used = True
         kwargs["kv_transfer_config"] = KVTransferConfig(
             kv_connector="LMCacheMPConnector",
             kv_connector_module_path="lmcache.integration.vllm.lmcache_mp_connector",
@@ -467,13 +501,37 @@ def main(argv: list[str] | None = None) -> int:
     cold_text = ""
     for i in range(args.runs):
         _reset_prefix_cache(llm)
+        # Insert nonce *after* BOS so we do not duplicate BOS / change layout.
         nonce = tokenizer.encode(
             f"[cold-nonce-{i}-{time.time_ns()}]",
             add_special_tokens=False,
         )
-        cold_ids = nonce + prompts["abc"]
-        if len(cold_ids) + args.max_tokens > args.max_model_len:
-            cold_ids = nonce[:16] + prompts["abc"]
+        # Keep total length == warm ABC: shrink chunk A by len(nonce).
+        shrink = len(nonce)
+        if shrink >= chunk_tokens:
+            nonce = nonce[: max(1, chunk_tokens // 8)]
+            shrink = len(nonce)
+        cold_map = {
+            "A": chunk_map["A"][shrink:],
+            "B": chunk_map["B"],
+            "C": chunk_map["C"],
+        }
+        cold_system = system[:1] + nonce + system[1:] if system else nonce
+        cold_ids = _prompt_for_order(
+            ORDERS["abc"],
+            chunk_map=cold_map,
+            system=cold_system,
+            question_ids=question_ids,
+            sep=sep,
+        )
+        # Pad/truncate to exact warm length for fair cold vs warm.
+        target_len = len(prompts["abc"])
+        if len(cold_ids) > target_len:
+            cold_ids = cold_ids[:target_len]
+        elif len(cold_ids) < target_len:
+            cold_ids = cold_ids + [question_ids[-1] if question_ids else 0] * (
+                target_len - len(cold_ids)
+            )
         ms, text, ttft_method = _ttft_ms(llm, cold_ids, sampling)
         cold_samples.append(ms)
         cold_text = text
@@ -482,6 +540,7 @@ def main(argv: list[str] | None = None) -> int:
         "n": len(cold_samples),
         "p50_ms": statistics.median(cold_samples),
         "p90_ms": _percentile(cold_samples, 0.9),
+        "cv": _cv(cold_samples),
         "samples_ms": cold_samples,
         "last_output": cold_text,
     }
@@ -506,10 +565,17 @@ def main(argv: list[str] | None = None) -> int:
         "prompt_format": "chunk_sep",
         "blend_special_str": args.blend_special_str,
         "chunk_tokens": chunk_tokens,
+        "chunk_tokens_aligned_256": chunk_tokens % 256 == 0,
         "target_prefix_tokens": args.target_prefix_tokens,
         "abc_prompt_tokens": prompt_tokens,
         "ttft_method": ttft_method,
+        "max_tokens": args.max_tokens,
         "enforce_eager": enforce_eager_used,
+        "blend_client_env": args.backend == "blend",
+        "warm_abc_cv": results["warm_abc"].get("cv"),
+        "warm_reorder_cv": _cv(
+            results["warm_bac"]["samples_ms"] + results["warm_cba"]["samples_ms"]
+        ),
         "protocol": (
             "chunk_sep prompts → seed_abc → warm_abc×N → "
             "for reorder: reset_prefix_cache → seed abc → measure bac/cba ×N "
