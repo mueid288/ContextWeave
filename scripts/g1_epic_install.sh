@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Install DerekHJH/epic (vLLM ~0.7 fork) for G1 step 4.
-# DESTROYS the stock vLLM 0.32 Colab pin — use a **fresh** GPU session only.
+# Use a **fresh** GPU session only (replaces stock vLLM in the EPIC venv).
+#
+# On Colab Python 3.13: bootstraps an isolated CPython 3.11 via `uv`
+# (torch==2.5.1 has no 3.13 wheels; EPIC CMake supports 3.9–3.12 only).
 set -euo pipefail
 
 if [[ "${CONTEXTWEAVE_ALLOW_MODEL_LOAD:-}" != "1" ]]; then
@@ -16,20 +19,70 @@ fi
 
 EPIC_DIR="${EPIC_DIR:-/content/epic}"
 EPIC_REPO="${EPIC_REPO:-https://github.com/DerekHJH/epic.git}"
+EPIC_VENV="${EPIC_VENV:-/content/epic-venv}"
+EPIC_PY_TARGET="${EPIC_PY_TARGET:-3.11}"
+CW_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# Prefer ContextWeave under /content when present (Colab).
+if [[ -d /content/ContextWeave ]]; then
+  CW_ROOT=/content/ContextWeave
+fi
 
-PY_MINOR="$(python - <<'PY'
+_py_minor() {
+  "$1" - <<'PY'
 import sys
 print(f"{sys.version_info.major}.{sys.version_info.minor}")
 PY
-)"
-case "$PY_MINOR" in
-  3.10|3.11|3.12) ;;
-  *)
-    echo "BLOCK: EPIC needs Python 3.10–3.12 (torch==2.5.1). Got ${PY_MINOR}."
-    echo "Stop this session; use a 3.10–3.12 runtime or another host."
+}
+
+ensure_epic_python() {
+  local sys_py="python"
+  local minor
+  minor="$(_py_minor "$sys_py")"
+  case "$minor" in
+    3.10|3.11|3.12)
+      echo "=== system Python ${minor} OK for EPIC ==="
+      EPIC_PYTHON="$(command -v python)"
+      return 0
+      ;;
+  esac
+
+  echo "=== system Python ${minor} incompatible; bootstrapping ${EPIC_PY_TARGET} venv at ${EPIC_VENV} ==="
+
+  if [[ -x "${EPIC_VENV}/bin/python" ]]; then
+    local vminor
+    vminor="$(_py_minor "${EPIC_VENV}/bin/python")"
+    case "$vminor" in
+      3.10|3.11|3.12)
+        EPIC_PYTHON="${EPIC_VENV}/bin/python"
+        echo "Reusing existing venv Python ${vminor}: ${EPIC_PYTHON}"
+        # shellcheck disable=SC1091
+        source "${EPIC_VENV}/bin/activate"
+        return 0
+        ;;
+    esac
+  fi
+
+  if ! command -v uv >/dev/null 2>&1; then
+    echo "=== installing uv ==="
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="${HOME}/.local/bin:${PATH}"
+  fi
+  if ! command -v uv >/dev/null 2>&1; then
+    echo "BLOCK: uv not on PATH after install. Add ~/.local/bin and retry."
     exit 4
-    ;;
-esac
+  fi
+
+  uv python install "$EPIC_PY_TARGET"
+  uv venv "$EPIC_VENV" --python "$EPIC_PY_TARGET" --seed
+  # shellcheck disable=SC1091
+  source "${EPIC_VENV}/bin/activate"
+  EPIC_PYTHON="${EPIC_VENV}/bin/python"
+  echo "EPIC_PYTHON=${EPIC_PYTHON} ($(_py_minor "$EPIC_PYTHON"))"
+}
+
+ensure_epic_python
+export PATH="$(dirname "$EPIC_PYTHON"):${PATH}"
+hash -r 2>/dev/null || true
 
 echo "=== cloning EPIC fork into $EPIC_DIR ==="
 if [[ ! -d "$EPIC_DIR/.git" ]]; then
@@ -38,26 +91,42 @@ else
   git -C "$EPIC_DIR" pull --ff-only || true
 fi
 
-echo "=== uninstalling stock vLLM (if any) ==="
-pip uninstall -y vllm || true
+echo "=== installing build deps + torch==2.5.1 into EPIC env ==="
+"$EPIC_PYTHON" -m pip install -U pip setuptools wheel ninja cmake packaging
+# cu124 wheels run on newer Colab drivers; pin matches EPIC / vLLM 0.7.
+"$EPIC_PYTHON" -m pip install \
+  "torch==2.5.1" "torchvision==0.20.1" "torchaudio==2.5.1" \
+  --index-url https://download.pytorch.org/whl/cu124
+
+echo "=== uninstalling any prior vLLM in this env ==="
+"$EPIC_PYTHON" -m pip uninstall -y vllm || true
 
 echo "=== installing EPIC fork editable (long: CUDA extension build) ==="
 cd "$EPIC_DIR"
-pip install -U pip setuptools wheel ninja cmake packaging
-# Match fork pyproject pin when possible; Colab may already have a torch —
-# prefer the fork's declared torch if CUDA build demands it.
-pip install -e . || {
+export VLLM_PYTHON_EXECUTABLE="$EPIC_PYTHON"
+"$EPIC_PYTHON" -m pip install -e . || {
   echo "pip install -e . failed; trying setup.py build fallback…"
-  python setup.py build
-  # Copy built _C.so next to package if present (see EPIC benchmarks_ours README).
+  "$EPIC_PYTHON" setup.py build
   SO="$(find build -name '_C*.so' 2>/dev/null | head -1 || true)"
   if [[ -n "$SO" ]]; then
     cp "$SO" vllm/
   fi
-  pip install -e . --no-build-isolation
+  "$EPIC_PYTHON" -m pip install -e . --no-build-isolation
 }
 
 echo "=== verify fork markers ==="
-cd /content/ContextWeave 2>/dev/null || cd "$(dirname "$0")/.."
-python scripts/g1_epic_probe.py --json | tee g1_epic_probe.json
-echo "If epic_fork_detected is true, run: python scripts/g1_epic_bench.py --json | tee g1_epic.json"
+cd "$CW_ROOT"
+"$EPIC_PYTHON" scripts/g1_epic_probe.py --json | tee g1_epic_probe.json
+
+cat <<EOF
+
+=== EPIC env ready ===
+Activate before benches:
+  source ${EPIC_VENV}/bin/activate   # if using the uv venv
+  # or:
+  export PATH="$(dirname "$EPIC_PYTHON"):\$PATH"
+
+Then:
+  export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
+  python scripts/g1_epic_bench.py --json | tee g1_epic.json
+EOF

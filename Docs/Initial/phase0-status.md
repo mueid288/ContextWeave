@@ -31,7 +31,7 @@ Updated: 2026-10-22
 - [x] G1 matched-pin Stage A harness — benches/scripts/pre-reg (`Docs/g1-matched-colab.md`)
 - [x] G1 matched-pin B–E — prior runs **CONFOUNDED** (antigravity Round-2); harness remediation landed
 - [x] G1 matched re-run (vLLM 0.18 / lmcache 0.4.2, `cw-g1-r2`) — **C/D PASS**, **E FAIL** fair @12k (blend reorder≈cold); CacheBlend closed
-- [x] G1 step 4 EPIC on Colab — **BLOCK** (Python 3.13; need 3.10–3.12 for torch 2.5.1). Optional: re-try on RunPod/Py3.11 host
+- [ ] G1 step 4 EPIC — Colab OK via nested **uv Py3.11** venv (`g1_epic_install.sh`); GPU re-run pending
 
 
 - [ ] Partner log optional (`docs/partner-ask.md`)

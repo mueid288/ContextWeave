@@ -331,14 +331,13 @@
   Do not tune blend ratios this session. Optional next: EPIC on a **new** VM (`Docs/g1-epic.md`).
   ResolventKV still deferred.
 
-## 2026-10-22 — G1 EPIC BLOCK on Colab Python 3.13
+## 2026-10-22 — G1 EPIC on Colab via nested Python 3.11 (not a hard BLOCK)
 
-- Fresh session for DerekHJH/epic (`torch==2.5.1` / vLLM ~0.7 fork)
-- `bash scripts/g1_epic_install.sh` → exit 4: **Python 3.13** (need 3.10–3.12)
-- Same class of pin gap as legacy vLLM 0.6.6 on Py3.13; do not force-install
-- Decision: stop Colab EPIC attempt. Options: (1) GPU host with Py3.11/3.12
-  (RunPod/etc.), (2) close G1 non-prefix lanes as Colab-blocked and proceed
-  offline / planner without EPIC latency proof
+- Fresh session: system Python **3.13** rejected by first install gate (torch 2.5.1)
+- Workaround: `g1_epic_install.sh` bootstraps `/content/epic-venv` with **uv + CPython 3.11**,
+  installs `torch==2.5.1+cu124`, then editable DerekHJH/epic (CUDA build)
+- Do not install EPIC into system 3.13; activate venv before `g1_epic_bench.py`
+- Status: pending GPU re-run with updated installer
 
 ## Template for future entries
 
