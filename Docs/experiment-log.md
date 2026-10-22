@@ -315,6 +315,22 @@
 - `pip install vllm==0.6.6.post1` fails on Colab Python 3.13 (`torchvision==0.20.1` unavailable)
 - Install script now auto-selects `vllm==0.18.0` + `lmcache==0.4.2` on Py≥3.13
 
+## 2026-10-22 — Post-remediation matched re-run (vLLM 0.18.0 / lmcache 0.4.2)
+
+- Env: Colab A100, Python 3.13, `Qwen/Qwen3-8B`; CuPy dual-wheel fixed; heartbeat 60s; `lmcache_driven`
+- Gate B: **PASS** (smoke `/no_think`)
+- Gate C/D: **PASS** — control then blend reorder `agree=1.0` `contains=1.0` `garbage=0.0`
+  (earlier mid-run unhealthy voided; not a quality miss)
+- Gate E @12k `chunk_sep` n=10: native warm **39** / reorder **928** / cold **932**
+  (`reorder_vs_warm≈23.6×`, `harness_ok True`, `polluted False`);
+  blend warm **190** / reorder **948** / cold **953** (`harness_ok True`);
+  speedup **0.98×** → **Gate E FAIL** (need ≤0.85×)
+- Blend reorder≈cold: LMCache stores warm ABC but **non-prefix reorder does not beat
+  native prefix-miss** on this pin at ~12k
+- **Verdict:** CacheBlend G1 = quality OK / latency miss on fair post-CRIT harness.
+  Do not tune blend ratios this session. Optional next: EPIC on a **new** VM (`Docs/g1-epic.md`).
+  ResolventKV still deferred.
+
 ## Template for future entries
 
 ```
