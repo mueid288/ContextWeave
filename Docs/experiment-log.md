@@ -273,7 +273,7 @@
 - Blend: warm_abc **716** / reorder **707–710** / cold **967** — flat across orders; connector+eager overhead vs native warm **251**
 - Gate D already PASS; **Gate E FAIL** (≥15% faster than native reorder not met)
 - Runbook path: D✓ E✗ at this scale on A100-40 / vLLM 0.32 / lmcache MP blend — longer context needs ~80GB; do not open ResolventKV
-- Matched CacheBlend G1 branch **closed** on this pin; optional next = dedicated EPIC session (`Docs/g1-epic.md`)
+- Matched CacheBlend G1 branch **closed** at ~6k; same-session follow-up: longer-context Gate E (~12k) before concluding scale
 
 ## Template for future entries
 
