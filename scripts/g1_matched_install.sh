@@ -40,6 +40,13 @@ pip install "vllm==${VLLM_PIN}" "lmcache==${LMCACHE_PIN}"
 # Ensure console script is present (some installs omit it from PATH).
 pip install --force-reinstall --no-deps "lmcache==${LMCACHE_PIN}" >/dev/null 2>&1 || true
 
+# Dual CuPy packages → CUDA IPC hangs in LMCache blend server.
+echo "=== normalizing CuPy to match torch CUDA ==="
+CUDA_VER="$(python -c 'import torch; print((torch.version.cuda or "12").split(".")[0])' 2>/dev/null || echo 12)"
+pip uninstall -y cupy cupy-cuda11x cupy-cuda12x cupy-cuda13x >/dev/null 2>&1 || true
+pip install -q "cupy-cuda${CUDA_VER}x" || pip install -q cupy-cuda12x
+python -c "import cupy; print('cupy OK', cupy.__version__)" || echo "WARN: cupy import failed"
+
 OUT="${G1_MATCHED_ENV_JSON:-g1_matched_env.json}"
 python - <<'PY' >"$OUT"
 import json, sys

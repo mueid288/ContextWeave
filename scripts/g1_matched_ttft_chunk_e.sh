@@ -18,6 +18,8 @@ export PYTHONHASHSEED=0
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export LMCACHE_MP_HOST="${LMCACHE_MP_HOST:-127.0.0.1}"
 export LMCACHE_MP_PORT="${LMCACHE_MP_PORT:-5555}"
+export LMCACHE_MP_HEARTBEAT_INTERVAL="${LMCACHE_MP_HEARTBEAT_INTERVAL:-60}"
+export LMCACHE_MP_TRANSFER_MODE="${LMCACHE_MP_TRANSFER_MODE:-lmcache_driven}"
 HTTP_PORT="${LMCACHE_HTTP_PORT:-18080}"
 LOG="${LMCACHE_MP_LOG:-/tmp/lmcache_matched_blend.log}"
 READY_TIMEOUT_S="${LMCACHE_READY_TIMEOUT_S:-90}"
@@ -51,7 +53,8 @@ while (( SECONDS < deadline )); do
   if grep -qE 'ZMQ cache server is running|LMCache cache server is running|Uvicorn running|Application startup complete' "$LOG" 2>/dev/null; then
     ready=1; break
   fi
-  if curl -fsS "http://127.0.0.1:${HTTP_PORT}/healthcheck" >/dev/null 2>&1; then
+  if curl -fsS "http://127.0.0.1:${HTTP_PORT}/api/healthcheck" >/dev/null 2>&1 \
+    || curl -fsS "http://127.0.0.1:${HTTP_PORT}/healthcheck" >/dev/null 2>&1; then
     ready=1; break
   fi
   sleep 1

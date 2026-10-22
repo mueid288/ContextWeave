@@ -198,6 +198,8 @@ def _reset_prefix_cache(llm) -> None:
 def _kv_transfer_config(host: str, port: int):
     from vllm.config import KVTransferConfig
 
+    # heartbeat_interval also caps PING wait; 10s falsely marks busy blend servers
+    # unhealthy → KV load failure_policy=fail (empty 6ms cases).
     return KVTransferConfig(
         kv_connector="LMCacheMPConnector",
         kv_connector_module_path="lmcache.integration.vllm.lmcache_mp_connector",
@@ -205,6 +207,13 @@ def _kv_transfer_config(host: str, port: int):
         kv_connector_extra_config={
             "lmcache.mp.host": f"tcp://{host}",
             "lmcache.mp.port": port,
+            "lmcache.mp.mq_timeout": float(os.environ.get("LMCACHE_MP_MQ_TIMEOUT", "300")),
+            "lmcache.mp.heartbeat_interval": float(
+                os.environ.get("LMCACHE_MP_HEARTBEAT_INTERVAL", "60")
+            ),
+            "lmcache.mp.mp_transfer_mode": os.environ.get(
+                "LMCACHE_MP_TRANSFER_MODE", "lmcache_driven"
+            ),
         },
     )
 

@@ -441,6 +441,15 @@ def main(argv: list[str] | None = None) -> int:
             kv_connector_extra_config={
                 "lmcache.mp.host": f"tcp://{host}",
                 "lmcache.mp.port": port,
+                "lmcache.mp.mq_timeout": float(
+                    os.environ.get("LMCACHE_MP_MQ_TIMEOUT", "300")
+                ),
+                "lmcache.mp.heartbeat_interval": float(
+                    os.environ.get("LMCACHE_MP_HEARTBEAT_INTERVAL", "60")
+                ),
+                "lmcache.mp.mp_transfer_mode": os.environ.get(
+                    "LMCACHE_MP_TRANSFER_MODE", "lmcache_driven"
+                ),
             },
         )
 

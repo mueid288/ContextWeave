@@ -54,7 +54,8 @@ start_server() {
     if grep -qE 'ZMQ cache server is running|LMCache cache server is running|Uvicorn running|Application startup complete' "$LOG" 2>/dev/null; then
       ready=1; break
     fi
-    if curl -fsS "http://127.0.0.1:${HTTP_PORT}/healthcheck" >/dev/null 2>&1; then
+    if curl -fsS "http://127.0.0.1:${HTTP_PORT}/api/healthcheck" >/dev/null 2>&1 \
+      || curl -fsS "http://127.0.0.1:${HTTP_PORT}/healthcheck" >/dev/null 2>&1; then
       ready=1; break
     fi
     sleep 1
@@ -68,6 +69,23 @@ start_server() {
 # Clear orphans from prior failed starts (wrong PID capture / manual sanity checks).
 pkill -f 'lmcache.v1.multiprocess' 2>/dev/null || true
 sleep 2
+
+# Dual CuPy wheels hang CUDA IPC under blend load → PING timeout → degraded mode.
+if python - <<'PY'
+import importlib.util
+pkgs = [n for n in ("cupy_cuda12x", "cupy_cuda13x") if importlib.util.find_spec(n)]
+raise SystemExit(0 if len(pkgs) >= 2 else 1)
+PY
+then
+  echo "WARN: both cupy-cuda12x and cupy-cuda13x installed — fixing to one wheel"
+  CUDA_VER="$(python -c 'import torch; print((torch.version.cuda or "12").split(".")[0])')"
+  pip uninstall -y cupy cupy-cuda11x cupy-cuda12x cupy-cuda13x >/dev/null 2>&1 || true
+  pip install -q "cupy-cuda${CUDA_VER}x" || pip install -q cupy-cuda12x
+fi
+
+export LMCACHE_MP_HEARTBEAT_INTERVAL="${LMCACHE_MP_HEARTBEAT_INTERVAL:-60}"
+export LMCACHE_MP_TRANSFER_MODE="${LMCACHE_MP_TRANSFER_MODE:-lmcache_driven}"
+export LMCACHE_L1_GB="${LMCACHE_L1_GB:-16}"
 
 # --- Gate C: control (default engine, no blend module) ---
 start_server default
