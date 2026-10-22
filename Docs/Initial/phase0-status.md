@@ -29,8 +29,9 @@ Updated: 2026-10-21
 - [x] G1 step 4: EPIC — **documented pin BLOCK** on Colab vLLM 0.32 (`g1_epic_probe.json`); dedicated fork session optional
 - [x] G1 Colab pin closeout — `cw-smoke` stopped; residual = pin gap (see experiment-log)
 - [x] G1 matched-pin Stage A harness — benches/scripts/pre-reg (`Docs/g1-matched-colab.md`)
-- [x] G1 matched-pin B–E — Gate C/D **PASS**; Gate E **FAIL** (short + long filler); native TTFT shows no reorder gap — harness fix before retest
+- [x] G1 matched-pin B–E — Gate C/D **PASS**; Gate E **FAIL** after fixed native harness (~2.57× reorder @6k; blend reorder **slower** than native 0.91×)
 - [ ] Partner log optional (`docs/partner-ask.md`)
+
 
 ## Explicitly not started
 

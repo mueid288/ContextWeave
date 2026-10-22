@@ -267,6 +267,14 @@
 - `reorder_vs_warm_abc≈2.57×`; `cold_vs_warm≈2.62×`; `prefix_cache_reset_ok`; **harness_ok True**
 - Next: same-session blend Gate E vs this native reorder baseline
 
+## 2026-10-22 — Matched Gate E FAIL (fixed harness, ~6k)
+
+- Native warm_reorder p50 **646 ms**; blend warm_reorder p50 **709 ms** (ratio **0.91×**, slower)
+- Blend: warm_abc **716** / reorder **707–710** / cold **967** — flat across orders; connector+eager overhead vs native warm **251**
+- Gate D already PASS; **Gate E FAIL** (≥15% faster than native reorder not met)
+- Runbook path: D✓ E✗ at this scale on A100-40 / vLLM 0.32 / lmcache MP blend — longer context needs ~80GB; do not open ResolventKV
+- Matched CacheBlend G1 branch **closed** on this pin; optional next = dedicated EPIC session (`Docs/g1-epic.md`)
+
 ## Template for future entries
 
 ```
