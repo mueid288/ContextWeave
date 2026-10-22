@@ -282,6 +282,13 @@
 - Fair first-sample reorder **~1401** vs native **1055** → **slower**; do not cite 1.32×
 - Fix: blend reorder trials use unique filler salt so LMCache cannot BAC self-hit; re-run blend @12k
 
+## 2026-10-22 — Gate E @12k FAIL (salted harness, fair)
+
+- Native reorder p50 **1055 ms**; blend reorder p50 **1391 ms** (ratio **0.76×**, slower)
+- Blend: warm_abc **801** / reorder **~1390** / cold **1415**; `polluted False`; bac samples stable ~1376–1397
+- **Gate E FAIL** at ~12k on A100-40 / this pin — non-prefix reuse not paying off vs native prefix miss
+- Matched CacheBlend G1 **closed** (C/D✓ E✗ @6k and @12k fair). Optional later: EPIC on a **new** session
+
 ## Template for future entries
 
 ```
