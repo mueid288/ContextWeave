@@ -102,9 +102,25 @@ echo "=== installing build deps + torch==2.5.1 into EPIC env ==="
 # setup.py imports torch at import time → must not use build isolation.
 # Shallow clone often has no tags → pretend a v0.7-era version for setuptools_scm.
 export SETUPTOOLS_SCM_PRETEND_VERSION="${SETUPTOOLS_SCM_PRETEND_VERSION:-0.7.0}"
-# Cap parallel nvcc to avoid Colab OOM during the extension build.
-export MAX_JOBS="${MAX_JOBS:-2}"
-export NVCC_THREADS="${NVCC_THREADS:-2}"
+# Parallelism: Colab A100 is fine at 4; drop to 2 if the VM OOMs.
+export MAX_JOBS="${MAX_JOBS:-4}"
+export NVCC_THREADS="${NVCC_THREADS:-4}"
+# Default to A100 (sm_80). Override for other GPUs, e.g. T4 → 7.5, L4 → 8.9.
+# Building 8.0+8.6+8.9+9.0 makes the Colab compile multi-hour.
+if [[ -z "${TORCH_CUDA_ARCH_LIST:-}" ]]; then
+  if command -v nvidia-smi >/dev/null 2>&1; then
+    case "$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1)" in
+      *A100*) export TORCH_CUDA_ARCH_LIST="8.0" ;;
+      *H100*) export TORCH_CUDA_ARCH_LIST="9.0" ;;
+      *L4*)   export TORCH_CUDA_ARCH_LIST="8.9" ;;
+      *T4*)   export TORCH_CUDA_ARCH_LIST="7.5" ;;
+      *)      export TORCH_CUDA_ARCH_LIST="8.0" ;;
+    esac
+  else
+    export TORCH_CUDA_ARCH_LIST="8.0"
+  fi
+fi
+echo "=== TORCH_CUDA_ARCH_LIST=${TORCH_CUDA_ARCH_LIST} MAX_JOBS=${MAX_JOBS} ==="
 
 _find_cuda_home() {
   if [[ -n "${CUDA_HOME:-}" && -x "${CUDA_HOME}/bin/nvcc" ]]; then
