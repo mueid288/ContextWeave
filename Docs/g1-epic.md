@@ -21,8 +21,8 @@ Then stop the idle session: `colab stop -s cw-smoke`.
 Fresh A100 Colab (or other GPU). Expect a long CUDA extension build.
 
 **Python gate (do this first):** EPIC pins `torch==2.5.1`, which has **no Py3.13 wheels**.
-Current default Colab is often 3.13 — if `python -V` shows 3.13, **stop** and log a pin BLOCK
-(same class of failure as CacheBlend’s old 0.6.6 pin). Need **3.10–3.12** runtime, or another host.
+**Colab default is 3.13 (2026-10-22) → documented BLOCK** — do not burn install time there.
+Need a host with **Python 3.10–3.12** (e.g. RunPod template / custom image), then the steps below.
 
 ```bash
 # local: start a NEW session (do not reuse cw-g1-r2)
