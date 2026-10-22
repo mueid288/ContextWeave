@@ -17,6 +17,20 @@ fi
 EPIC_DIR="${EPIC_DIR:-/content/epic}"
 EPIC_REPO="${EPIC_REPO:-https://github.com/DerekHJH/epic.git}"
 
+PY_MINOR="$(python - <<'PY'
+import sys
+print(f"{sys.version_info.major}.{sys.version_info.minor}")
+PY
+)"
+case "$PY_MINOR" in
+  3.10|3.11|3.12) ;;
+  *)
+    echo "BLOCK: EPIC needs Python 3.10–3.12 (torch==2.5.1). Got ${PY_MINOR}."
+    echo "Stop this session; use a 3.10–3.12 runtime or another host."
+    exit 4
+    ;;
+esac
+
 echo "=== cloning EPIC fork into $EPIC_DIR ==="
 if [[ ! -d "$EPIC_DIR/.git" ]]; then
   git clone --depth 1 "$EPIC_REPO" "$EPIC_DIR"

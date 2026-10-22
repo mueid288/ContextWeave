@@ -20,9 +20,18 @@ Then stop the idle session: `colab stop -s cw-smoke`.
 
 Fresh A100 Colab (or other GPU). Expect a long CUDA extension build.
 
+**Python gate (do this first):** EPIC pins `torch==2.5.1`, which has **no Py3.13 wheels**.
+Current default Colab is often 3.13 — if `python -V` shows 3.13, **stop** and log a pin BLOCK
+(same class of failure as CacheBlend’s old 0.6.6 pin). Need **3.10–3.12** runtime, or another host.
+
 ```bash
+# local: start a NEW session (do not reuse cw-g1-r2)
+colab create -n cw-epic -s a100   # or your usual create flags
+colab connect -s cw-epic          # then ssh / shell into it
+
 cd /content && git clone https://github.com/mueid288/ContextWeave.git
 cd ContextWeave
+python -V   # must be 3.10–3.12; abort on 3.13
 
 export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
 export CONTEXTWEAVE_ALLOW_EPIC_REINSTALL=1
@@ -36,7 +45,7 @@ python scripts/g1_epic_bench.py --json | tee g1_epic.json
 ```
 
 **Success:** `pass_heuristic: true` (LegoLink-8 ≥15% faster than full prefill **and** both answers contain gold `Karachi`).  
-**Fail / abort:** install dies, fork markers missing, OOM, or quality fail → log and stop; do not expand matrix.
+**Fail / abort:** Python 3.13 / torch pin, install dies, fork markers missing, OOM, or quality fail → log and stop; do not expand matrix.
 
 ## Why this split
 
