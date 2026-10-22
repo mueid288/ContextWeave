@@ -92,19 +92,38 @@ else
 fi
 
 echo "=== installing build deps + torch==2.5.1 into EPIC env ==="
-"$EPIC_PYTHON" -m pip install -U pip setuptools wheel ninja cmake packaging
+"$EPIC_PYTHON" -m pip install -U pip setuptools wheel ninja cmake packaging \
+  "setuptools-scm>=8" jinja2
 # cu124 wheels run on newer Colab drivers; pin matches EPIC / vLLM 0.7.
 "$EPIC_PYTHON" -m pip install \
   "torch==2.5.1" "torchvision==0.20.1" "torchaudio==2.5.1" \
   --index-url https://download.pytorch.org/whl/cu124
 
+# setup.py imports torch at import time → must not use build isolation.
+# Shallow clone often has no tags → pretend a v0.7-era version for setuptools_scm.
+export SETUPTOOLS_SCM_PRETEND_VERSION="${SETUPTOOLS_SCM_PRETEND_VERSION:-0.7.0}"
+# Cap parallel nvcc to avoid Colab OOM during the extension build.
+export MAX_JOBS="${MAX_JOBS:-2}"
+export NVCC_THREADS="${NVCC_THREADS:-2}"
+
+if [[ -f "$EPIC_DIR/requirements-build.txt" ]]; then
+  "$EPIC_PYTHON" -m pip install -r "$EPIC_DIR/requirements-build.txt" || true
+fi
+if [[ -f "$EPIC_DIR/requirements-common.txt" ]]; then
+  "$EPIC_PYTHON" -m pip install -r "$EPIC_DIR/requirements-common.txt" || true
+fi
+if [[ -f "$EPIC_DIR/requirements-cuda.txt" ]]; then
+  "$EPIC_PYTHON" -m pip install -r "$EPIC_DIR/requirements-cuda.txt" || true
+fi
+
 echo "=== uninstalling any prior vLLM in this env ==="
 "$EPIC_PYTHON" -m pip uninstall -y vllm || true
 
-echo "=== installing EPIC fork editable (long: CUDA extension build) ==="
+echo "=== installing EPIC fork editable (no build isolation; long CUDA build) ==="
 cd "$EPIC_DIR"
 export VLLM_PYTHON_EXECUTABLE="$EPIC_PYTHON"
-"$EPIC_PYTHON" -m pip install -e . || {
+# Verbose so the next failure is diagnosable on Colab.
+if ! "$EPIC_PYTHON" -m pip install -e . --no-build-isolation -v; then
   echo "pip install -e . failed; trying setup.py build fallback…"
   "$EPIC_PYTHON" setup.py build
   SO="$(find build -name '_C*.so' 2>/dev/null | head -1 || true)"
@@ -112,7 +131,7 @@ export VLLM_PYTHON_EXECUTABLE="$EPIC_PYTHON"
     cp "$SO" vllm/
   fi
   "$EPIC_PYTHON" -m pip install -e . --no-build-isolation
-}
+fi
 
 echo "=== verify fork markers ==="
 cd "$CW_ROOT"
