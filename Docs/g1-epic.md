@@ -26,8 +26,7 @@ Current default Colab is often 3.13 — if `python -V` shows 3.13, **stop** and 
 
 ```bash
 # local: start a NEW session (do not reuse cw-g1-r2)
-colab create -n cw-epic -s a100   # or your usual create flags
-colab connect -s cw-epic          # then ssh / shell into it
+colab new -s cw-epic   # add your usual GPU/accelerator flags if any
 
 cd /content && git clone https://github.com/mueid288/ContextWeave.git
 cd ContextWeave
