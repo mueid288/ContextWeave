@@ -54,8 +54,10 @@ colab stop -s <session>
   same `--enforce-eager` on both native and blend arms.
 - Quality: each case does `reset → seed ABC → measure order+question` (no shared-body
   prefix hits across cases). Includes multi-hop cases.
-- Install: `VLLM_PIN` is required (default `0.6.6.post1` with `lmcache==0.5.3`); do not
-  leave Colab’s stock `vllm==0.32`.
+- Install: `scripts/g1_matched_install.sh` picks a pair by Python version:
+  - Py 3.10–3.12 → `vllm==0.6.6.post1` + `lmcache==0.5.3` (legacy “0.5.3 era”)
+  - Py ≥3.13 (current Colab) → `vllm==0.18.0` + `lmcache==0.4.2` (LMCache matrix green)
+  Override with `VLLM_PIN` / `LMCACHE_PIN`. Do **not** force 0.6.6 on Py3.13 (no wheel).
 - Pre-remediation artifacts under `artifacts/g1-matched-2026-10-22/` are **confounded** —
   re-run Gates C–E after `git pull` on a fresh matched install before citing results.
 

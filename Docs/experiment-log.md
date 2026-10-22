@@ -310,6 +310,11 @@
 - **Status:** CacheBlend G1 evidence remains **CONFOUNDED** until a new GPU session re-runs fixed C/D/E on a true matched `VLLM_PIN`+blend stack
 - Do not cite pre-remediation Gate D PASS / Gate E FAIL as algorithm verdicts
 
+## 2026-10-22 — Colab Py3.13 blocks legacy vLLM 0.6.6.post1
+
+- `pip install vllm==0.6.6.post1` fails on Colab Python 3.13 (`torchvision==0.20.1` unavailable)
+- Install script now auto-selects `vllm==0.18.0` + `lmcache==0.4.2` on Py≥3.13
+
 ## Template for future entries
 
 ```
