@@ -41,6 +41,7 @@ Issue [#3238](https://github.com/LMCache/LMCache/issues/3238) reported CacheBlen
 | Colab A100-40GB, vLLM **0.32.0**, lmcache **0.5.6**, Qwen3-8B, in-process blend | Engine starts (after #4131 register_model patch); first generate dies in layerwise `batched_from_gpu` with `IndexError` dim 4 |
 | Same stack, MP `--engine-type blend` + `LMCacheMPConnector` | Runs; warm reorder **1.22×** vs cold (latency heuristic); **answers garbage** — not a quality baseline |
 | Same stack, EPIC probe | **BLOCKED** — stock vLLM 0.32 has no `cache_fuse_metadata` / `hack_kv`; need DerekHJH/epic fork session |
+| Colab A100, vLLM **0.32.0** + lmcache **0.5.3**, MP blend | Quality Gate D **PASS** (agree 1.0); Gate E **FAIL** — blend reorder 326 ms vs native 297 ms |
 
 **Do not** treat this pair as a CacheBlend quality baseline. Prefer `lmcache/vllm-openai` image or re-pin; require answer-gold checks, not latency alone.
 

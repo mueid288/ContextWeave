@@ -189,6 +189,16 @@
 - **PASS:** `contains=1.0` `garbage=0.0` `agree_with_control=1.0` (`gate_d True`)
 - Decision: quality OK on this pin → proceed Stage E TTFT (n≥10); never cite prior voided 1.22×
 
+## 2026-10-22 — G1 matched-pin Gate E FAIL (no TTFT win)
+
+- Env: Colab A100, vLLM **0.32.0**, lmcache **0.5.3**, Qwen3-8B; n=10 after warmup
+- Native warm-reorder p50 **297 ms**; blend warm-reorder p50 **326 ms** (blend **slower**, ratio 0.91)
+- Native cold/warm/reorder all ~295–300 ms (no reorder gap at this prompt scale either)
+- Blend cold/warm/reorder all ~323–336 ms (LMCache overhead, no reuse win visible)
+- **Gate E FAIL** (need blend ≥15% faster than native reorder)
+- Quality (D) PASS + latency (E) FAIL → non-prefix reuse not paying off at ~6k-ish filler scale on this pin
+- Decision: bank as **G1 CacheBlend quality OK / latency miss**. Next: longer context (more filler / 80GB) **or** EPIC session — not ResolventKV kernels yet. Collect artifacts + stop Colab.
+
 ## 2026-10-22 — G1 matched-pin CacheBlend pre-registration (before GPU)
 
 - Host: **fresh Colab** (pip-match to `lmcache/vllm-openai:v0.5.3` era — not Docker digest)

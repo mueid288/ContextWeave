@@ -29,7 +29,7 @@ Updated: 2026-10-21
 - [x] G1 step 4: EPIC — **documented pin BLOCK** on Colab vLLM 0.32 (`g1_epic_probe.json`); dedicated fork session optional
 - [x] G1 Colab pin closeout — `cw-smoke` stopped; residual = pin gap (see experiment-log)
 - [x] G1 matched-pin Stage A harness — benches/scripts/pre-reg (`Docs/g1-matched-colab.md`)
-- [ ] G1 matched-pin Stage B–F on fresh Colab (`lmcache==0.5.3` era)
+- [x] G1 matched-pin B–E — Gate C/D **PASS** (quality); Gate E **FAIL** (blend slower than native reorder)
 - [ ] Partner log optional (`docs/partner-ask.md`)
 
 ## Explicitly not started
