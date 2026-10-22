@@ -289,6 +289,13 @@
 - **Gate E FAIL** at ~12k on A100-40 / this pin — non-prefix reuse not paying off vs native prefix miss
 - Matched CacheBlend G1 **closed** (C/D✓ E✗ @6k and @12k fair). Optional later: EPIC on a **new** session
 
+## 2026-10-22 — Stage E protocol fix: chunk+separator (pending GPU)
+
+- Hypothesis: markdown concat shifted 256-token LMCache boundaries → blend reorder≈cold; fix = MP-style `" # # "` chunk join for **both** backends
+- Harness: `scripts/g1_matched_ttft_bench.py` `prompt_format=chunk_sep`; runner `scripts/g1_matched_ttft_chunk_e.sh`
+- Prior markdown Gate E FAILs remain valid as no-reuse evidence; do not delete
+- Next: same-session `bash scripts/g1_matched_ttft_chunk_e.sh` → bank `*_12k_chunks.json`
+
 ## Template for future entries
 
 ```

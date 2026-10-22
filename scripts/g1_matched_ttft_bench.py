@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
-"""G1 matched-pin TTFT bench (GPU).
+"""G1 matched-pin TTFT bench (GPU) — CacheBlend chunk+separator format.
+
+Both backends use the same token-id prompts: fixed chunks joined by
+``blend_special_str`` (``" # # "``), matching ``g1_cacheblend_mp_bench.py``.
+Markdown-concat prompts do not preserve LMCache chunk ids under reorder.
 
 Native prefix protocol:
   1. Seed ABC once (discarded)
   2. Measure warm_abc × N  (exact repeat → prefix hit)
-  3. Measure warm_bac × N  (reorder, **no** BAC seed → should miss)
-  4. Measure warm_cba × N
-  5. Measure cold_abc × N  (unique **leading** nonce)
+  3. Each reorder trial: reset_prefix_cache → seed ABC → measure BAC/CBA
+  4. Cold ABC × N (unique leading nonce tokens)
 
-Size prompts to ``--target-prefix-tokens`` (default 6000) — short fillers on A100
-only show ~tens of ms cold/warm delta, which hides the reorder gap.
+Blend: same, plus unique chunk-body salt per reorder trial so LMCache cannot
+BAC/CBA self-hit when ``reset_prefix_cache`` fails.
 
   export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
-  python scripts/g1_matched_ttft_bench.py --backend native_prefix --runs 10 --json
+  python scripts/g1_matched_ttft_bench.py --backend native_prefix --runs 10 \\
+    --max-model-len 16384 --target-prefix-tokens 12000 --out g1_ttft_native_12k_chunks.json
 """
 
 from __future__ import annotations
@@ -36,24 +40,102 @@ ORDERS = {
     "cba": ("C", "B", "A"),
 }
 
+CHUNK_FACTS = {
+    "A": "Document Alpha. Secret code: ALPHA-9173.",
+    "B": "Document Beta. Named city: Karachi.",
+    "C": "Document Gamma. Stated year: 2019.",
+}
 
-def _docs(order: tuple[str, ...], *, fillers: dict[str, str], head: str) -> str:
-    blocks = {
-        "A": f"### Document Alpha\nSecret code: ALPHA-9173.\n{fillers['A']}\n",
-        "B": f"### Document Beta\nNamed city: Karachi.\n{fillers['B']}\n",
-        "C": f"### Document Gamma\nStated year: 2019.\n{fillers['C']}\n",
-    }
-    return head + "\n".join(blocks[k] for k in order)
+DEFAULT_BLEND_SPECIAL = " # # "
+QUESTION = (
+    "Which city is named in Document Beta? Reply with only the city name.\n/no_think"
+)
+SYSTEM_TEXT = (
+    "You are a careful assistant. Prefer a short answer. "
+    "Reply with only the requested value."
+)
 
 
-def _fillers_for_chars(n: int, *, salt: str = "") -> dict[str, str]:
-    """Build per-doc fillers. ``salt`` makes LMCache chunk ids unique across trials."""
-    prefix = f"{salt}" if salt else ""
-    return {
-        "A": (prefix + "alpha-only filler sentence for prefix bench. " * 400)[:n],
-        "B": (prefix + "beta-unique filler sentence for prefix bench. " * 400)[:n],
-        "C": (prefix + "gamma-unique filler sentence for prefix bench. " * 400)[:n],
-    }
+def _fill_chunk(
+    tokenizer,
+    key: str,
+    target_tokens: int,
+    *,
+    salt: str = "",
+) -> list[int]:
+    """Fixed-length token chunk; ``salt`` changes LMCache ids across trials."""
+    fact = CHUNK_FACTS[key]
+    name = {"A": "Alpha", "B": "Beta", "C": "Gamma"}[key]
+    line = f"{salt}{fact} Document {name} token-fill for matched TTFT. "
+    ids: list[int] = []
+    piece = tokenizer.encode(line, add_special_tokens=False)
+    if not piece:
+        raise SystemExit(f"empty encode for chunk {key}")
+    while len(ids) < target_tokens:
+        ids.extend(piece)
+    return ids[:target_tokens]
+
+
+def _sep_ids(tokenizer, blend_special_str: str) -> list[int]:
+    sep = tokenizer.encode(blend_special_str, add_special_tokens=False)
+    if sep and getattr(tokenizer, "bos_token_id", None) is not None:
+        if sep[0] == tokenizer.bos_token_id and len(sep) > 1:
+            sep = sep[1:]
+    return sep
+
+
+def _join_chunks(
+    *,
+    system: list[int],
+    chunks: list[list[int]],
+    question_ids: list[int],
+    sep: list[int],
+) -> list[int]:
+    out = list(system)
+    for ch in chunks:
+        out.extend(sep)
+        out.extend(ch)
+    out.extend(sep)
+    out.extend(question_ids)
+    return out
+
+
+def _prompt_for_order(
+    order: tuple[str, ...],
+    *,
+    chunk_map: dict[str, list[int]],
+    system: list[int],
+    question_ids: list[int],
+    sep: list[int],
+) -> list[int]:
+    return _join_chunks(
+        system=system,
+        chunks=[chunk_map[k] for k in order],
+        question_ids=question_ids,
+        sep=sep,
+    )
+
+
+def _chunk_tokens_for_target(
+    *,
+    target_prefix_tokens: int,
+    max_model_len: int,
+    max_tokens: int,
+    system_len: int,
+    question_len: int,
+    sep_len: int,
+) -> int:
+    """Per-chunk size so ABC prompt ≈ target (3 chunks + 4 seps + system + q)."""
+    overhead = system_len + question_len + 4 * sep_len + 8
+    prefix_cap = max_model_len - max_tokens - 8
+    want = min(target_prefix_tokens, prefix_cap)
+    usable = want - overhead
+    if usable < 3 * 256:
+        raise SystemExit(
+            f"target/max_model_len too small for 3 chunks "
+            f"(want={want}, overhead={overhead})"
+        )
+    return usable // 3
 
 
 def _reorder_series_polluted(samples: list[float]) -> bool:
@@ -79,13 +161,17 @@ def _percentile(xs: list[float], p: float) -> float:
     return ys[f] + (ys[c] - ys[f]) * (k - f)
 
 
-def _ttft_ms(llm, prompt: str, sampling) -> tuple[float, str, str]:
-    """Wall-clock generate time (same as working g1_reorder_gap / g1_ttft)."""
+def _ttft_ms(llm, prompt_ids: list[int], sampling) -> tuple[float, str, str]:
+    """Wall-clock generate on prompt_token_ids (CacheBlend MP style)."""
     t0 = time.perf_counter()
-    outs = llm.generate([prompt], sampling, use_tqdm=False)
+    outs = llm.generate(
+        prompts={"prompt_token_ids": prompt_ids},
+        sampling_params=sampling,
+        use_tqdm=False,
+    )
     wall = (time.perf_counter() - t0) * 1000.0
     text = outs[0].outputs[0].text.strip() if outs and outs[0].outputs else ""
-    return wall, text, "wall_clock_generate"
+    return wall, text, "wall_clock_generate_token_ids"
 
 
 def _reset_prefix_cache(llm) -> bool:
@@ -115,12 +201,12 @@ def _reset_prefix_cache(llm) -> bool:
     return False
 
 
-def _measure(llm, prompt: str, sampling, *, n: int, label: str) -> tuple[dict, str]:
+def _measure(llm, prompt_ids: list[int], sampling, *, n: int, label: str) -> tuple[dict, str]:
     samples: list[float] = []
     last_text = ""
     method = "unknown"
     for i in range(n):
-        ms, text, method = _ttft_ms(llm, prompt, sampling)
+        ms, text, method = _ttft_ms(llm, prompt_ids, sampling)
         samples.append(ms)
         last_text = text
         print(f"  {label} {i + 1}/{n} {ms:.0f} ms", flush=True)
@@ -136,19 +222,14 @@ def _measure(llm, prompt: str, sampling, *, n: int, label: str) -> tuple[dict, s
 def _measure_reorder_after_abc(
     llm,
     *,
-    abc_prompt: str,
-    reorder_prompt: str,
+    abc_ids: list[int],
+    reorder_ids: list[int],
     sampling,
     n: int,
     label: str,
     prompt_pair_fn=None,
 ) -> tuple[dict, str, bool]:
-    """Each trial: clear cache → seed ABC → measure reorder once (true miss).
-
-    For blend/LMCache, pass ``prompt_pair_fn(i) -> (abc, reorder)`` with a unique
-    filler salt each trial so prior BAC/CBA entries cannot self-hit (vLLM
-    ``reset_prefix_cache`` often fails while LMCache still holds blocks).
-    """
+    """Each trial: clear cache → seed ABC → measure reorder once."""
     samples: list[float] = []
     last_text = ""
     method = "unknown"
@@ -157,10 +238,9 @@ def _measure_reorder_after_abc(
         if prompt_pair_fn is not None:
             abc_i, reorder_i = prompt_pair_fn(i)
         else:
-            abc_i, reorder_i = abc_prompt, reorder_prompt
+            abc_i, reorder_i = abc_ids, reorder_ids
         if not _reset_prefix_cache(llm):
             cleared = False
-        # Repopulate ABC so we measure "reorder after prefix-hot ABC".
         _ttft_ms(llm, abc_i, sampling)
         ms, text, method = _ttft_ms(llm, reorder_i, sampling)
         samples.append(ms)
@@ -188,43 +268,6 @@ def _measure_reorder_after_abc(
     )
 
 
-def _size_fillers(
-    *,
-    model: str,
-    target_prefix_tokens: int,
-    max_model_len: int,
-    max_tokens: int,
-    head: str,
-    question: str,
-) -> tuple[dict[str, str], int, str]:
-    """Binary-search per-doc chars so ABC prompt ≈ target tokens."""
-    from transformers import AutoTokenizer
-
-    tok = AutoTokenizer.from_pretrained(model, trust_remote_code=True)
-    q_n = len(tok.encode(question, add_special_tokens=False))
-    prefix_cap = max_model_len - max_tokens - q_n - 16
-    want = min(target_prefix_tokens, prefix_cap)
-    if want < 512:
-        raise SystemExit(f"max_model_len={max_model_len} too small for TTFT bench")
-
-    lo, hi = 400, max(4000, want * 5)
-    best_fillers = _fillers_for_chars(lo)
-    best_n = 0
-    best_prompt = ""
-    while lo <= hi:
-        mid = (lo + hi) // 2
-        fillers = _fillers_for_chars(mid)
-        prompt = _docs(ORDERS["abc"], fillers=fillers, head=head) + question
-        n = len(tok.encode(prompt, add_special_tokens=True))
-        if n <= want:
-            best_fillers, best_n, best_prompt = fillers, n, prompt
-            lo = mid + 1
-        else:
-            hi = mid - 1
-    print(f"  sized ABC prompt ≈ {best_n} tokens (target {want})", flush=True)
-    return best_fillers, best_n, best_prompt
-
-
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default=os.environ.get("SMOKE_MODEL", "Qwen/Qwen3-8B"))
@@ -236,15 +279,26 @@ def main(argv: list[str] | None = None) -> int:
         "--target-prefix-tokens",
         type=int,
         default=6000,
-        help="Approximate ABC prompt tokens (matches g1_ttft scale where gap showed).",
+        help="Approximate ABC prompt tokens (3 equal chunks + separators).",
     )
     parser.add_argument(
-        "--filler-chars",
+        "--chunk-tokens",
         type=int,
         default=None,
-        help="If set, skip token sizing and use this many chars per doc.",
+        help="If set, fixed tokens per chunk (skip auto-size from target).",
+    )
+    parser.add_argument(
+        "--blend-special-str",
+        default=DEFAULT_BLEND_SPECIAL,
+        help="CacheBlend separator between chunks (must match LMCache docs).",
     )
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.75)
+    parser.add_argument(
+        "--enforce-eager",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Blend path: eager by default (stability). Try --no-enforce-eager for latency.",
+    )
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -256,43 +310,74 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
+    from transformers import AutoTokenizer
     from vllm import LLM, SamplingParams
 
-    head = (
-        "You are a careful assistant. Prefer a short answer.\n"
-        "Reply with only the requested value.\n\n"
-    )
-    question = (
-        "\nWhich city is named in Document Beta? Reply with only the city name.\n/no_think"
-    )
+    tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
+    sep = _sep_ids(tokenizer, args.blend_special_str)
+    system = tokenizer.encode(SYSTEM_TEXT, add_special_tokens=True)
+    question_ids = tokenizer.encode(QUESTION, add_special_tokens=False)
 
-    if args.filler_chars is not None:
-        fillers = _fillers_for_chars(args.filler_chars)
-        prompt_tokens = None
-        filler_chars = args.filler_chars
+    if args.chunk_tokens is not None:
+        chunk_tokens = args.chunk_tokens
     else:
-        fillers, prompt_tokens, _ = _size_fillers(
-            model=args.model,
+        chunk_tokens = _chunk_tokens_for_target(
             target_prefix_tokens=args.target_prefix_tokens,
             max_model_len=args.max_model_len,
             max_tokens=args.max_tokens,
-            head=head,
-            question=question,
+            system_len=len(system),
+            question_len=len(question_ids),
+            sep_len=len(sep),
         )
-        filler_chars = len(fillers["A"])
 
+    chunk_map = {
+        k: _fill_chunk(tokenizer, k, chunk_tokens) for k in ("A", "B", "C")
+    }
     prompts = {
-        key: _docs(order, fillers=fillers, head=head) + question
+        key: _prompt_for_order(
+            order,
+            chunk_map=chunk_map,
+            system=system,
+            question_ids=question_ids,
+            sep=sep,
+        )
         for key, order in ORDERS.items()
     }
+    prompt_tokens = len(prompts["abc"])
+    print(
+        f"  chunk_tokens={chunk_tokens} ABC_len={prompt_tokens} "
+        f"sep_len={len(sep)} format=chunk_sep",
+        flush=True,
+    )
+    if prompt_tokens + args.max_tokens > args.max_model_len:
+        print(
+            f"ABC prompt too long ({prompt_tokens}) for max_model_len="
+            f"{args.max_model_len}",
+            file=sys.stderr,
+        )
+        return 3
 
     def _blend_prompt_pair(order_key: str):
-        """Unique filler salt per trial so LMCache cannot BAC/CBA self-hit."""
-
-        def _fn(i: int) -> tuple[str, str]:
-            salted = _fillers_for_chars(filler_chars, salt=f"t{i}-{order_key}-")
-            abc = _docs(ORDERS["abc"], fillers=salted, head=head) + question
-            reo = _docs(ORDERS[order_key], fillers=salted, head=head) + question
+        def _fn(i: int) -> tuple[list[int], list[int]]:
+            salt = f"t{i}-{order_key}-"
+            cmap = {
+                k: _fill_chunk(tokenizer, k, chunk_tokens, salt=salt)
+                for k in ("A", "B", "C")
+            }
+            abc = _prompt_for_order(
+                ORDERS["abc"],
+                chunk_map=cmap,
+                system=system,
+                question_ids=question_ids,
+                sep=sep,
+            )
+            reo = _prompt_for_order(
+                ORDERS[order_key],
+                chunk_map=cmap,
+                system=system,
+                question_ids=question_ids,
+                sep=sep,
+            )
             return abc, reo
 
         return _fn
@@ -302,8 +387,8 @@ def main(argv: list[str] | None = None) -> int:
         "max_model_len": args.max_model_len,
         "gpu_memory_utilization": args.gpu_memory_utilization,
         "trust_remote_code": True,
-        # Match working g1_ttft / reorder_gap (no enforce_eager).
     }
+    enforce_eager_used = False
     if args.backend == "native_prefix":
         kwargs["enable_prefix_caching"] = True
     else:
@@ -312,7 +397,9 @@ def main(argv: list[str] | None = None) -> int:
         host = os.environ.get("LMCACHE_MP_HOST", "127.0.0.1")
         port = int(os.environ.get("LMCACHE_MP_PORT", "5555"))
         kwargs["enable_prefix_caching"] = False
-        kwargs["enforce_eager"] = True  # blend path was more stable eager
+        if args.enforce_eager:
+            kwargs["enforce_eager"] = True
+            enforce_eager_used = True
         kwargs["kv_transfer_config"] = KVTransferConfig(
             kv_connector="LMCacheMPConnector",
             kv_connector_module_path="lmcache.integration.vllm.lmcache_mp_connector",
@@ -325,7 +412,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print(
         f"matched TTFT backend={args.backend} runs={args.runs} "
-        f"target_tokens={args.target_prefix_tokens}",
+        f"target_tokens={args.target_prefix_tokens} chunk_tokens={chunk_tokens}",
         flush=True,
     )
     llm = LLM(**kwargs)
@@ -335,21 +422,18 @@ def main(argv: list[str] | None = None) -> int:
     _ttft_ms(llm, prompts["abc"], sampling)
 
     results: dict[str, dict] = {}
-    ttft_method = "wall_clock_generate"
+    ttft_method = "wall_clock_generate_token_ids"
 
     warm_abc, ttft_method = _measure(
         llm, prompts["abc"], sampling, n=args.runs, label="warm_abc"
     )
     results["warm_abc"] = warm_abc
 
-    # Critical: do NOT measure bac×N without clearing — trial 2..N become BAC self-hits
-    # (previous false harness_ok=False with warm≈reorder while cold_vs_warm≈2.5×).
-    # Blend: also salt fillers per trial — LMCache ignores failed reset_prefix_cache.
     blend_pairs = args.backend == "blend"
     warm_bac, ttft_method, cleared_bac = _measure_reorder_after_abc(
         llm,
-        abc_prompt=prompts["abc"],
-        reorder_prompt=prompts["bac"],
+        abc_ids=prompts["abc"],
+        reorder_ids=prompts["bac"],
         sampling=sampling,
         n=args.runs,
         label="warm_bac",
@@ -359,8 +443,8 @@ def main(argv: list[str] | None = None) -> int:
 
     warm_cba, ttft_method, cleared_cba = _measure_reorder_after_abc(
         llm,
-        abc_prompt=prompts["abc"],
-        reorder_prompt=prompts["cba"],
+        abc_ids=prompts["abc"],
+        reorder_ids=prompts["cba"],
         sampling=sampling,
         n=args.runs,
         label="warm_cba",
@@ -383,8 +467,14 @@ def main(argv: list[str] | None = None) -> int:
     cold_text = ""
     for i in range(args.runs):
         _reset_prefix_cache(llm)
-        cold_prompt = f"[cold-nonce-{i}-{time.time_ns()}]\n" + prompts["abc"]
-        ms, text, ttft_method = _ttft_ms(llm, cold_prompt, sampling)
+        nonce = tokenizer.encode(
+            f"[cold-nonce-{i}-{time.time_ns()}]",
+            add_special_tokens=False,
+        )
+        cold_ids = nonce + prompts["abc"]
+        if len(cold_ids) + args.max_tokens > args.max_model_len:
+            cold_ids = nonce[:16] + prompts["abc"]
+        ms, text, ttft_method = _ttft_ms(llm, cold_ids, sampling)
         cold_samples.append(ms)
         cold_text = text
         print(f"  cold_abc {i + 1}/{args.runs} {ms:.0f} ms", flush=True)
@@ -413,14 +503,18 @@ def main(argv: list[str] | None = None) -> int:
         "backend": args.backend,
         "model": args.model,
         "runs": args.runs,
+        "prompt_format": "chunk_sep",
+        "blend_special_str": args.blend_special_str,
+        "chunk_tokens": chunk_tokens,
         "target_prefix_tokens": args.target_prefix_tokens,
         "abc_prompt_tokens": prompt_tokens,
         "ttft_method": ttft_method,
+        "enforce_eager": enforce_eager_used,
         "protocol": (
-            "seed_abc → warm_abc×N → "
+            "chunk_sep prompts → seed_abc → warm_abc×N → "
             "for reorder: reset_prefix_cache → seed abc → measure bac/cba ×N "
-            "(blend: unique filler salt per trial) → "
-            "cold_abc×N (reset + leading nonce)"
+            "(blend: unique chunk salt per trial) → "
+            "cold_abc×N (reset + leading nonce tokens)"
         ),
         "prefix_cache_reset_ok": prefix_cache_reset_ok,
         "reorder_series_polluted": reorder_polluted,
@@ -437,8 +531,9 @@ def main(argv: list[str] | None = None) -> int:
         "cold_vs_warm_abc": cold_vs_warm,
         "harness_reorder_gap_ok": harness_reorder_gap_ok and prefix_cache_reset_ok,
         "note": (
+            "prompt_format=chunk_sep required for CacheBlend chunk-id reuse. "
             "harness_reorder_gap_ok requires reorder ≥1.15× warm ABC and no "
-            "self-hit pollution (first≫later). "
+            "self-hit pollution. "
             "Gate E: blend warm_reorder ≤ 0.85 × native warm_reorder. "
             "Do not cite gate_e if reorder_series_polluted."
         ),
@@ -453,7 +548,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{scen}: p50={r['p50_ms']:.0f} p90={r['p90_ms']:.0f} n={r['n']}")
         print(
             f"reorder_vs_warm_abc={reorder_gap} cold_vs_warm={cold_vs_warm} "
-            f"harness_ok={harness_reorder_gap_ok}"
+            f"harness_ok={payload['harness_reorder_gap_ok']}"
         )
     return 0
 

@@ -201,21 +201,58 @@ def test_g1_matched_quality_refuses_without_allow(monkeypatch: pytest.MonkeyPatc
     assert mod.main(["--mode", "native", "--json"]) == 1
 
 
+class _FakeTok:
+    bos_token_id = 1
+
+    def encode(self, text: str, add_special_tokens: bool = False):
+        # Deterministic fake ids from character codes (stable for order/salt tests).
+        ids = [ord(c) % 97 + 2 for c in text]
+        if add_special_tokens:
+            return [self.bos_token_id, *ids]
+        return ids
+
+
 def test_g1_matched_ttft_scenarios(monkeypatch: pytest.MonkeyPatch):
     mod = _load_script("g1_matched_ttft_bench.py")
     assert set(mod.ORDERS) == {"abc", "bac", "cba"}
     assert mod._percentile([1.0, 2.0, 3.0, 4.0, 5.0], 0.5) == 3.0
-    fillers = mod._fillers_for_chars(40)
-    assert "alpha-only" in fillers["A"] and "beta-unique" in fillers["B"]
-    salted = mod._fillers_for_chars(40, salt="t0-bac-")
-    assert salted["A"].startswith("t0-bac-")
-    assert salted["A"] != fillers["A"]
     assert mod._reorder_series_polluted([1400.0, 800.0, 801.0, 799.0, 802.0])
     assert not mod._reorder_series_polluted([1050.0, 1054.0, 1052.0, 1056.0])
-    abc = mod._docs(("A", "B", "C"), fillers=fillers, head="H\n")
-    bac = mod._docs(("B", "A", "C"), fillers=fillers, head="H\n")
-    assert abc.index("Document Alpha") < abc.index("Document Beta")
-    assert bac.index("Document Beta") < bac.index("Document Alpha")
+
+    tok = _FakeTok()
+    sep = mod._sep_ids(tok, " # # ")
+    assert sep  # non-empty separator token ids
+    a = mod._fill_chunk(tok, "A", 32)
+    b = mod._fill_chunk(tok, "B", 32)
+    c = mod._fill_chunk(tok, "C", 32)
+    assert len(a) == len(b) == len(c) == 32
+    a_salt = mod._fill_chunk(tok, "A", 32, salt="t0-bac-")
+    assert a_salt != a
+
+    system = tok.encode("sys", add_special_tokens=True)
+    q = tok.encode("q?", add_special_tokens=False)
+    cmap = {"A": a, "B": b, "C": c}
+    abc = mod._prompt_for_order(
+        ("A", "B", "C"), chunk_map=cmap, system=system, question_ids=q, sep=sep
+    )
+    bac = mod._prompt_for_order(
+        ("B", "A", "C"), chunk_map=cmap, system=system, question_ids=q, sep=sep
+    )
+    # Same multiset of chunk bytes, different order: BAC starts with B after first sep.
+    assert abc != bac
+    assert len(abc) == len(bac)
+    # Separator appears between chunks.
+    assert sep[0] in abc
+    ct = mod._chunk_tokens_for_target(
+        target_prefix_tokens=6000,
+        max_model_len=8192,
+        max_tokens=16,
+        system_len=10,
+        question_len=20,
+        sep_len=3,
+    )
+    assert ct >= 256
+
     assert callable(mod._reset_prefix_cache)
     assert callable(mod._measure_reorder_after_abc)
     monkeypatch.delenv("CONTEXTWEAVE_ALLOW_MODEL_LOAD", raising=False)

@@ -14,6 +14,11 @@ Colab A100 session `cw-matched`. Stack: vLLM **0.32.0**, lmcache **0.5.3**, `Qwe
 | `g1_ttft_native_12k.json` | Native @~12k PASS (reorder≈3.79×) |
 | `g1_ttft_blend_12k.json` | **VOID** — polluted p50 (self-hits); do not cite |
 | `g1_ttft_blend_12k_salted.json` | Gate E FAIL fair (blend 1391 vs native 1055; 0.76×) |
+| `g1_ttft_native_12k_chunks.json` | Stage E native with `chunk_sep` (pending / after re-run) |
+| `g1_ttft_blend_12k_chunks.json` | Stage E blend with `chunk_sep` (pending / after re-run) |
+
+Stage E now requires `prompt_format=chunk_sep` (`scripts/g1_matched_ttft_chunk_e.sh`).  
+Markdown Gate E rows above = no-reuse FAILs, not chunk-aligned CacheBlend.
 
 Narrative: `Docs/experiment-log.md` (2026-10-22 matched-pin entries).  
 Runbook: `Docs/Reviews/claude_g1_cacheblend_matched_image_runbook.md`.

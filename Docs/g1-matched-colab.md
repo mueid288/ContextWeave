@@ -36,16 +36,21 @@ chmod +x scripts/g1_matched_*.sh scripts/g1_collect_artifacts.sh
 bash scripts/g1_matched_install.sh          # writes g1_matched_env.json
 bash scripts/g1_matched_smoke.sh            # Gate B
 bash scripts/g1_matched_blend.sh            # Gate C then D
-# If Gate D PASS:
-RUN_TTFT=1 bash scripts/g1_matched_blend.sh # or run ttft benches once
-# Or:
-# python scripts/g1_matched_ttft_bench.py --backend native_prefix --runs 10 --out g1_matched_ttft_native.json
-# python scripts/g1_matched_ttft_bench.py --backend blend --runs 10 --out g1_matched_ttft_blend.json
+# If Gate D PASS — Stage E uses **chunk+separator** prompts (not markdown concat):
+bash scripts/g1_matched_ttft_chunk_e.sh
+# Writes g1_ttft_native_12k_chunks.json + g1_ttft_blend_12k_chunks.json
+# Gate E: blend warm_reorder ≤ 0.85 × native warm_reorder; polluted must be False
 
 bash scripts/g1_collect_artifacts.sh
 # download the tarball, then:
 colab stop -s <session>
 ```
+
+## Stage E prompt format
+
+`g1_matched_ttft_bench.py` builds **fixed token chunks** joined by `" # # "` (same as
+`g1_cacheblend_mp_bench.py`). Markdown-only docs do not preserve LMCache chunk ids
+under reorder — those runs stay on record as no-reuse FAILs, not as Gate E evidence.
 
 ## Gates
 
@@ -54,6 +59,6 @@ colab stop -s <session>
 | B smoke | coherent `smoke-ok`-like output |
 | C control | `contains_rate ≥ 0.9`, `garbage_rate ≤ 0.05` |
 | D blend | C bars + `agree_with_control_rate ≥ 0.9` on reorder |
-| E latency | blend warm-reorder p50 ≥15% faster than same-session native reorder |
+| E latency | blend warm-reorder p50 ≥15% faster than same-session native reorder (chunk_sep) |
 
 **Never cite latency if Gate D failed.**
