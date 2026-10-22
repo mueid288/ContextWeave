@@ -10,6 +10,8 @@ fi
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
+# shellcheck source=g1_lmcache_cmd.sh
+source "$ROOT/scripts/g1_lmcache_cmd.sh"
 
 export PYTHONHASHSEED=0
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
@@ -36,7 +38,9 @@ start_server() {
   fi
   rm -f "$LOG"
   echo "=== lmcache server engine-type=${eng} req=:${LMCACHE_MP_PORT} http=:${HTTP_PORT} ==="
-  lmcache server \
+  # Ensure scripts dir on PATH for this shell (pip often installs lmcache here).
+  export PATH="$(python -c 'import sysconfig; print(sysconfig.get_path("scripts"))'):${PATH}"
+  run_lmcache server \
     --host 127.0.0.1 \
     --port "$LMCACHE_MP_PORT" \
     --http-host 127.0.0.1 \

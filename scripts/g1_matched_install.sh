@@ -54,5 +54,13 @@ print(json.dumps(payload, indent=2))
 PY
 echo "Wrote $OUT:"
 cat "$OUT"
-command -v lmcache >/dev/null && echo "lmcache CLI: $(command -v lmcache)" || echo "WARN: lmcache CLI not on PATH"
+SCRIPTS_DIR="$(python -c 'import sysconfig; print(sysconfig.get_path("scripts"))')"
+export PATH="${SCRIPTS_DIR}:${PATH}"
+if command -v lmcache >/dev/null 2>&1; then
+  echo "lmcache CLI: $(command -v lmcache)"
+  lmcache -h >/dev/null 2>&1 && echo "lmcache CLI OK" || echo "WARN: lmcache -h failed"
+else
+  echo "WARN: lmcache not on PATH; scripts will try ${SCRIPTS_DIR}/lmcache or python -m"
+  ls -la "${SCRIPTS_DIR}/lmcache" 2>/dev/null || true
+fi
 echo "Next: bash scripts/g1_matched_smoke.sh"

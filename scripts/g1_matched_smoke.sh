@@ -10,31 +10,9 @@ fi
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 export PYTHONHASHSEED=0
+export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export SMOKE_MODEL="${SMOKE_MODEL:-Qwen/Qwen3-8B}"
+export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
 
-python - <<'PY'
-import os
-import sys
-
-os.environ["CONTEXTWEAVE_ALLOW_MODEL_LOAD"] = "1"
-from vllm import LLM, SamplingParams
-
-model = os.environ["SMOKE_MODEL"]
-print(f"=== Gate B smoke model={model} ===", flush=True)
-llm = LLM(
-    model=model,
-    max_model_len=2048,
-    trust_remote_code=True,
-    enforce_eager=True,
-    gpu_memory_utilization=0.5,
-)
-out = llm.generate(
-    ["Reply with exactly: smoke-ok"],
-    SamplingParams(temperature=0.0, max_tokens=8),
-)
-text = out[0].outputs[0].text if out and out[0].outputs else ""
-print("SMOKE_OUTPUT:", repr(text), flush=True)
-ok = "smoke-ok" in text.lower().replace(" ", "")
-print("GATE_B:", "PASS" if ok else "FAIL", flush=True)
-sys.exit(0 if ok else 2)
-PY
+# Real .py path required — vLLM spawn cannot re-exec a bash heredoc.
+exec python scripts/g1_matched_smoke.py

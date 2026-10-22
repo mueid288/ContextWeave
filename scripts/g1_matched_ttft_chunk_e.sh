@@ -11,6 +11,8 @@ fi
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
+# shellcheck source=g1_lmcache_cmd.sh
+source "$ROOT/scripts/g1_lmcache_cmd.sh"
 
 export PYTHONHASHSEED=0
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
@@ -30,11 +32,12 @@ python scripts/g1_matched_ttft_bench.py --backend native_prefix --runs "$RUNS" \
   --gpu-memory-utilization "$GPU_UTIL" \
   --out g1_ttft_native_12k_chunks.json
 
-pkill -f 'lmcache server' 2>/dev/null || true
+pkill -f 'lmcache' 2>/dev/null || true
 sleep 2
 rm -f "$LOG"
 echo "=== lmcache blend server ==="
-lmcache server \
+export PATH="$(python -c 'import sysconfig; print(sysconfig.get_path("scripts"))'):${PATH}"
+run_lmcache server \
   --host 127.0.0.1 \
   --port "$LMCACHE_MP_PORT" \
   --http-host 127.0.0.1 \
