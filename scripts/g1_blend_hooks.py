@@ -13,8 +13,61 @@ from __future__ import annotations
 
 import importlib
 import os
+import sys
+import types
 
 BLEND_KV_CONNECTOR = "LMCacheConnectorV1"
+
+
+def ensure_vllm_attention_compat() -> bool:
+    """Alias ``vllm.attention.Attention`` for lmcache ≤0.4.2 on vLLM ≥0.17.
+
+    lmcache 0.4.2 does ``from vllm.attention import Attention``. vLLM 0.18 moved
+    the class to ``vllm.model_executor.layers.attention.attention`` (lmcache
+    ≥0.5.0 already try/excepts this). Without the alias, in-process blend dies
+    at ``Creating blender`` with ``ModuleNotFoundError: vllm.attention``.
+    """
+    try:
+        importlib.import_module("vllm.attention")
+        return True
+    except ModuleNotFoundError:
+        pass
+
+    new_paths = (
+        "vllm.model_executor.layers.attention.attention",
+        "vllm.attention.layer",
+    )
+    Attention = None
+    for path in new_paths:
+        try:
+            mod = importlib.import_module(path)
+            Attention = getattr(mod, "Attention", None)
+            if Attention is not None:
+                break
+        except Exception:
+            continue
+    if Attention is None:
+        print(
+            "WARN: vllm.attention shim failed — Attention class not found",
+            flush=True,
+        )
+        return False
+
+    alias = types.ModuleType("vllm.attention")
+    alias.Attention = Attention
+    sys.modules["vllm.attention"] = alias
+    try:
+        import vllm
+
+        vllm.attention = alias  # type: ignore[attr-defined]
+    except Exception:
+        pass
+    print(
+        "shimmed vllm.attention.Attention → "
+        f"{Attention.__module__}.{Attention.__qualname__}",
+        flush=True,
+    )
+    return True
 
 
 def setup_blend_env(*, blend_special_str: str, cpu_gb: float | None = None) -> None:
@@ -73,6 +126,7 @@ def prepare_blend_worker(*, blend_special_str: str, cpu_gb: float | None = None)
     # In-process worker so the monkeypatch is visible (not a forked child).
     os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
     setup_blend_env(blend_special_str=blend_special_str, cpu_gb=cpu_gb)
+    ensure_vllm_attention_compat()
     try:
         patch_vllm_register_model_for_blend()
     except Exception as exc:  # noqa: BLE001 — lmcache may be absent on CPU CI

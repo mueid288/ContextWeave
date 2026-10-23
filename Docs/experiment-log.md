@@ -417,6 +417,18 @@
 - Control (Gate C) still uses MP + default engine
 - Next: push → Colab G1-DIAG #2 (Gate R only question); collect before stop
 
+## 2026-10-23 — G1-DIAG #2: blender engages, then `vllm.attention` miss
+
+- **Status:** `INCONCLUSIVE` (pin ABI; not algorithm)
+- Progress vs DIAG #1: `Creating blender for vllm-instance` + import
+  `LMCQwen3Model` — register_model / Qwen3 path **works**
+- Block: lmcache **0.4.2** `from vllm.attention import Attention` vs vLLM **0.18**
+  (Attention moved to `model_executor.layers.attention.attention`). Same error on
+  quality blend and TTFT blend init
+- Fix in tree: `ensure_vllm_attention_compat()` shim (lmcache ≥0.5.0 already has
+  try/except). Retry blend without full reinstall after `git pull`
+- Risk after shim: same-class `IndexError` as 0.32 in-process (log if seen)
+
 ## Template for future entries
 
 ```

@@ -274,6 +274,39 @@ def test_g1_blend_hooks_prepare_disables_v1_mp(monkeypatch: pytest.MonkeyPatch):
     assert hooks.BLEND_KV_CONNECTOR == "LMCacheConnectorV1"
 
 
+def test_g1_blend_hooks_attention_shim_aliases_moved_class(monkeypatch: pytest.MonkeyPatch):
+    """lmcache 0.4.2 imports vllm.attention; vLLM 0.18 moved Attention."""
+    import sys
+    import types
+
+    hooks = _load_script("g1_blend_hooks.py")
+
+    class _Attention:
+        marker = "shim-ok"
+
+    # Tear down any prior vllm.attention; install only the new path.
+    monkeypatch.delitem(sys.modules, "vllm.attention", raising=False)
+    parents = [
+        "vllm",
+        "vllm.model_executor",
+        "vllm.model_executor.layers",
+        "vllm.model_executor.layers.attention",
+    ]
+    for name in parents:
+        if name not in sys.modules:
+            monkeypatch.setitem(sys.modules, name, types.ModuleType(name))
+    new = types.ModuleType("vllm.model_executor.layers.attention.attention")
+    new.Attention = _Attention
+    monkeypatch.setitem(
+        sys.modules, "vllm.model_executor.layers.attention.attention", new
+    )
+
+    assert hooks.ensure_vllm_attention_compat() is True
+    from vllm.attention import Attention as Attn
+
+    assert Attn.marker == "shim-ok"
+
+
 def test_g1_matched_benches_use_inprocess_blend_hooks():
     ttft = _load_script("g1_matched_ttft_bench.py")
     quality = _load_script("g1_matched_quality_bench.py")
