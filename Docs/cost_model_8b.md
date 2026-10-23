@@ -36,4 +36,25 @@
 - Short contexts over slow links (e.g. 25 GbE at 10k) can lose if load is serialized.
 - Chunk lengths should be multiples of `kv_block_size` (pad/mask tails).
 - Corpus storage, not just per-request TTFT, drives cost.
-- Confirm with measurement when a GPU is available; do not treat these as G1 results.
+- Tables above remain **planning estimates**, not H4 validation.
+
+## Measured A100 anchors (G1 — not H4)
+
+Source: `artifacts/g1-diag-2026-10-23/` + earlier G1 steps. Colab A100, Qwen3-8B,
+vLLM 0.18 / lmcache 0.4.2 (blend in-process). **Quality-constrained KPI still fails**
+for CacheBlend even where latency looks soft-positive.
+
+| Scenario | p50 TTFT | Notes |
+|---|---|---|
+| Native prefix warm ABC @~12k | **~41 ms** | Exact prefix hit |
+| Native reorder @~12k | **~924 ms** | Prefix miss on reorder |
+| Blend warm ABC @~12k | **~619 ms** | Same-order LMCache hit (not as fast as native prefix) |
+| Blend warm BAC @~12k | **~622 ms** | Non-prefix engage (~7705 cached tok) |
+| Blend warm CBA @~12k | **~1065 ms** | ≈miss (cached ~19); slower than cold |
+| Blend cold ABC @~12k | **~930 ms** | |
+| Blend reorder (bac+cba median) vs native reorder | **~1.10×** | Below 1.15× Gate E; Gate D bac agree 0.67 |
+| Full vs prefix @6k (earlier G1 step 1) | **~2.57×** | Prefix gap is real |
+
+**Planner implication:** do not treat §7.5 “reuse wins on PCIe” as permission to pick
+C4. Use measured quality + ≥15% bar (`contextweave.planner.v0`). H4 (cost-model
+±20% vs measured) remains **untested** — needs a dedicated Phase 2 comparison.

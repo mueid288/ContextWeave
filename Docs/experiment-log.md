@@ -477,6 +477,13 @@
   (C4 discarded for quality + &lt;15% latency bar); prefix → **C1**
 - Doc: `Docs/planner-v0.md`
 
+## 2026-10-23 — Cost model: measured A100 anchors
+
+- **Status:** `VALID` (desk; not H4)
+- Appended G1 TTFT ratios to `Docs/cost_model_8b.md` so planning tables are not
+  mistaken for permission to select CacheBlend
+- H4 (±20% cost-model vs measured) still deferred to Phase 2 if ever opened
+
 ## Template for future entries
 
 ```

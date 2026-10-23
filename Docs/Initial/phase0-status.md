@@ -37,13 +37,14 @@ Updated: 2026-10-23
   (no quality-preserving ≥15% TTFT win; Gate D bac 0.67; see experiment-log)
 - [x] Post-G1 desk pivot (first cut): thesis restatement `Docs/g1-closeout-thesis.md` +
   planner v0 `contextweave.planner.v0` (refuses C4 on G1 calibration)
-- [ ] Cost-model note: fold measured A100 ratios into `Docs/cost_model_8b.md` (optional)
-- [ ] Partner log optional (`docs/partner-ask.md`)
+- [x] Cost-model note: measured A100 anchors folded into `Docs/cost_model_8b.md` (not H4)
+- [ ] Partner log optional (`Docs/partner-ask.md`) — **no partner yet**; do not block Phase 0 on this (G0 already passed on `my_corpus`)
 
 
 ## Explicitly not started
 
-Planner, ResolventKV kernels, repair product, API, distributed cache, RoPE CUDA.
+ResolventKV kernels, repair product, API, distributed cache, RoPE CUDA, Phase 1
+oracle (G2), Phase 2 risk-signal/H4 (G3). Planner **v0** exists (CPU rules only).
 
 ## Laptop safety
 
