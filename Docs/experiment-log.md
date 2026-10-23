@@ -10,8 +10,8 @@
 - Native prefix + reorder harness: **VALID**
 - ResolventKV: **deferred** until a non-prefix path shows verified engagement +
   quality-preserving ≥15% TTFT win (§6)
-- Next: optional cost-model A100 note; partner trace; GPU only with new pre-reg
-  (e.g. fair EPIC @12k). Planner v0 + thesis: `Docs/g1-closeout-thesis.md`
+- Next: maintenance desk only; partner optional; GPU only with new pre-reg.
+  Exit memo: `Docs/phase0-exit-decision.md`
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -483,6 +483,13 @@
 - Appended G1 TTFT ratios to `Docs/cost_model_8b.md` so planning tables are not
   mistaken for permission to select CacheBlend
 - H4 (±20% cost-model vs measured) still deferred to Phase 2 if ever opened
+
+## 2026-10-23 — Phase 0 exit decision (pivot)
+
+- **Status:** `VALID` (project decision)
+- Wrote `Docs/phase0-exit-decision.md`: **do not** open Phase 1/G2 or Phase 2/G3;
+  ResolventKV remains blocked; optional GPU only under a new pre-reg
+- Prior-art Tier 1 CacheBlend/EPIC rows updated with measured gaps
 
 ## Template for future entries
 

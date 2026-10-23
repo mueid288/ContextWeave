@@ -61,6 +61,7 @@ On the measured A100 @12k Qwen3 slice, the v0 planner must **discard C4
 ## Next desk work
 
 1. Keep planner v0 calibrations in sync when new slices are measured.
-2. Cost-model: fold measured A100 TTFT ratios into planning notes (still not H4).
-3. Optional partner trace (`Docs/partner-ask.md`) to harden G0 beyond `my_corpus`.
-4. Only reopen GPU with a written one-question pre-reg (e.g. EPIC @≥6k/12k).
+2. ~~Cost-model A100 anchors~~ — done (`Docs/cost_model_8b.md`).
+3. Phase 0 exit memo — `Docs/phase0-exit-decision.md` (**pivot**; no Phase 1).
+4. Optional partner trace (`Docs/partner-ask.md`) — non-blocking.
+5. Only reopen GPU with a written one-question pre-reg (e.g. EPIC @≥6k/12k).
