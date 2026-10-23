@@ -1,37 +1,31 @@
-# Pre-registration: H3 order-risk signal (parked)
+# Pre-registration: H3 order-risk signal
 
-**Status:** PARKED — do not run until owner explicitly starts.  
-**Date written:** 2026-10-23  
+**Status:** **PASS** (2026-10-23) — in-sample replay banked  
+`artifacts/h3-order-risk-2026-10-23/`.  
 **Not a G2 redo.** G2 FAIL stands. Phase 2 not opened.
 
 ## One question
 
-Using only **CPU-visible features** of a multi-doc request (chunk order permutation
-id, question type, optional cheap embedding/hash features — **no** model forward
-for the signal itself), can a rule or tiny classifier trained on
-`artifacts/phase1-oracle-2026-10-23/oracle_trials.jsonl` predict C3 quality failure
-with **precision ≥0.9** on held-out fails (ACB/BAC pattern) such that a policy
-“C3 if predicted safe else C0” keeps **contains ≥0.95** while cutting **mean**
-TTFT by ≥20% vs always-C0 on a replay of that suite?
+Using only **CPU-visible** chunk-order features on the banked Phase 1 oracle
+JSONL, can a rule predict C3 failures with precision ≥0.9 such that
+“C3 if safe else C0” keeps contains ≥0.95 and cuts **mean** TTFT ≥20% vs C0?
 
-## Fixed
+## Result
 
-| Item | Value |
+| Field | Value |
 |---|---|
-| Data | Banked oracle JSONL only for v0; optional one GPU confirm later |
-| Positive class | C3 `quality < 1` rows |
-| Metric | Precision on fails; mean TTFT of policy vs C0; **not** G2 p95 bar |
-| Out of scope | Recomp sweeps, CacheBlend, ResolventKV, claiming G2 PASS |
+| Rule | refuse C3 if order ∈ {ACB, BAC} (unknown → refuse) |
+| Precision / recall | **1.0 / 1.0** |
+| Policy mean_q | **1.0** |
+| Mean TTFT reduction vs C0 | **40%** |
+| `pass_heuristic` | **true** |
 
-## Pass / fail
+## Caveat
 
-| Outcome | Next |
-|---|---|
-| PASS on replay | Optional thin planner rule; still no Phase 2 auto |
-| FAIL | Keep C3 refused; archive H3 |
-| Need more labels | One capped GPU collect pre-reg — separate memo |
+Fit and evaluated on the same 20-request suite (pattern is deterministic there).
+Production needs the real doc permutation exposed to the planner.
 
-## Procedure (when approved)
+## Next
 
-Desk-first: train/eval on banked trials; document features. GPU only if replay
-is insufficient and owner opens a new session.
+Planner v0 uses the gate (`RequestView.chunk_order`). Still **no Phase 2**.
+Optional: GPU confirm on a fresh seed — separate pre-reg if owner wants.

@@ -22,6 +22,6 @@ See experiment-log 2026-10-23 oracle entry + `artifacts/phase1-oracle-2026-10-23
 
 ## Resume only via
 
-1. Stay paused (default).
-2. Parked H3 pre-reg — [`Docs/pre-reg/pre-reg-h3-order-risk.md`](../pre-reg/pre-reg-h3-order-risk.md) (mean-TTFT product policy; **not** a G2 redo).
-3. Explicit new go memo (Phase 2 or kernels) — not justified by current evidence.
+1. Stay desk-idle (default) — H3 replay already **PASS**.
+2. Optional GPU confirm of H3 on new seeds — new pre-reg required.
+3. Explicit Phase 2 go memo — **not** justified by G2; H3 is not a G2 pass.

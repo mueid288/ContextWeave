@@ -1,7 +1,7 @@
 """Rule-based composition planner v0 (PRD §7.6) — CPU only.
 
-Uses offline calibration from Phase 0 / G1 measurements. Does **not** load
-models or claim correctness guarantees; it selects among C0/C1/C4 with
+Uses offline calibration from Phase 0 / G1 / H3 measurements. Does **not** load
+models or claim correctness guarantees; it selects among C0/C1/C3/C4 with
 explicit reason codes.
 """
 
@@ -10,6 +10,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
+
+from contextweave.risk.order_signal import predict_c3_quality_fail
 
 
 class ConfigId(str, Enum):
@@ -62,6 +64,8 @@ class RequestView:
     # Validated non-prefix chunk artifacts available for blend-style reuse.
     has_validated_nonprefix_artifacts: bool = False
     artifacts_valid: bool = True
+    # Doc permutation for H3 EPIC risk (e.g. "BCA"). None ⇒ fail-closed for C3.
+    chunk_order: str | None = None
 
 
 @dataclass
@@ -93,17 +97,16 @@ G1_CACHEBLEND_A100_12K = MethodCalibration(
     ),
 )
 
-# EPIC Phase 1 oracle (2026-10-23) A100, Mistral-7B-Instruct-v0.2, N=20 @12k.
-# artifacts/phase1-oracle-2026-10-23/ — C3 mean contains 0.70 (ACB/BAC orders fail);
-# best fixed = C0; G2 FAIL (oracle quality/p95 TTFT upside 0 vs C0).
+# EPIC @12k when H3 order gate says safe (not ACB/BAC). Unsafe/unknown → discarded
+# in plan() before quality_delta is applied. G2 FAIL still stands (p95 vs C0).
 G1_EPIC_A100_12K = MethodCalibration(
     config=ConfigId.C3_EPIC,
-    ttft_vs_prefill=1.0 / 1.9813145219210888,  # still fast when correct
-    quality_delta_points=-30.0,  # ~30% contains miss on reorder suite
+    ttft_vs_prefill=1.0 / 1.9813145219210888,
+    quality_delta_points=0.0,  # on H3-safe orders only (replay contains 1.0)
     supported=True,
     notes=(
-        "Phase1 oracle: C3 mean_q=0.70 (ACB_city/BAC_year fail); C0 mean_q=1.0; "
-        "G2 FAIL. Prefer C0 until order-aware risk signal exists."
+        "H3 order gate: refuse ACB/BAC (and unknown). Safe orders: ~2× TTFT, "
+        "q=1.0 on Phase1 replay. Not a G2 pass."
     ),
 )
 
@@ -164,6 +167,9 @@ def plan(
             continue
         if not request.has_validated_nonprefix_artifacts:
             discard(cfg, ReasonCode.ARTIFACT_INVALID.value)
+            continue
+        if cfg == ConfigId.C3_EPIC and predict_c3_quality_fail(request.chunk_order):
+            discard(cfg, ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value)
             continue
         if cal.quality_delta_points is None and policy.refuse_unknown_quality:
             discard(cfg, ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value)

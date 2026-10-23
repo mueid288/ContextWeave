@@ -19,31 +19,52 @@ def test_prefix_hit_wins():
     assert ReasonCode.PREFIX_HIT.value in d.reason_codes
 
 
-def test_phase1_oracle_refuses_epic_and_cacheblend():
-    """Phase1 oracle: C3 quality risk → C0; C4 still refused."""
+def test_unknown_order_refuses_c3_fail_closed():
     d = plan(
         RequestView(
-            has_exact_prefix=False,
             has_validated_nonprefix_artifacts=True,
-            artifacts_valid=True,
+            chunk_order=None,
         )
     )
     assert d.chosen == ConfigId.C0_FULL_PREFILL
-    assert ReasonCode.FALLBACK_PREFILL.value in d.reason_codes
     assert ConfigId.C3_EPIC.value in d.discarded
-    assert ConfigId.C4_CACHEBLEND.value in d.discarded
     assert (
         ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value
         in d.discarded[ConfigId.C3_EPIC.value]
     )
-    assert (
-        ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value
-        in d.discarded[ConfigId.C4_CACHEBLEND.value]
+
+
+def test_unsafe_order_refuses_c3():
+    d = plan(
+        RequestView(
+            has_validated_nonprefix_artifacts=True,
+            chunk_order="ACB",
+        )
     )
+    assert d.chosen == ConfigId.C0_FULL_PREFILL
+    assert ConfigId.C3_EPIC.value in d.discarded
+
+
+def test_safe_order_prefers_c3_over_c0():
+    d = plan(
+        RequestView(
+            has_validated_nonprefix_artifacts=True,
+            chunk_order="BCA",
+        )
+    )
+    assert d.chosen == ConfigId.C3_EPIC
+    assert ReasonCode.LOWEST_COST_SAFE.value in d.reason_codes
+    assert ConfigId.C4_CACHEBLEND.value in d.discarded
 
 
 def test_no_artifacts_falls_back():
-    d = plan(RequestView(has_exact_prefix=False, has_validated_nonprefix_artifacts=False))
+    d = plan(
+        RequestView(
+            has_exact_prefix=False,
+            has_validated_nonprefix_artifacts=False,
+            chunk_order="BCA",
+        )
+    )
     assert d.chosen == ConfigId.C0_FULL_PREFILL
     assert ConfigId.C3_EPIC.value in d.discarded
     assert ConfigId.C4_CACHEBLEND.value in d.discarded
@@ -55,7 +76,7 @@ def test_safe_fast_blend_would_be_chosen():
         config=ConfigId.C3_EPIC,
         ttft_vs_prefill=0.50,
         quality_delta_points=0.0,
-        supported=False,  # isolate C4 hypothetical
+        supported=False,
     )
     cals[ConfigId.C4_CACHEBLEND] = MethodCalibration(
         config=ConfigId.C4_CACHEBLEND,
@@ -65,7 +86,7 @@ def test_safe_fast_blend_would_be_chosen():
         notes="hypothetical passing calibration",
     )
     d = plan(
-        RequestView(has_validated_nonprefix_artifacts=True),
+        RequestView(has_validated_nonprefix_artifacts=True, chunk_order="BCA"),
         calibrations=cals,
         policy=PlannerPolicy(),
     )
@@ -83,12 +104,12 @@ def test_latency_bar_alone_discards_modest_win():
     )
     cals[ConfigId.C4_CACHEBLEND] = MethodCalibration(
         config=ConfigId.C4_CACHEBLEND,
-        ttft_vs_prefill=0.91,  # ~1.10× — G1-like
-        quality_delta_points=-0.5,  # within 2pt
+        ttft_vs_prefill=0.91,
+        quality_delta_points=-0.5,
         supported=True,
     )
     d = plan(
-        RequestView(has_validated_nonprefix_artifacts=True),
+        RequestView(has_validated_nonprefix_artifacts=True, chunk_order="BCA"),
         calibrations=cals,
     )
     assert d.chosen == ConfigId.C0_FULL_PREFILL

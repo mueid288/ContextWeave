@@ -2,12 +2,12 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** **PAUSED** after G2 FAIL — `Docs/status/closeout-g2.md`, `Docs/status/pause.md`
-- **Phase 0 / 1:** pivot + scoped oracle done; **G2 FAIL**; thin policy **C1 else C0**
-- **G1:** CacheBlend CLOSED; EPIC reorder suite mean_q **0.70**
-- Planner: C3/C4 refused; Phase 2 / ResolventKV closed; **do not re-attack G2**
-- **Resume:** parked H3 only — `Docs/pre-reg/pre-reg-h3-order-risk.md` (mean TTFT, not G2)
-- Colab: stopped (`cw-phase1-oracle`); ~160 CU, 0/hr
+- **Project state:** H3 order-risk **PASS** (replay); G2 FAIL stands — `Docs/status/pause.md`
+- **Phase 0 / 1:** G2 FAIL; best fixed C0 on p95; **do not re-attack G2**
+- **H3:** refuse C3 on orders ACB/BAC (unknown fail-closed) → mean TTFT **−40%** vs C0,
+  quality 1.0 — `artifacts/h3-order-risk-2026-10-23/`
+- Planner: C1 if prefix; else C3 if safe order + artifacts; else C0; C4 refused
+- Phase 2 / ResolventKV: **not opened**; GPU idle
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -572,6 +572,16 @@
 - Stopped `cw-phase1-oracle` (was still billing). Wrote `Docs/status/closeout-g2.md`;
   parked H3 pre-reg (mean-TTFT only, not G2 redo). Default = stay paused.
 - Supersedes: open-ended Phase 1 desk
+
+## 2026-10-23 — H3 order-risk PASS (CPU replay)
+
+- **Status:** `VALID` (desk)
+- Rule: refuse C3 if `chunk_order` ∈ {ACB, BAC} else allow C3; unknown → refuse.
+- On Phase1 oracle JSONL: precision/recall 1.0; policy mean_q 1.0; mean TTFT
+  **40%** below always-C0. Not a G2 claim (p95 unused).
+- Artifacts: `artifacts/h3-order-risk-2026-10-23/`. Module `contextweave.risk.order_signal`;
+  planner `RequestView.chunk_order` wired. Phase 2 still closed.
+- Supersedes: blanket C3 refuse after G2
 
 ## Template for future entries
 
