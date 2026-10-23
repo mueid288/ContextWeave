@@ -135,48 +135,30 @@ def _layer0_seam_keydev(
     old_kvs: list,
     seam_tokens: int,
 ) -> float:
-    """Mean (1−cos) Layer-0: isolated seam keys vs prefix+seam joint keys.
+    """Mean (1−cos) Layer-0 at doc seams from **isolated** collected keys.
 
-    Probes each non-first doc chunk (skips system and question). Restores
-    ``old_kvs`` afterward. Returns 0.0 if no seams.
+    No extra ``generate`` — joint prefix+seam probes IMA on EPIC Path A when
+    ``old_kvs`` is live. Score = mean discontinuity between the token before
+    each doc chunk and the first ``seam_tokens`` isolated keys of that chunk.
     """
-    import torch
+    del llm  # API symmetry with callers; unused (CPU-side on collected tensors)
     import torch.nn.functional as F
-    from vllm import SamplingParams
 
-    meta = _get_cache_fuse(llm)
-    layers = _get_layers(llm)
-    k_iso = old_kvs[0][0]
-    collect_params = SamplingParams(temperature=0.0, max_tokens=1)
+    k_iso = old_kvs[0][0].detach().float()
     diffs: list[float] = []
-    # token_ids: [system, *docs, question] — seams at doc chunks 1..len(docs)
     n_docs = len(token_ids) - 2
     for doc_i in range(n_docs):
         chunk_idx = doc_i + 1  # skip system
-        n = min(seam_tokens, len(token_ids[chunk_idx]))
+        b = start_offset[chunk_idx]
+        if b <= 0 or b >= k_iso.shape[0]:
+            continue
+        n = min(seam_tokens, len(token_ids[chunk_idx]), k_iso.shape[0] - b)
         if n <= 0:
             continue
-        prefix = [t for chunk in token_ids[:chunk_idx] for t in chunk]
-        probe = prefix + token_ids[chunk_idx][:n]
-        meta["collect"] = True
-        meta["kvlink"] = []
-        meta["check"] = False
-        llm.generate(
-            sampling_params=collect_params,
-            prompt_token_ids=[probe],
-            use_tqdm=False,
-        )
-        k_joint = layers[0].self_attn.hack_kv[0]
-        b = start_offset[chunk_idx]
+        prev = k_iso[b - 1].flatten().unsqueeze(0)
         for t in range(n):
-            if b + t >= k_iso.shape[0] or t >= k_joint.shape[0]:
-                continue
-            # joint seam keys are the last n positions of the probe forward
-            a = k_iso[b + t].float().flatten().unsqueeze(0)
-            c = k_joint[-n + t].float().flatten().unsqueeze(0)
-            diffs.append(float(1.0 - F.cosine_similarity(a, c).item()))
-    _set_old_kvs(llm, old_kvs)
-    meta["collect"] = False
+            cur = k_iso[b + t].flatten().unsqueeze(0)
+            diffs.append(float(1.0 - F.cosine_similarity(prev, cur).item()))
     if not diffs:
         return 0.0
     return float(sum(diffs) / len(diffs))
@@ -195,8 +177,8 @@ def _collect_and_link(
 ) -> tuple[float, str] | tuple[float, str, float]:
     """EPIC two-pass: collect chunk KV, then generate with kvlink recompute.
 
-    If ``return_keydev``, also returns Layer-0 seam key-deviation (mean 1−cos)
-    measured after isolated collect and before LegoLink generate.
+    If ``return_keydev``, also returns Layer-0 isolated seam discontinuity
+    (mean 1−cos) after collect, before LegoLink generate — no extra forwards.
     """
     import torch
     from vllm import SamplingParams

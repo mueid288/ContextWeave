@@ -6,14 +6,16 @@
 
 ## One question
 
-Does a **runtime** Layer-0 seam key-deviation score (isolated chunk KV vs
-prefix+seam joint KV at doc boundaries, mean \(1-\cos\)) predict EPIC/C3
-gold-contains fails well enough that “refuse C3 if score ≥ T else C3” keeps
-mean contains ≥0.95 and cuts **mean** TTFT ≥20% vs always-C0 — when **T is fit
-on filler-seed 99** and evaluated on **filler-seed 100** (same Lisbon golds)?
+Does a **runtime** Layer-0 seam discontinuity score (mean \(1-\cos\) between the
+token before each doc chunk and the first LegoLink-N isolated keys of that
+chunk, from the EPIC collect pass) predict EPIC/C3 gold-contains fails well
+enough that “refuse C3 if score ≥ T else C3” keeps mean contains ≥0.95 and cuts
+**mean** TTFT ≥20% vs always-C0 — when **T is fit on filler-seed 99** and
+evaluated on **filler-seed 100** (same Lisbon golds)?
 
-This is PRD §3.2 / Gemini Stage-1 bailout: signal is **in-flight** after chunk
-collect, before LegoLink generate — not a control-plane static table.
+In-flight after chunk collect, before LegoLink generate — not a static table.
+(Joint prefix+seam re-forward was attempted; it CUDA-IMA’d on EPIC Path A, so
+the registered signal is **isolated-seam only**.)
 
 ## Why this signal class
 

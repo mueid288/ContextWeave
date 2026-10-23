@@ -1,7 +1,7 @@
-"""H3 runtime: Layer-0 seam key-deviation gate (CPU threshold logic).
+"""H3 runtime: Layer-0 isolated seam discontinuity gate (CPU threshold logic).
 
-Score is mean (1 − cosine) between isolated-chunk keys and prefix+seam joint
-keys at document boundaries (see EPIC collector). High score ⇒ refuse C3.
+Score is mean (1 − cosine) at doc boundaries from EPIC isolated collect keys
+(see ``g1_epic_bench._layer0_seam_keydev``). High score ⇒ refuse C3.
 """
 
 from __future__ import annotations

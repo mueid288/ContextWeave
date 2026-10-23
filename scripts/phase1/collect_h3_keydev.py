@@ -291,7 +291,7 @@ def main(argv: list[str] | None = None) -> int:
         "gold_set": "Lisbon/2021/BETA-4242",
         "n_requests": args.n_requests,
         "trials": str(args.out),
-        "signal": "layer0_seam_keydev_mean_1_minus_cos",
+        "signal": "layer0_isolated_seam_discontinuity_mean_1_minus_cos",
         "content_fingerprint": hashlib.sha256(
             (str(args.filler_seed) + "Lisbon2021BETA-4242").encode()
         ).hexdigest()[:16],
