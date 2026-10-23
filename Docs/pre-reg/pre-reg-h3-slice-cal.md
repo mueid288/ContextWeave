@@ -33,5 +33,5 @@ else C0. Default (no table) remains refuse C3.
 
 ## Next
 
-Optional GPU confirm: calibrate on seed S of a gold distribution, serve held-out
-prompts from the **same** golds (not a new gold set). New pre-reg if/when run.
+GPU confirm pre-reg (desk): `Docs/pre-reg/pre-reg-h3-slice-cal-gpu.md` —
+calibrate seed 99 → serve seed 100, **same** golds.

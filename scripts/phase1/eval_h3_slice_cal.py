@@ -148,10 +148,16 @@ def _safe_cells(path: Path) -> set[tuple[str, str]]:
     return {k for k, qs in cell_q.items() if all(q >= 1.0 for q in qs)}
 
 
-def _cross_suite(train: Path, test: Path) -> dict:
+def _apply_table(train: Path, test: Path, *, pass_bar: bool) -> dict:
+    """Apply safe cells from train to every C0/C3 pair in test (calibrate→serve)."""
     safe = _safe_cells(train)
     by_req = _load_pairs(test)
     tp = fp = tn = fn = 0
+    policy_q: list[float] = []
+    policy_t: list[float] = []
+    c0_t: list[float] = []
+    c0_q: list[float] = []
+    c3_q: list[float] = []
     for rid, cfgs in sorted(by_req.items()):
         c0, c3 = cfgs.get("C0"), cfgs.get("C3")
         if not c0 or not c3:
@@ -169,47 +175,111 @@ def _cross_suite(train: Path, test: Path) -> dict:
             tn += 1
         else:
             fn += 1
+        if refuse:
+            policy_q.append(float(c0["quality"]))
+            policy_t.append(float(c0["ttft_ms"]))
+        else:
+            policy_q.append(float(c3["quality"]))
+            policy_t.append(float(c3["ttft_ms"]))
+        c0_t.append(float(c0["ttft_ms"]))
+        c0_q.append(float(c0["quality"]))
+        c3_q.append(float(c3["quality"]))
+
+    n = len(policy_q)
     prec = tp / (tp + fp) if (tp + fp) else 0.0
     rec = tp / (tp + fn) if (tp + fn) else 0.0
-    return {
+    mean_q = sum(policy_q) / n if n else 0.0
+    mean_t = sum(policy_t) / n if n else 0.0
+    mean_c0_t = sum(c0_t) / n if n else 0.0
+    ttft_red = (1.0 - mean_t / mean_c0_t) if mean_c0_t > 0 else 0.0
+    pass_h = prec >= 0.9 and mean_q >= 0.95 and ttft_red >= 0.20
+    out = {
         "train": str(train),
         "test": str(test),
         "train_safe_cells": sorted([f"{o}/{f}" for o, f in safe]),
+        "n_requests": n,
         "tp": tp,
         "fp": fp,
         "tn": tn,
         "fn": fn,
         "precision": prec,
         "recall": rec,
-        "note": "Secondary only — not a pass bar. Transfer expected weak.",
+        "policy_mean_quality": mean_q,
+        "policy_mean_ttft_ms": mean_t,
+        "always_c0_mean_ttft_ms": mean_c0_t,
+        "always_c0_mean_quality": sum(c0_q) / n if n else 0.0,
+        "always_c3_mean_quality": sum(c3_q) / n if n else 0.0,
+        "mean_ttft_reduction_vs_c0": ttft_red,
+        "pass_heuristic": pass_h if pass_bar else None,
     }
+    if not pass_bar:
+        out["note"] = "Secondary only — not a pass bar. Transfer expected weak."
+    return out
+
+
+def _cross_suite(train: Path, test: Path) -> dict:
+    return _apply_table(train, test, pass_bar=False)
 
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--inputs", type=Path, nargs="+", required=True)
+    p.add_argument(
+        "--inputs",
+        type=Path,
+        nargs="+",
+        default=None,
+        help="Same-suite LOO mode (one or more JSONL files).",
+    )
+    p.add_argument(
+        "--calibrate",
+        type=Path,
+        default=None,
+        help="Calibrate→serve: JSONL used to build safe-cell table.",
+    )
+    p.add_argument(
+        "--serve",
+        type=Path,
+        default=None,
+        help="Calibrate→serve: JSONL to score with the table.",
+    )
     p.add_argument("--out", type=Path, default=None)
     p.add_argument("--json", action="store_true")
     args = p.parse_args(argv)
 
-    same = [_loo_same_suite(path) for path in args.inputs]
-    all_pass = all(s["pass_heuristic"] for s in same)
-
-    cross = []
-    if len(args.inputs) >= 2:
-        a, b = args.inputs[0], args.inputs[1]
-        cross = [_cross_suite(a, b), _cross_suite(b, a)]
-
-    payload = {
-        "pre_reg": "Docs/pre-reg/pre-reg-h3-slice-cal.md",
-        "same_suite_loo": same,
-        "cross_suite_transfer": cross,
-        "pass_heuristic": all_pass,
-        "note": (
-            "Same-suite LOO is the pass bar. Cross-suite transfer is diagnostic "
-            "only (motivates workload-local tables). Not a G2 claim; p95 unused."
-        ),
-    }
+    if args.calibrate is not None or args.serve is not None:
+        if args.calibrate is None or args.serve is None:
+            p.error("--calibrate and --serve must be used together")
+        serve = _apply_table(args.calibrate, args.serve, pass_bar=True)
+        payload = {
+            "pre_reg": "Docs/pre-reg/pre-reg-h3-slice-cal-gpu.md",
+            "mode": "calibrate_then_serve",
+            "result": serve,
+            "pass_heuristic": bool(serve["pass_heuristic"]),
+            "note": (
+                "GPU confirm: table from calibrate JSONL applied to serve JSONL. "
+                "Not a G2 claim; p95 unused."
+            ),
+        }
+        all_pass = bool(serve["pass_heuristic"])
+    else:
+        if not args.inputs:
+            p.error("provide --inputs … or --calibrate/--serve")
+        same = [_loo_same_suite(path) for path in args.inputs]
+        all_pass = all(s["pass_heuristic"] for s in same)
+        cross = []
+        if len(args.inputs) >= 2:
+            a, b = args.inputs[0], args.inputs[1]
+            cross = [_cross_suite(a, b), _cross_suite(b, a)]
+        payload = {
+            "pre_reg": "Docs/pre-reg/pre-reg-h3-slice-cal.md",
+            "same_suite_loo": same,
+            "cross_suite_transfer": cross,
+            "pass_heuristic": all_pass,
+            "note": (
+                "Same-suite LOO is the pass bar. Cross-suite transfer is diagnostic "
+                "only (motivates workload-local tables). Not a G2 claim; p95 unused."
+            ),
+        }
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(payload, indent=2) + "\n")
@@ -217,7 +287,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.json:
         print(json.dumps(payload, indent=2))
     else:
-        print(f"pass={all_pass} suites={len(same)}")
+        print(f"pass={all_pass}")
     return 0 if all_pass else 4
 
 

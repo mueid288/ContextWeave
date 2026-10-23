@@ -8,7 +8,8 @@
 - **H3:** order-only confirm **FAIL**; **slice-cal LOO PASS** (local tables only;
   cross-suite transfer 0.33–0.50) — `artifacts/h3-slice-cal-2026-10-23/`
 - Planner: **C1** / **C3 iff SliceCalibration safe** / else **C0**; C4 refused
-- Phase 2 / ResolventKV: **not opened**; Colab idle
+- Phase 2 / ResolventKV: **not opened**
+- **Next:** H3 slice-cal GPU confirm — `Docs/pre-reg/pre-reg-h3-slice-cal-gpu.md`
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -611,6 +612,15 @@
 - Module `contextweave.risk.slice_calibration`; planner enables C3 only with table.
 - Artifacts: `artifacts/h3-slice-cal-2026-10-23/`. **Unpaused** (desk). No Phase 2.
 - Supersedes: “stay paused” default after order confirm FAIL
+
+## 2026-10-23 — H3 slice-cal GPU confirm pre-reg (desk)
+
+- **Status:** `VALID` (desk)
+- Pre-reg `Docs/pre-reg/pre-reg-h3-slice-cal-gpu.md`: calibrate on seed-99 confirm
+  table → serve filler-seed **100** same Lisbon/2021/BETA-4242 golds.
+- Eval: `eval_h3_slice_cal.py --calibrate … --serve …`. Session `cw-h3-slice-cal`
+  not started yet.
+- Supersedes: slice-cal §Next “optional GPU” as unspecified
 
 ## Template for future entries
 

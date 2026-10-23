@@ -23,6 +23,7 @@ Phase 2, ResolventKV, G2 re-attack, order-only ACB/BAC as production gate.
 
 ## Next
 
-1. Optional: GPU confirm of calibrate-then-serve on **same** gold distribution  
+1. **GPU confirm** — `Docs/pre-reg/pre-reg-h3-slice-cal-gpu.md` (`cw-h3-slice-cal`,
+   filler-seed 100, same Lisbon golds; calibrate from seed-99 confirm table)  
 2. Partner trace — optional  
-3. Desk-idle — fine; C3 stays off until a table is supplied  
+3. Desk-idle until Colab — C3 stays off without a table
