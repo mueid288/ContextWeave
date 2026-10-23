@@ -658,7 +658,12 @@ def main(argv: list[str] | None = None) -> int:
             f"reorder_vs_warm_abc={reorder_gap} cold_vs_warm={cold_vs_warm} "
             f"harness_ok={payload['harness_reorder_gap_ok']}"
         )
-    return 0
+    try:
+        del llm
+    except Exception:  # noqa: BLE001
+        pass
+    print("exiting (hard) to avoid CUDA teardown hang", flush=True)
+    os._exit(0)
 
 
 if __name__ == "__main__":

@@ -451,7 +451,15 @@ def main(argv: list[str] | None = None) -> int:
             f"contains={contains_rate:.2f} garbage={garbage_rate:.2f} "
             f"agree={agree_rate} pass={payload['pass_heuristic']}"
         )
-    return 0 if payload["pass_heuristic"] else 4
+    code = 0 if payload["pass_heuristic"] else 4
+    # vLLM/LMCache CUDA IPC teardown often hangs after the last generate; results
+    # are already on disk — hard-exit so the shell can start the next order.
+    try:
+        del llm
+    except Exception:  # noqa: BLE001
+        pass
+    print("exiting (hard) to avoid CUDA teardown hang", flush=True)
+    os._exit(code)
 
 
 if __name__ == "__main__":
