@@ -10,7 +10,8 @@
 - Native prefix + reorder harness: **VALID**
 - ResolventKV: **deferred** until a non-prefix path shows verified engagement +
   quality-preserving ≥15% TTFT win (§6)
-- Next: fingerprint/provenance + cost-model / planner desk work (Phase 0 remainder)
+- Next: optional cost-model A100 note; partner trace; GPU only with new pre-reg
+  (e.g. fair EPIC @12k). Planner v0 + thesis: `Docs/g1-closeout-thesis.md`
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -467,6 +468,14 @@
   on vLLM 0.18 + lmcache 0.4.2”
 - Artifacts committed under `artifacts/g1-diag-2026-10-23/`
 - Pivot: fingerprint/provenance + cost-model / planner desk work
+
+## 2026-10-23 — Desk pivot: thesis + planner v0
+
+- **Status:** `VALID` (CPU)
+- Added `Docs/g1-closeout-thesis.md` (H1/H2 restatement; go/pivot/stop = **pivot**)
+- Added `contextweave.planner.v0` + tests: with G1 calibration, non-prefix → **C0**
+  (C4 discarded for quality + &lt;15% latency bar); prefix → **C1**
+- Doc: `Docs/planner-v0.md`
 
 ## Template for future entries
 

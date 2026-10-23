@@ -35,7 +35,9 @@ Updated: 2026-10-23
 - [x] Offline FIX-1/2/3 — Gate R + alignment audit + log relabel (`claude_g1_remaining_gaps…`)
 - [x] G1-DIAG #1/#2 — engagement proven on in-process blend; **G1 CacheBlend CLOSED**
   (no quality-preserving ≥15% TTFT win; Gate D bac 0.67; see experiment-log)
-- [ ] Phase 0 desk pivot: fingerprint/provenance + cost-model / planner (post-G1)
+- [x] Post-G1 desk pivot (first cut): thesis restatement `Docs/g1-closeout-thesis.md` +
+  planner v0 `contextweave.planner.v0` (refuses C4 on G1 calibration)
+- [ ] Cost-model note: fold measured A100 ratios into `Docs/cost_model_8b.md` (optional)
 - [ ] Partner log optional (`docs/partner-ask.md`)
 
 
