@@ -75,6 +75,9 @@ echo "=== fast EPIC: torch 2.5.1 + vllm==${VLLM_WHEEL_PIN} wheel (no source CUDA
   --index-url https://download.pytorch.org/whl/cu124
 "$EPIC_PYTHON" -m pip uninstall -y vllm || true
 "$EPIC_PYTHON" -m pip install "vllm==${VLLM_WHEEL_PIN}"
+# Newer transformers (2026) require torch>=2.6 and break vLLM 0.7 tokenizer helpers.
+"$EPIC_PYTHON" -m pip install \
+  "transformers>=4.45.2,<4.50" "tokenizers>=0.19.1,<0.21" "huggingface-hub<1"
 
 echo "=== cloning EPIC for Python overlay ==="
 if [[ ! -d "$EPIC_DIR/.git" ]]; then
