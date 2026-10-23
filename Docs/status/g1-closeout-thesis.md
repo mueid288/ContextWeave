@@ -29,7 +29,7 @@
 | ID | Claim | After G1 |
 |---|---|---|
 | H1 | Enough non-prefix recurrence | **Supported** (G0) |
-| H2 | No single fixed PIC config wins; selection helps | **In test** — Phase 1 oracle on {C0,C1,C3} |
+| H2 | No single fixed PIC config wins; selection helps | **Not supported at G2** — oracle upside 0 vs C0 on this slice |
 | H3/H4 | Risk signal / cost model | **Not tested** on GPU; cost model planning-only |
 | ResolventKV | Beat CacheBlend with our kernels | **Blocked** — §6; prefer verifying EPIC quality breadth first |
 
@@ -49,6 +49,6 @@ when non-prefix artifacts are valid; **C4** (CacheBlend) refused; else **C0**.
 
 ## Next
 
-1. GPU oracle collect per [`../pre-reg/pre-reg-phase1-oracle.md`](../pre-reg/pre-reg-phase1-oracle.md).
-2. G2 decide; Phase 2 only with a new memo.
-3. Partner trace optional.
+1. Thin policy: **C1** if prefix else **C0** (C3/C4 refused).
+2. Optional later: H3 order-aware risk signal pre-reg — only if reviving C3.
+3. Phase 2 / ResolventKV still closed.

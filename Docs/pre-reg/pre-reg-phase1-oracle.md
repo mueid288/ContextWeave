@@ -1,9 +1,18 @@
 # Pre-registration: Phase 1 oracle upside (scoped {C0, C1, C3})
 
-**Status:** READY — collect CLI landed; start `cw-phase1-oracle` when owner runs GPU.  
-**Date written:** 2026-10-23 · **Updated:** 2026-10-23 (collector)  
+**Status:** **G2 FAIL** (2026-10-23) — banked `artifacts/phase1-oracle-2026-10-23/`.  
+**Date written:** 2026-10-23 · **Closed:** 2026-10-23  
 **Go memo:** [`Docs/status/phase1-go-memo.md`](../status/phase1-go-memo.md)  
 **Not** CacheBlend reopen. **Not** Phase 2.
+
+### Result
+
+| Field | Value |
+|---|---|
+| Best fixed | **C0** (mean_q=1.0) |
+| C3 mean_q | **0.70** (ACB/BAC fails) |
+| Oracle vs fixed | q upside **0**; p95 TTFT red **0** |
+| `g2_pass` | **false** → thin policy C0; no Phase 2 |
 
 ## One question
 

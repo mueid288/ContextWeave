@@ -3,10 +3,10 @@
 Research harness for a **validity-checked planner** over modular KV-cache reuse
 (prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-**Status (2026-10-23): Phase 1 GO (scoped)** —
-[Docs/status/phase1-go-memo.md](Docs/status/phase1-go-memo.md),
-[Docs/pre-reg/pre-reg-phase1-oracle.md](Docs/pre-reg/pre-reg-phase1-oracle.md).  
-G0 held; CacheBlend **CLOSED**; EPIC@12k multi-fact **PASS**. Oracle set **{C0,C1,C3}**. Phase 2 not opened.
+**Status (2026-10-23): Phase 1 G2 FAIL** —
+[Docs/status/pause.md](Docs/status/pause.md),
+[artifacts/phase1-oracle-2026-10-23/](artifacts/phase1-oracle-2026-10-23/).  
+G0 held; CacheBlend **CLOSED**; EPIC fast but **0.70** contains on reorder suite → best fixed **C0**. Phase 2 not opened.
 
 **Laptop policy:** never download or run models on this machine. See
 [Docs/runbooks/local-safety.md](Docs/runbooks/local-safety.md). Baseline scripts refuse

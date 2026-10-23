@@ -93,16 +93,17 @@ G1_CACHEBLEND_A100_12K = MethodCalibration(
     ),
 )
 
-# EPIC@12k + multi-fact quality (2026-10-23) A100, Mistral-7B-Instruct-v0.2.
-# artifacts/g1-epic-quality-2026-10-23/ — city/year/code contains 1.0; min speedup ~1.98×.
+# EPIC Phase 1 oracle (2026-10-23) A100, Mistral-7B-Instruct-v0.2, N=20 @12k.
+# artifacts/phase1-oracle-2026-10-23/ — C3 mean contains 0.70 (ACB/BAC orders fail);
+# best fixed = C0; G2 FAIL (oracle quality/p95 TTFT upside 0 vs C0).
 G1_EPIC_A100_12K = MethodCalibration(
     config=ConfigId.C3_EPIC,
-    ttft_vs_prefill=1.0 / 1.9813145219210888,  # conservative: slowest case (code)
-    quality_delta_points=0.0,  # 3/3 gold contains both arms @12k
+    ttft_vs_prefill=1.0 / 1.9813145219210888,  # still fast when correct
+    quality_delta_points=-30.0,  # ~30% contains miss on reorder suite
     supported=True,
     notes=(
-        "EPIC quality PASS: city 3.86× / year 2.19× / code 1.98×; contains 1.0; "
-        "requires EPIC vLLM fork runtime (not CacheBlend pins)."
+        "Phase1 oracle: C3 mean_q=0.70 (ACB_city/BAC_year fail); C0 mean_q=1.0; "
+        "G2 FAIL. Prefer C0 until order-aware risk signal exists."
     ),
 )
 

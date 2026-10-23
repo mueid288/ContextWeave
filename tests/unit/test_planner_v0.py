@@ -19,8 +19,8 @@ def test_prefix_hit_wins():
     assert ReasonCode.PREFIX_HIT.value in d.reason_codes
 
 
-def test_g1_epic_preferred_over_refused_cacheblend():
-    """EPIC@12k PASS → C3; CacheBlend G1 still refused on quality."""
+def test_phase1_oracle_refuses_epic_and_cacheblend():
+    """Phase1 oracle: C3 quality risk → C0; C4 still refused."""
     d = plan(
         RequestView(
             has_exact_prefix=False,
@@ -28,11 +28,18 @@ def test_g1_epic_preferred_over_refused_cacheblend():
             artifacts_valid=True,
         )
     )
-    assert d.chosen == ConfigId.C3_EPIC
-    assert ReasonCode.LOWEST_COST_SAFE.value in d.reason_codes
+    assert d.chosen == ConfigId.C0_FULL_PREFILL
+    assert ReasonCode.FALLBACK_PREFILL.value in d.reason_codes
+    assert ConfigId.C3_EPIC.value in d.discarded
     assert ConfigId.C4_CACHEBLEND.value in d.discarded
-    reasons = d.discarded[ConfigId.C4_CACHEBLEND.value]
-    assert ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value in reasons
+    assert (
+        ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value
+        in d.discarded[ConfigId.C3_EPIC.value]
+    )
+    assert (
+        ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value
+        in d.discarded[ConfigId.C4_CACHEBLEND.value]
+    )
 
 
 def test_no_artifacts_falls_back():

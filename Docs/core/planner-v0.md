@@ -14,9 +14,9 @@ python -c "from contextweave.planner import plan, RequestView; print(plan(Reques
 4. Discard if quality drop &gt; 2 points or predicted TTFT not ≤ 0.85× prefill.
 5. Else pick lowest predicted TTFT; if none remain → **C0** full prefill.
 
-With shipped calibrations, non-prefix + valid artifacts → **C3** (C4 refused on quality).
-C3 assumes an **EPIC fork** runtime — not the CacheBlend pin set. Multi-fact @12k
-PASS (contains 1.0; min ~1.98×) is reflected in C3 notes / conservative TTFT.
+With shipped calibrations after Phase 1 oracle, **C3 and C4 are both refused** on
+quality risk → **C0** unless **C1** (exact prefix). C3 remains fast when correct but
+failed ~30% of reorder cases (`artifacts/phase1-oracle-2026-10-23/`).
 
 Module: `src/contextweave/planner/v0.py`. Tests: `tests/unit/test_planner_v0.py`.
 Thesis: `Docs/status/g1-closeout-thesis.md`.

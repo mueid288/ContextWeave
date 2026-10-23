@@ -2,13 +2,13 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** **Phase 1 GO (scoped)** — `Docs/status/phase1-go-memo.md`
-- **Phase 0:** `PIVOT` complete — `Docs/status/phase0-exit-decision.md`
-- **G1 CacheBlend:** `CLOSED`; **G1 EPIC:** quality+latency **PASS** @12k
-- **Phase 1:** oracle harness CPU-ready (`contextweave.oracle`); GPU pre-reg
-  `Docs/pre-reg/pre-reg-phase1-oracle.md` (not started)
-- Config set: **{C0, C1, C3}**; C4/ResolventKV/Phase 2 still closed
-- **Next:** `cw-phase1-oracle` — `scripts/phase1/collect_oracle_epic.py` (C0+C3; C1 skipped)
+- **Project state:** Phase 1 oracle **G2 FAIL** — thin policy **C0** — `Docs/status/pause.md`
+- **Phase 0:** `PIVOT` complete; Phase 1 scoped go answered
+- **G1:** CacheBlend CLOSED; EPIC single-slice PASS but **reorder suite mean_q=0.70**
+- **Phase 1 / G2:** **FAIL** (`artifacts/phase1-oracle-2026-10-23/`) — oracle upside 0 vs C0
+- Planner: **C3 refused** (quality risk); C4 refused; C1 if prefix else C0
+- Phase 2 / ResolventKV: **not opened**
+- **Next:** `colab stop -s cw-phase1-oracle`; pause unless owner picks H3 desk lane
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -554,6 +554,18 @@
   `scripts/phase1/run_oracle_study.py`; pre-reg
   `Docs/pre-reg/pre-reg-phase1-oracle.md`. GPU not started.
 - Supersedes: pause-as-default after EPIC quality
+
+## 2026-10-23 — Phase 1 oracle G2 FAIL (Colab A100)
+
+- **Status:** `VALID`
+- Session `cw-phase1-oracle`; N=20 @12k; C0 vs C3 (C1 infeasible).
+- C0 mean_q **1.0**; C3 mean_q **0.70** (fails ACB_city / BAC_year ×3 each).
+- Best fixed **C0**; oracle recovers q=1.0 via C0 fallback → p95 TTFT upside **0**;
+  quality upside vs C0 **0** → `g2_pass: false`.
+- Artifacts: `artifacts/phase1-oracle-2026-10-23/`.
+- Planner: refuse C3 on quality risk (like C4); default C0 unless C1.
+- **No Phase 2.** Thin policy around C0.
+- Supersedes: “C3 preferred” planner calibration; EPIC as default PIC
 
 ## Template for future entries
 

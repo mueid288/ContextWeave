@@ -44,9 +44,9 @@ Timestamp: **2026-10-23**. Same proposed numbers as PRD §3 unless noted.
 
 ## First deliverables (ordered)
 
-1. CPU oracle upside module + CLI (JSONL in → report) — **this session**.
-2. Pre-reg [`Docs/pre-reg/pre-reg-phase1-oracle.md`](../pre-reg/pre-reg-phase1-oracle.md) — GPU collect when owner starts.
-3. After GPU: G2 decide go / pivot / stop; Phase 2 only with a new memo.
+1. CPU oracle upside module + CLI — **done**.
+2. Pre-reg + GPU collect — **done** (`artifacts/phase1-oracle-2026-10-23/`).
+3. **G2 result: FAIL** — thin policy C0; Phase 2 **not** opened.
 
 ## Explicit non-goals
 
