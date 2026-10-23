@@ -2,12 +2,12 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** **ACTIVE (desk)** — H3 **keydev** pre-reg ready; G2 FAIL stands —
-  `Docs/status/pause.md`, `Docs/pre-reg/pre-reg-h3-keydev.md`
+- **Project state:** **PAUSED** — H3 keydev **FAIL**; G2 FAIL stands —
+  `Docs/status/pause.md`, `artifacts/h3-keydev-2026-10-23/`
 - **Phase 0 / 1:** G2 FAIL; best fixed C0; **do not re-attack G2**
-- **H3:** static transfers FAIL; next = runtime Layer-0 seam keydev (fit 99 → test 100)
-- Planner: **C1 else C0**; C3 via keydev threshold or exact-distro slice table
-- Phase 2 / ResolventKV: **not opened**
+- **H3:** static + isolated-seam keydev all FAIL transfer / separability
+- Planner: **C1 else C0** by default; C3/C4 refused
+- Phase 2 / ResolventKV: **not opened**; Colab idle
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -637,6 +637,15 @@
 - Code: `contextweave.risk.keydev`, `collect_h3_keydev.py`, `eval_h3_keydev.py`,
   EPIC `_collect_and_link(..., return_keydev=True)`. Session not started.
 - Supersedes: “stay paused” after slice-cal GPU FAIL
+
+## 2026-10-23 — H3 runtime keydev FAIL (Colab A100)
+
+- **Status:** `VALID`
+- Session `cw-h3-keydev`; isolated-seam scores only (~3 order-tied values
+  0.132–0.133); train fit **untrainable**; test prec 0.33 / TTFT red 0 → FAIL.
+- Joint probe path previously CUDA-IMA’d (fixed to isolated-only). Stopped Colab.
+- Artifacts: `artifacts/h3-keydev-2026-10-23/`. **PAUSED.**
+- Supersedes: keydev as production C3 gate
 
 ## Template for future entries
 
