@@ -307,6 +307,24 @@ def test_g1_blend_hooks_attention_shim_aliases_moved_class(monkeypatch: pytest.M
     assert Attn.marker == "shim-ok"
 
 
+def test_g1_blend_hooks_flashinfer_sparse_symbol_shim(monkeypatch: pytest.MonkeyPatch):
+    """lmcache 0.4.2 eagerly imports a flashinfer sparse helper this wheel lacks."""
+    import sys
+    import types
+
+    hooks = _load_script("g1_blend_hooks.py")
+    name = "block_sparse_indices_to_vector_sparse_offsets"
+
+    fi = types.ModuleType("flashinfer")
+    page = types.ModuleType("flashinfer.page")
+    monkeypatch.setitem(sys.modules, "flashinfer", fi)
+    monkeypatch.setitem(sys.modules, "flashinfer.page", page)
+    assert not hasattr(page, name)
+
+    assert hooks.ensure_flashinfer_sparse_compat() is True
+    assert callable(getattr(page, name))
+
+
 def test_g1_matched_benches_use_inprocess_blend_hooks():
     ttft = _load_script("g1_matched_ttft_bench.py")
     quality = _load_script("g1_matched_quality_bench.py")

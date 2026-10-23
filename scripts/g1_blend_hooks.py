@@ -121,12 +121,43 @@ def patch_vllm_register_model_for_blend() -> None:
         print(f"patched {mod_name}.GPUModelRunner.load_model for CacheBlend", flush=True)
 
 
+def ensure_flashinfer_sparse_compat() -> bool:
+    """Satisfy lmcache 0.4.2's eager ``flash_infer_sparse`` import.
+
+    ``attention/utils.py`` imports ``LMCFlashInferSparseBackend`` even when
+    ``enable_sparse=False``. That module needs
+    ``flashinfer.page.block_sparse_indices_to_vector_sparse_offsets``, which
+    newer/older flashinfer wheels may lack. Stub the symbol so non-sparse
+    FlashAttention CacheBlend can load; calling the stub raises if sparse is
+    actually enabled.
+    """
+    name = "block_sparse_indices_to_vector_sparse_offsets"
+    try:
+        import flashinfer.page as page
+    except ImportError:
+        print("WARN: flashinfer not installed — sparse shim skipped", flush=True)
+        return False
+    if hasattr(page, name):
+        return True
+
+    def _missing(*_args, **_kwargs):  # noqa: ANN001
+        raise RuntimeError(
+            f"flashinfer.page.{name} is not in this wheel; "
+            "keep LMCACHE sparse/enable_sparse off for CacheBlend"
+        )
+
+    setattr(page, name, _missing)
+    print(f"shimmed flashinfer.page.{name} (sparse unused)", flush=True)
+    return True
+
+
 def prepare_blend_worker(*, blend_special_str: str, cpu_gb: float | None = None) -> None:
     """Env + register_model patch so in-worker LMCBlender can engage."""
     # In-process worker so the monkeypatch is visible (not a forked child).
     os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
     setup_blend_env(blend_special_str=blend_special_str, cpu_gb=cpu_gb)
     ensure_vllm_attention_compat()
+    ensure_flashinfer_sparse_compat()
     try:
         patch_vllm_register_model_for_blend()
     except Exception as exc:  # noqa: BLE001 — lmcache may be absent on CPU CI

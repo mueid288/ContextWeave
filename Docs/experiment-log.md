@@ -427,7 +427,12 @@
   quality blend and TTFT blend init
 - Fix in tree: `ensure_vllm_attention_compat()` shim (lmcache ≥0.5.0 already has
   try/except). Retry blend without full reinstall after `git pull`
-- Risk after shim: same-class `IndexError` as 0.32 in-process (log if seen)
+- Follow-on (same session): attention shim OK → next
+  `ImportError: block_sparse_indices_to_vector_sparse_offsets` from eager
+  `flash_infer_sparse` import in lmcache 0.4.2. Shimmed in
+  `ensure_flashinfer_sparse_compat()` (sparse unused for our Gate R path)
+- Risk after shims: same-class `IndexError` as 0.32 in-process (log if seen);
+  if import moles continue, bump `LMCACHE_PIN=0.5.3` (lazy sparse) + reinstall
 
 ## Template for future entries
 
