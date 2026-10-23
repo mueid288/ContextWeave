@@ -3,20 +3,18 @@
 PRD §7.6 rule-based planner. **No model load.**
 
 ```bash
-python -c "from contextweave.planner import plan, RequestView; print(plan(RequestView(has_validated_nonprefix_artifacts=True)).to_dict())"
+python -c "from contextweave.planner import plan, RequestView; print(plan(RequestView(has_validated_nonprefix_artifacts=True, chunk_order='BCA')).to_dict())"
 ```
 
 ## Rules (short)
 
 1. Invalid / unknown artifacts → no non-prefix reuse.
 2. Exact prefix → **C1**.
-3. Else consider calibrated methods: **C3** EPIC (EPIC@12k PASS) and **C4** CacheBlend (G1-DIAG #2).
-4. Discard if quality drop &gt; 2 points or predicted TTFT not ≤ 0.85× prefill.
-5. Else pick lowest predicted TTFT; if none remain → **C0** full prefill.
+3. Else consider calibrated methods; discard on quality / latency policy.
+4. **C3 (EPIC):** refused after H3 GPU confirm FAIL (order-only gate does not
+   generalize). `chunk_order` may still be passed for experiments.
+5. **C4 (CacheBlend):** refused (G1 quality).
+6. Else → **C0** full prefill.
 
-After H3: **C1** if prefix; else **C3** when non-prefix artifacts and
-`chunk_order` is H3-safe (not ACB/BAC; unknown → refuse); else **C0**. **C4** still
-refused. G2 FAIL unchanged — H3 optimizes **mean** TTFT, not p95 oracle upside.
-
-Module: `src/contextweave/planner/v0.py`. Tests: `tests/unit/test_planner_v0.py`.
-Thesis: `Docs/status/g1-closeout-thesis.md`.
+Module: `src/contextweave/planner/v0.py`.  
+Evidence: `artifacts/phase1-oracle-2026-10-23/`, `artifacts/h3-confirm-2026-10-23/`.

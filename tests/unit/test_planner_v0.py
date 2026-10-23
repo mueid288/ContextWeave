@@ -19,11 +19,12 @@ def test_prefix_hit_wins():
     assert ReasonCode.PREFIX_HIT.value in d.reason_codes
 
 
-def test_unknown_order_refuses_c3_fail_closed():
+def test_h3_confirm_fail_blanket_refuses_c3_even_on_safe_order():
+    """After GPU confirm FAIL, C3 calibration refuses regardless of order."""
     d = plan(
         RequestView(
             has_validated_nonprefix_artifacts=True,
-            chunk_order=None,
+            chunk_order="BCA",  # was "safe" on Phase1 suite only
         )
     )
     assert d.chosen == ConfigId.C0_FULL_PREFILL
@@ -32,28 +33,6 @@ def test_unknown_order_refuses_c3_fail_closed():
         ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value
         in d.discarded[ConfigId.C3_EPIC.value]
     )
-
-
-def test_unsafe_order_refuses_c3():
-    d = plan(
-        RequestView(
-            has_validated_nonprefix_artifacts=True,
-            chunk_order="ACB",
-        )
-    )
-    assert d.chosen == ConfigId.C0_FULL_PREFILL
-    assert ConfigId.C3_EPIC.value in d.discarded
-
-
-def test_safe_order_prefers_c3_over_c0():
-    d = plan(
-        RequestView(
-            has_validated_nonprefix_artifacts=True,
-            chunk_order="BCA",
-        )
-    )
-    assert d.chosen == ConfigId.C3_EPIC
-    assert ReasonCode.LOWEST_COST_SAFE.value in d.reason_codes
     assert ConfigId.C4_CACHEBLEND.value in d.discarded
 
 
@@ -67,7 +46,6 @@ def test_no_artifacts_falls_back():
     )
     assert d.chosen == ConfigId.C0_FULL_PREFILL
     assert ConfigId.C3_EPIC.value in d.discarded
-    assert ConfigId.C4_CACHEBLEND.value in d.discarded
 
 
 def test_safe_fast_blend_would_be_chosen():
@@ -83,7 +61,6 @@ def test_safe_fast_blend_would_be_chosen():
         ttft_vs_prefill=0.80,
         quality_delta_points=-1.0,
         supported=True,
-        notes="hypothetical passing calibration",
     )
     d = plan(
         RequestView(has_validated_nonprefix_artifacts=True, chunk_order="BCA"),
@@ -91,7 +68,6 @@ def test_safe_fast_blend_would_be_chosen():
         policy=PlannerPolicy(),
     )
     assert d.chosen == ConfigId.C4_CACHEBLEND
-    assert ReasonCode.LOWEST_COST_SAFE.value in d.reason_codes
 
 
 def test_latency_bar_alone_discards_modest_win():

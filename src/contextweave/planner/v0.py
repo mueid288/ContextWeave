@@ -97,16 +97,17 @@ G1_CACHEBLEND_A100_12K = MethodCalibration(
     ),
 )
 
-# EPIC @12k when H3 order gate says safe (not ACB/BAC). Unsafe/unknown → discarded
-# in plan() before quality_delta is applied. G2 FAIL still stands (p95 vs C0).
+# EPIC: H3 order rule failed GPU confirm on fresh golds (2026-10-23).
+# artifacts/h3-confirm-2026-10-23/ — C3 mean_q=0.5; ACB/BAC rule precision 0.5.
+# Blanket refuse until a signal that generalizes (not order-only).
 G1_EPIC_A100_12K = MethodCalibration(
     config=ConfigId.C3_EPIC,
     ttft_vs_prefill=1.0 / 1.9813145219210888,
-    quality_delta_points=0.0,  # on H3-safe orders only (replay contains 1.0)
+    quality_delta_points=-50.0,  # confirm suite mean contains 0.5
     supported=True,
     notes=(
-        "H3 order gate: refuse ACB/BAC (and unknown). Safe orders: ~2× TTFT, "
-        "q=1.0 on Phase1 replay. Not a G2 pass."
+        "H3 GPU confirm FAIL: order∈{ACB,BAC} does not transfer (code fails on "
+        "CAB/CBA; ACB city OK). Blanket refuse C3. G2 FAIL stands."
     ),
 )
 
@@ -168,6 +169,8 @@ def plan(
         if not request.has_validated_nonprefix_artifacts:
             discard(cfg, ReasonCode.ARTIFACT_INVALID.value)
             continue
+        # Order gate kept for experiments but C3 calibration refuses on quality
+        # after H3 confirm FAIL; gate alone is not trusted for production policy.
         if cfg == ConfigId.C3_EPIC and predict_c3_quality_fail(request.chunk_order):
             discard(cfg, ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value)
             continue

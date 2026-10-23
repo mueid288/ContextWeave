@@ -2,13 +2,12 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** H3 order-risk **PASS** (replay); G2 FAIL stands — `Docs/status/pause.md`
-- **Phase 0 / 1:** G2 FAIL; best fixed C0 on p95; **do not re-attack G2**
-- **H3:** refuse C3 on orders ACB/BAC (unknown fail-closed) → mean TTFT **−40%** vs C0,
-  quality 1.0 — `artifacts/h3-order-risk-2026-10-23/`
-- Planner: C1 if prefix; else C3 if safe order + artifacts; else C0; C4 refused
-- Phase 2 / ResolventKV: **not opened**
-- **Next:** H3 GPU confirm — `Docs/pre-reg/pre-reg-h3-gpu-confirm.md` (`cw-h3-confirm`)
+- **Project state:** **PAUSED** — H3 GPU confirm **FAIL**; G2 FAIL stands — `Docs/status/pause.md`
+- **Phase 0 / 1:** G2 FAIL; best fixed C0; **do not re-attack G2**
+- **H3:** replay looked good in-sample; **confirm FAIL** on fresh golds
+  (`artifacts/h3-confirm-2026-10-23/` — C3 mean_q 0.5; rule precision 0.5)
+- Planner: **C1 else C0**; C3/C4 refused (order-only H3 not trusted)
+- Phase 2 / ResolventKV: **not opened**; Colab idle
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -591,6 +590,16 @@
   `scripts/phase1/collect_h3_confirm.py`; pre-reg
   `Docs/pre-reg/pre-reg-h3-gpu-confirm.md`. GPU not started.
 - Supersedes: in-sample-only H3 as final word
+
+## 2026-10-23 — H3 GPU confirm FAIL (Colab A100)
+
+- **Status:** `VALID`
+- Session `cw-h3-confirm`; N=12; alt golds; C3 mean_q **0.5**; ACB/BAC rule
+  precision **0.5** / policy mean_q **0.67** → `pass_heuristic: false`.
+- Failures: CAB/CBA **code**, BAC **year**; ACB city OK (inverted vs Phase1).
+- Artifacts: `artifacts/h3-confirm-2026-10-23/`. Planner reverts to blanket C3 refuse.
+- Stopped Colab. **PAUSED.** No Phase 2.
+- Supersedes: H3 order gate as production policy
 
 ## Template for future entries
 
