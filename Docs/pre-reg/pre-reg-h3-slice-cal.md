@@ -31,7 +31,8 @@ transfer across golds. Local calibration is required.
 Planner: C3 only if `RequestView.slice_calibration` marks `(order, fact)` safe;
 else C0. Default (no table) remains refuse C3.
 
-## Next
+## Next (done — bounded)
 
-GPU confirm pre-reg (desk): `Docs/pre-reg/pre-reg-h3-slice-cal-gpu.md` —
-calibrate seed 99 → serve seed 100, **same** golds.
+GPU confirm seed99→100 **FAIL** —
+`Docs/pre-reg/pre-reg-h3-slice-cal-gpu.md`. LOO claim holds only for
+**same-filler / same-session**; do not reuse tables across filler text.

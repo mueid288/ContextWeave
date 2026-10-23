@@ -3,9 +3,10 @@
 Research harness for a **validity-checked planner** over modular KV-cache reuse
 (prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-**Status (2026-10-23): ACTIVE** — H3 slice-cal **PASS**; next = GPU confirm —
-[Docs/pre-reg/pre-reg-h3-slice-cal-gpu.md](Docs/pre-reg/pre-reg-h3-slice-cal-gpu.md).  
-G2 FAIL stands. Planner: **C1** / **C3 iff SliceCalibration safe** / else **C0**.
+**Status (2026-10-23): PAUSED** — H3 slice-cal GPU confirm **FAIL**; G2 FAIL stands —
+[Docs/status/pause.md](Docs/status/pause.md),
+[artifacts/h3-slice-cal-gpu-2026-10-23/](artifacts/h3-slice-cal-gpu-2026-10-23/).  
+Planner: **C1 else C0** (C3 only with exact-distribution probe table).
 
 **Laptop policy:** never download or run models on this machine. See
 [Docs/runbooks/local-safety.md](Docs/runbooks/local-safety.md). Baseline scripts refuse

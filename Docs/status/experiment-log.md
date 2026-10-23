@@ -2,14 +2,13 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** **ACTIVE (desk)** — H3 slice-cal **PASS**; G2 FAIL stands —
+- **Project state:** **PAUSED** — H3 slice-cal GPU confirm **FAIL**; G2 FAIL stands —
   `Docs/status/pause.md`
 - **Phase 0 / 1:** G2 FAIL; best fixed C0; **do not re-attack G2**
-- **H3:** order-only confirm **FAIL**; **slice-cal LOO PASS** (local tables only;
-  cross-suite transfer 0.33–0.50) — `artifacts/h3-slice-cal-2026-10-23/`
-- Planner: **C1** / **C3 iff SliceCalibration safe** / else **C0**; C4 refused
-- Phase 2 / ResolventKV: **not opened**
-- **Next:** H3 slice-cal GPU confirm — `Docs/pre-reg/pre-reg-h3-slice-cal-gpu.md`
+- **H3:** order confirm FAIL; slice-cal LOO PASS (same-filler); seed99→100
+  **FAIL** (prec 0.33, policy_q 0.83) — `artifacts/h3-slice-cal-gpu-2026-10-23/`
+- Planner: **C1 else C0** by default; C3 only with table from **exact** serve distro
+- Phase 2 / ResolventKV: **not opened**; Colab idle
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -621,6 +620,15 @@
 - Eval: `eval_h3_slice_cal.py --calibrate … --serve …`. Session `cw-h3-slice-cal`
   not started yet.
 - Supersedes: slice-cal §Next “optional GPU” as unspecified
+
+## 2026-10-23 — H3 slice-cal GPU confirm FAIL (Colab A100)
+
+- **Status:** `VALID`
+- Session `cw-h3-slice-cal`; seed 100 serve; apply seed-99 safe cells →
+  prec **0.33**, policy_q **0.83**, TTFT red 28% → `pass_heuristic: false`.
+- Flips: ABC/city 1→0; CAB/CBA code 0→1. Same golds ≠ transferable table.
+- Artifacts: `artifacts/h3-slice-cal-gpu-2026-10-23/`. Stopped Colab. **PAUSED.**
+- Supersedes: cross-filler reuse of slice-cal tables
 
 ## Template for future entries
 

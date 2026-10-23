@@ -1,29 +1,25 @@
-# Project status (H3 slice-cal PASS)
+# Project pause (H3 slice-cal GPU confirm FAIL)
 
 **Effective:** 2026-10-23  
-**State:** **ACTIVE (desk)** — not paused  
-**G2:** FAIL · **H3 order GPU confirm:** FAIL · **H3 slice-cal:** **PASS**
+**State:** **PAUSED**  
+**G2:** FAIL · **H3 order confirm:** FAIL · **H3 slice-cal LOO:** PASS (local) ·
+**H3 slice-cal GPU (seed99→100):** **FAIL**
 
 ## Policy (shipped)
 
-1. **C1** if exact prefix  
-2. Else **C3** only if workload-local `SliceCalibration` marks `(order, fact)` safe  
-3. Else **C0** · **C4** refused  
+**C1** if exact prefix, else **C0**. C3/C4 refused by default.
 
-Without a calibration table → same as before (C1 else C0).
-
-## Evidence
-
-- Same-suite LOO PASS: `artifacts/h3-slice-cal-2026-10-23/`
-- Cross-suite transfer fails → do not ship a global order/fact rule
+C3 only if a table was probed on the **exact** serve distribution (same golds
+**and** same filler/session). Cross-filler reuse is **not** trusted
+(`artifacts/h3-slice-cal-gpu-2026-10-23/`).
 
 ## Frozen
 
-Phase 2, ResolventKV, G2 re-attack, order-only ACB/BAC as production gate.
+Phase 2, ResolventKV, G2 re-attack, order-only rules, cross-filler slice tables,
+further EPIC quality-rule fishing without a new signal class + pre-reg.
 
-## Next
+## Resume
 
-1. **GPU confirm** — `Docs/pre-reg/pre-reg-h3-slice-cal-gpu.md` (`cw-h3-slice-cal`,
-   filler-seed 100, same Lisbon golds; calibrate from seed-99 confirm table)  
-2. Partner trace — optional  
-3. Desk-idle until Colab — C3 stays off without a table
+1. Stay paused / archive — **default**  
+2. New pre-reg only for a **different** risk class (e.g. runtime key deviation)  
+3. Partner trace — optional  

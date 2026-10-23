@@ -5,8 +5,9 @@ Cell key = ``(chunk_order, fact_type)`` parsed from synthetic request ids
 observed C3 quality in the calibration set is ≥ 1.0. Unknown cells are
 unsafe (fail-closed).
 
-Order-only ACB/BAC does **not** transfer across golds; this module requires
-a table built on the **target** workload distribution.
+Order-only ACB/BAC does **not** transfer across golds; seed99→100 same-gold
+filler transfer also **FAIL**ed GPU confirm. Build the table on the **exact**
+serve distribution (golds + filler/session), not a nearby cousin.
 """
 
 from __future__ import annotations
