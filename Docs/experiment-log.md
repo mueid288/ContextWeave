@@ -1,5 +1,16 @@
 # Experiment Log
 
+## Current verdict (update when it changes)
+
+- **G1 CacheBlend / EPIC:** `INCONCLUSIVE (mechanism engagement unproven)`
+- Native prefix + reorder harness: **VALID** (post-remediation)
+- Post-remediation CacheBlend D/E at 12k: **INCONCLUSIVE** — blend reorder≈cold≈native
+  miss ⇒ no reuse proof; do not cite as “quality OK / latency miss”
+- EPIC fast-path Mistral @~500 tok: **INCONCLUSIVE (toy scale)** — not a fair close
+- Next: offline FIX-1/2 done in tree → one **G1-DIAG** GPU session (Gate R) per
+  `Docs/Reviews/claude_g1_remaining_gaps_fixes_recommendations.md`
+- ResolventKV: still deferred until verified engaged reuse + quality-preserving win
+
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
 - Scaffolded research repo layout from PRD Section 19 (minimal subset).
@@ -317,19 +328,14 @@
 
 ## 2026-10-22 — Post-remediation matched re-run (vLLM 0.18.0 / lmcache 0.4.2)
 
+- **Status:** `INCONCLUSIVE` (engagement unproven) — supersedes prior “quality OK / latency miss”
 - Env: Colab A100, Python 3.13, `Qwen/Qwen3-8B`; CuPy dual-wheel fixed; heartbeat 60s; `lmcache_driven`
+- Engagement evidence: **none recorded** (no retrieved/cached token counts)
 - Gate B: **PASS** (smoke `/no_think`)
-- Gate C/D: **PASS** — control then blend reorder `agree=1.0` `contains=1.0` `garbage=0.0`
-  (earlier mid-run unhealthy voided; not a quality miss)
-- Gate E @12k `chunk_sep` n=10: native warm **39** / reorder **928** / cold **932**
-  (`reorder_vs_warm≈23.6×`, `harness_ok True`, `polluted False`);
-  blend warm **190** / reorder **948** / cold **953** (`harness_ok True`);
-  speedup **0.98×** → **Gate E FAIL** (need ≤0.85×)
-- Blend reorder≈cold: LMCache stores warm ABC but **non-prefix reorder does not beat
-  native prefix-miss** on this pin at ~12k
-- **Verdict:** CacheBlend G1 = quality OK / latency miss on fair post-CRIT harness.
-  Do not tune blend ratios this session. Optional next: EPIC on a **new** VM (`Docs/g1-epic.md`).
-  ResolventKV still deferred.
+- Gate C: control quality OK; Gate D “PASS” is **vacuous** without reuse proof
+- Gate E @12k: native warm **39** / reorder **928** / cold **932**; blend warm **190** /
+  reorder **948** / cold **953** — reorder≈cold≈native miss ⇒ **NO_REUSE pattern**
+- Decision: do not interpret as algorithm latency miss; run G1-DIAG with Gate R
 
 ## 2026-10-22 — G1 EPIC on Colab via nested Python 3.11 (not a hard BLOCK)
 
@@ -352,23 +358,32 @@
 
 ## 2026-10-23 — G1 EPIC fast-path bench: quality OK / latency FAIL
 
+- **Status:** `INCONCLUSIVE (toy scale)` — not a fair algorithm close
 - Env: Colab A100, uv Py3.11 venv, `vllm==0.7.0` wheel + EPIC `*.py` overlay,
-  `transformers<4.50`, `Mistral-7B-Instruct-v0.2`, recomp=8, n=5, filler≈2000 chars
-- full_prefill p50-ish **~235 ms**; kvlink-8 **~332 ms**; speedup **0.71×** (slower)
-- Outputs both contain gold `Karachi` → `quality_ok true`, `latency_ok false`,
-  **`pass_heuristic false`**
-- Interpretation: open demo LegoLink path runs and preserves answer at this scale, but
-  does **not** beat full prefill TTFT (authors note demo is functionality-focused)
-- **G1 EPIC closed** (fair negative on latency). Do not expand matrix / retune recomp
-  this session. ResolventKV still deferred until a non-prefix path wins latency.
+  `transformers<4.50`, `Mistral-7B-Instruct-v0.2`, recomp=8, n=5, filler≈2000 chars (~500 tok)
+- full_prefill ~**235 ms**; kvlink-8 ~**332 ms**; speedup **0.71×**; gold OK
+- Decision: do not cite as EPIC latency negative; only rerun at ≥6k/12k with same-stack
+  native baseline **after** CacheBlend G1-DIAG, if still needed
+
+## 2026-10-23 — Offline: FIX-1/2/3 + log relabel (CPU)
+
+- **Status:** `VALID` (harness work)
+- Relabeled Current verdict → INCONCLUSIVE; filled §6 project decision in review doc
+- Added `scripts/g1_engagement.py` (Gate R), `scripts/g1_blend_alignment_audit.py` (FIX-2)
+- TTFT bench records per-trial `num_cached_tokens` when exposed; `g1_matched_ttft_chunk_e.sh`
+  skips Gate E interpretation unless Gate R is `REUSE_OK`
+- Next GPU: **G1-DIAG** only (60 min cap) — engagement on reorder
 
 ## Template for future entries
 
 ```
 ## YYYY-MM-DD — <title>
+- Status: VALID | VOIDED | CONFOUNDED | INCONCLUSIVE
 - Hypothesis / gate:
 - Environment (CPU/GPU, drivers, pins):
+- Engagement evidence: retrieved/cached tokens on reorder (or none)
 - Command:
 - Result:
 - Decision:
+- Supersedes: <entry or none>
 ```

@@ -1,9 +1,19 @@
 # G1 matched-pin CacheBlend on Colab
 
-**Goal:** Fair quality-gated CacheBlend on a **pip-matched** pin (`lmcache==0.5.3` era), not the broken vLLM 0.32 + lmcache 0.5.6 stack.
+**Goal:** Fair quality-gated CacheBlend on a **pip-matched** pin.  
+**Current verdict:** `INCONCLUSIVE (engagement unproven)` — see experiment-log.
 
-Full agent law: [`Docs/Reviews/claude_g1_cacheblend_matched_image_runbook.md`](Reviews/claude_g1_cacheblend_matched_image_runbook.md)  
-Design: [`Docs/plans/2026-10-22-g1-matched-cacheblend-design.md`](plans/2026-10-22-g1-matched-cacheblend-design.md)
+Next GPU session = **G1-DIAG only** (60 min): prove blend reuse on reorder (**Gate R**)
+before interpreting D/E. Spec:
+[`Docs/Reviews/claude_g1_remaining_gaps_fixes_recommendations.md`](Reviews/claude_g1_remaining_gaps_fixes_recommendations.md)
+
+Offline first:
+```bash
+python scripts/g1_blend_alignment_audit.py --json
+pytest tests/unit/test_g1_engagement_and_alignment.py -q
+```
+
+Full agent law: [`Docs/Reviews/claude_g1_cacheblend_matched_image_runbook.md`](Reviews/claude_g1_cacheblend_matched_image_runbook.md)
 
 ## Session policy (default)
 
@@ -67,7 +77,8 @@ colab stop -s <session>
 |---|---|
 | B smoke | coherent `smoke-ok`-like output |
 | C control | `contains_rate ≥ 0.9`, `garbage_rate ≤ 0.05` |
-| D blend | C bars + `agree_with_control_rate ≥ 0.9` on reorder |
-| E latency | blend warm-reorder p50 ≥15% faster than same-session native reorder (chunk_sep) |
+| **R reuse** | reorder `cached/retrieved ≥ 0.7 × chunk_token_total` (fail closed if metric missing) |
+| D blend | **only if R passes**; C bars + `agree_with_control_rate ≥ 0.9` on reorder |
+| E latency | **only if R passes**; blend warm-reorder ≤ 0.85 × native warm-reorder |
 
-**Never cite latency if Gate D failed.**
+**Never cite D/E if Gate R is `ENGAGEMENT_FAIL` / `ENGAGEMENT_UNKNOWN`.**

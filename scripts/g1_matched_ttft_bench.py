@@ -31,8 +31,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+SCRIPTS = ROOT / "scripts"
+for p in (SRC, SCRIPTS):
+    if str(p) not in sys.path:
+        sys.path.insert(0, str(p))
 
 ORDERS = {
     "abc": ("A", "B", "C"),
@@ -184,8 +186,11 @@ def _percentile(xs: list[float], p: float) -> float:
     return ys[f] + (ys[c] - ys[f]) * (k - f)
 
 
-def _ttft_ms(llm, prompt_ids: list[int], sampling) -> tuple[float, str, str]:
+def _ttft_ms(llm, prompt_ids: list[int], sampling) -> tuple[float, str, str, dict]:
     """Wall-clock generate on prompt_token_ids (CacheBlend MP style)."""
+    # Local import keeps laptop imports of this module free of path hacks in tests.
+    from g1_engagement import extract_engagement
+
     t0 = time.perf_counter()
     outs = llm.generate(
         prompts={"prompt_token_ids": prompt_ids},
@@ -194,7 +199,8 @@ def _ttft_ms(llm, prompt_ids: list[int], sampling) -> tuple[float, str, str]:
     )
     wall = (time.perf_counter() - t0) * 1000.0
     text = outs[0].outputs[0].text.strip() if outs and outs[0].outputs else ""
-    return wall, text, "wall_clock_generate_token_ids"
+    eng = extract_engagement(outs)
+    return wall, text, "wall_clock_generate_token_ids", eng
 
 
 def _reset_prefix_cache(llm) -> bool:
@@ -226,13 +232,19 @@ def _reset_prefix_cache(llm) -> bool:
 
 def _measure(llm, prompt_ids: list[int], sampling, *, n: int, label: str) -> tuple[dict, str]:
     samples: list[float] = []
+    engagement_trials: list[dict] = []
     last_text = ""
     method = "unknown"
     for i in range(n):
-        ms, text, method = _ttft_ms(llm, prompt_ids, sampling)
+        ms, text, method, eng = _ttft_ms(llm, prompt_ids, sampling)
         samples.append(ms)
+        engagement_trials.append(eng)
         last_text = text
-        print(f"  {label} {i + 1}/{n} {ms:.0f} ms", flush=True)
+        cached = eng.get("num_cached_tokens")
+        extra = f" cached={cached}" if cached is not None else ""
+        print(f"  {label} {i + 1}/{n} {ms:.0f} ms{extra}", flush=True)
+    from g1_engagement import summarize_trial_engagement
+
     return {
         "n": len(samples),
         "p50_ms": statistics.median(samples),
@@ -240,6 +252,7 @@ def _measure(llm, prompt_ids: list[int], sampling, *, n: int, label: str) -> tup
         "cv": _cv(samples),
         "samples_ms": samples,
         "last_output": last_text,
+        "engagement": summarize_trial_engagement(engagement_trials),
     }, method
 
 
@@ -255,6 +268,7 @@ def _measure_reorder_after_abc(
 ) -> tuple[dict, str, bool]:
     """Each trial: clear cache → seed ABC → measure reorder once."""
     samples: list[float] = []
+    engagement_trials: list[dict] = []
     last_text = ""
     method = "unknown"
     cleared = True
@@ -266,10 +280,13 @@ def _measure_reorder_after_abc(
         if not _reset_prefix_cache(llm):
             cleared = False
         _ttft_ms(llm, abc_i, sampling)
-        ms, text, method = _ttft_ms(llm, reorder_i, sampling)
+        ms, text, method, eng = _ttft_ms(llm, reorder_i, sampling)
         samples.append(ms)
+        engagement_trials.append(eng)
         last_text = text
-        print(f"  {label} {i + 1}/{n} {ms:.0f} ms", flush=True)
+        cached = eng.get("num_cached_tokens")
+        extra = f" cached={cached}" if cached is not None else ""
+        print(f"  {label} {i + 1}/{n} {ms:.0f} ms{extra}", flush=True)
     polluted = _reorder_series_polluted(samples)
     if polluted:
         print(
@@ -277,6 +294,8 @@ def _measure_reorder_after_abc(
             f"{statistics.median(samples[1:]):.0f} ms — self-hit pollution",
             flush=True,
         )
+    from g1_engagement import summarize_trial_engagement
+
     return (
         {
             "n": len(samples),
@@ -287,6 +306,7 @@ def _measure_reorder_after_abc(
             "samples_ms": samples,
             "series_polluted": polluted,
             "last_output": last_text,
+            "engagement": summarize_trial_engagement(engagement_trials),
         },
         method,
         cleared and not polluted,
@@ -545,7 +565,7 @@ def main(argv: list[str] | None = None) -> int:
             cold_ids = cold_ids + [question_ids[-1] if question_ids else 0] * (
                 target_len - len(cold_ids)
             )
-        ms, text, ttft_method = _ttft_ms(llm, cold_ids, sampling)
+        ms, text, ttft_method, _eng = _ttft_ms(llm, cold_ids, sampling)
         cold_samples.append(ms)
         cold_text = text
         print(f"  cold_abc {i + 1}/{args.runs} {ms:.0f} ms", flush=True)
@@ -570,6 +590,27 @@ def main(argv: list[str] | None = None) -> int:
     )
     harness_reorder_gap_ok = reorder_gap is not None and reorder_gap >= 1.15
 
+    # Gate R: reuse proven on blend reorder (fail closed if metric missing).
+    gate_r_payload = None
+    if args.backend == "blend":
+        from g1_engagement import gate_r
+
+        chunk_token_total = 3 * chunk_tokens
+        eng_sum = results["warm_bac"].get("engagement") or {}
+        got = eng_sum.get("cached_tokens_p50")
+        gate_r_payload = gate_r(
+            cached_or_retrieved_tokens=got,
+            chunk_token_total=chunk_token_total,
+            ttft_ms=warm_reorder_p50,
+            native_reorder_p50_ms=None,  # filled by chunk_e.sh vs native JSON
+            require_ttft_win=False,
+        )
+        print(
+            f"GATE_R: {gate_r_payload['status']} "
+            f"got={gate_r_payload['got_tokens']} need>={gate_r_payload['need_tokens']}",
+            flush=True,
+        )
+
     payload = {
         "gate": "G1-matched-ttft",
         "backend": args.backend,
@@ -579,6 +620,7 @@ def main(argv: list[str] | None = None) -> int:
         "blend_special_str": args.blend_special_str,
         "chunk_tokens": chunk_tokens,
         "chunk_tokens_aligned_256": chunk_tokens % 256 == 0,
+        "chunk_token_total": 3 * chunk_tokens,
         "target_prefix_tokens": args.target_prefix_tokens,
         "abc_prompt_tokens": prompt_tokens,
         "ttft_method": ttft_method,
@@ -609,10 +651,13 @@ def main(argv: list[str] | None = None) -> int:
         "reorder_vs_warm_abc": reorder_gap,
         "cold_vs_warm_abc": cold_vs_warm,
         "harness_reorder_gap_ok": harness_reorder_gap_ok and prefix_cache_reset_ok,
+        "gate_r": gate_r_payload,
         "note": (
             "prompt_format=chunk_sep required for CacheBlend chunk-id reuse. "
             "harness_reorder_gap_ok requires reorder ≥1.15× warm ABC and no "
             "self-hit pollution. "
+            "Gate R (blend): cached/retrieved ≥0.7× chunk_token_total on reorder; "
+            "if ENGAGEMENT_FAIL/UNKNOWN do not interpret Gate D/E. "
             "Gate E: blend warm_reorder ≤ 0.85 × native warm_reorder. "
             "Do not cite gate_e if reorder_series_polluted."
         ),

@@ -30,8 +30,10 @@ Updated: 2026-10-22
 - [x] G1 Colab pin closeout — `cw-smoke` stopped; residual = pin gap (see experiment-log)
 - [x] G1 matched-pin Stage A harness — benches/scripts/pre-reg (`Docs/g1-matched-colab.md`)
 - [x] G1 matched-pin B–E — prior runs **CONFOUNDED** (antigravity Round-2); harness remediation landed
-- [x] G1 matched re-run (vLLM 0.18 / lmcache 0.4.2, `cw-g1-r2`) — **C/D PASS**, **E FAIL** fair @12k (blend reorder≈cold); CacheBlend closed
-- [x] G1 step 4 EPIC — fast path **quality OK / latency FAIL** (kvlink 332 vs full 235 ms, 0.71×; gold OK). G1 non-prefix closed
+- [x] G1 matched re-run (vLLM 0.18 / lmcache 0.4.2) — data banked; verdict **INCONCLUSIVE** (no engagement proof; reorder≈cold)
+- [x] G1 EPIC fast path — **INCONCLUSIVE (toy scale)**; not a fair close
+- [x] Offline FIX-1/2/3 — Gate R + alignment audit + log relabel (`claude_g1_remaining_gaps…`)
+- [ ] G1-DIAG GPU session (60 min) — prove blend engagement on reorder before any D/E claim
 
 
 - [ ] Partner log optional (`docs/partner-ask.md`)

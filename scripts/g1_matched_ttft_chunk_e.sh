@@ -72,12 +72,18 @@ python scripts/g1_matched_ttft_bench.py --backend blend --runs "$RUNS" \
 
 python - <<'PY'
 import json
+import sys
 n=json.load(open("g1_ttft_native_12k_chunks.json"))
 b=json.load(open("g1_ttft_blend_12k_chunks.json"))
 nr, br = n["warm_reorder_p50_ms"], b["warm_reorder_p50_ms"]
+gr = b.get("gate_r") or {}
 print("prompt_format", b.get("prompt_format"), "polluted", b.get("reorder_series_polluted"))
+print("GATE_R", gr.get("status"), "got", gr.get("got_tokens"), "need", gr.get("need_tokens"))
 print("native_reorder", nr, "blend_reorder", br)
 print("speedup", (nr/br) if br else None)
-print("gate_e", br < 0.85*nr if nr and br else None)
 print("blend warm_abc", b["warm_abc_p50_ms"], "blend cold", b["scenarios"]["cold_abc"]["p50_ms"])
+if gr.get("status") in (None, "ENGAGEMENT_FAIL", "ENGAGEMENT_UNKNOWN"):
+    print("gate_e SKIPPED (Gate R not REUSE_OK) — do not interpret D/E")
+    sys.exit(5)
+print("gate_e", br < 0.85*nr if nr and br else None)
 PY
