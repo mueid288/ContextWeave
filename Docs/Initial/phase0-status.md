@@ -1,6 +1,6 @@
 # Phase 0 status
 
-Updated: 2026-10-22
+Updated: 2026-10-23
 
 ## Done (CPU week)
 
@@ -33,9 +33,9 @@ Updated: 2026-10-22
 - [x] G1 matched re-run (vLLM 0.18 / lmcache 0.4.2) — data banked; verdict **INCONCLUSIVE** (no engagement proof; reorder≈cold)
 - [x] G1 EPIC fast path — **INCONCLUSIVE (toy scale)**; not a fair close
 - [x] Offline FIX-1/2/3 — Gate R + alignment audit + log relabel (`claude_g1_remaining_gaps…`)
-- [ ] G1-DIAG GPU session (60 min) — prove blend engagement on reorder before any D/E claim
-
-
+- [x] G1-DIAG #1/#2 — engagement proven on in-process blend; **G1 CacheBlend CLOSED**
+  (no quality-preserving ≥15% TTFT win; Gate D bac 0.67; see experiment-log)
+- [ ] Phase 0 desk pivot: fingerprint/provenance + cost-model / planner (post-G1)
 - [ ] Partner log optional (`docs/partner-ask.md`)
 
 

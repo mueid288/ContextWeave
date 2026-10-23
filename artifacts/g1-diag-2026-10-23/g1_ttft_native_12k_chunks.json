@@ -1,0 +1,170 @@
+{
+  "gate": "G1-matched-ttft",
+  "backend": "native_prefix",
+  "model": "Qwen/Qwen3-8B",
+  "runs": 10,
+  "prompt_format": "chunk_sep",
+  "blend_path": null,
+  "blend_special_str": " # # ",
+  "chunk_tokens": 3840,
+  "chunk_tokens_aligned_256": true,
+  "chunk_token_total": 11520,
+  "target_prefix_tokens": 12000,
+  "abc_prompt_tokens": 11568,
+  "ttft_method": "wall_clock_generate_token_ids",
+  "max_tokens": 1,
+  "enforce_eager": true,
+  "blend_client_env": false,
+  "warm_abc_cv": 0.3818168674661258,
+  "warm_reorder_cv": 0.003956537854828857,
+  "protocol": "chunk_sep prompts \u2192 seed_abc \u2192 warm_abc\u00d7N \u2192 for reorder: reset_prefix_cache \u2192 seed abc \u2192 measure bac/cba \u00d7N (blend: unique chunk salt per trial) \u2192 cold_abc\u00d7N (reset + leading nonce tokens)",
+  "prefix_cache_reset_ok": true,
+  "reorder_series_polluted": false,
+  "scenarios": {
+    "warm_abc": {
+      "n": 10,
+      "p50_ms": 40.71578349999072,
+      "p90_ms": 46.860382200293294,
+      "cv": 0.3818168674661258,
+      "samples_ms": [
+        96.05975700014824,
+        41.035736999674555,
+        41.12611300024582,
+        41.393785000309435,
+        40.62293700008013,
+        40.808629999901314,
+        40.21594999994704,
+        39.90797400001611,
+        39.68463499995778,
+        39.64151900026991
+      ],
+      "last_output": "",
+      "engagement": {
+        "n_trials": 10,
+        "n_with_metric": 10,
+        "cached_tokens_p50": 11552,
+        "cached_tokens_min": 11552,
+        "cached_tokens_max": 11552,
+        "samples": [
+          11552,
+          11552,
+          11552,
+          11552,
+          11552,
+          11552,
+          11552,
+          11552,
+          11552,
+          11552
+        ]
+      }
+    },
+    "warm_bac": {
+      "n": 10,
+      "p50_ms": 921.1270829998739,
+      "p90_ms": 923.4383468999113,
+      "cv": 0.0028139868933638734,
+      "first_ms": 917.7391059997717,
+      "samples_ms": [
+        917.7391059997717,
+        916.438024999934,
+        917.9294769996886,
+        920.2649819999351,
+        920.5924469997626,
+        921.6617189999852,
+        921.7919679999795,
+        922.9696950001198,
+        923.3706949999032,
+        924.0472139999838
+      ],
+      "series_polluted": false,
+      "last_output": "",
+      "engagement": {
+        "n_trials": 10,
+        "n_with_metric": 10,
+        "cached_tokens_p50": 16,
+        "cached_tokens_min": 16,
+        "cached_tokens_max": 16,
+        "samples": [
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16
+        ]
+      }
+    },
+    "warm_cba": {
+      "n": 10,
+      "p50_ms": 926.8864204998408,
+      "p90_ms": 928.1138967997776,
+      "cv": 0.0016686444702904443,
+      "first_ms": 923.9551760001632,
+      "samples_ms": [
+        923.9551760001632,
+        924.9395070000901,
+        924.8858920000202,
+        927.5257109998165,
+        925.9539230001792,
+        927.2910659997251,
+        926.4817749999565,
+        928.0899249997674,
+        928.32964299987,
+        927.9705169997214
+      ],
+      "series_polluted": false,
+      "last_output": "",
+      "engagement": {
+        "n_trials": 10,
+        "n_with_metric": 10,
+        "cached_tokens_p50": 16,
+        "cached_tokens_min": 16,
+        "cached_tokens_max": 16,
+        "samples": [
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16
+        ]
+      }
+    },
+    "cold_abc": {
+      "n": 10,
+      "p50_ms": 926.17083250002,
+      "p90_ms": 926.7003124999519,
+      "cv": 0.0004998290143437229,
+      "samples_ms": [
+        926.2270889998945,
+        925.665981000293,
+        926.0729290003837,
+        926.1145760001455,
+        926.6373529999328,
+        926.6218040002059,
+        926.0064169998259,
+        927.2669480001241,
+        926.4419289997932,
+        925.8784090002337
+      ],
+      "last_output": ""
+    }
+  },
+  "warm_abc_p50_ms": 40.71578349999072,
+  "warm_reorder_p50_ms": 924.0067517498574,
+  "warm_reorder_first_ms": 920.8471409999675,
+  "reorder_vs_warm_abc": 22.694067811566686,
+  "cold_vs_warm_abc": 22.747218716796425,
+  "harness_reorder_gap_ok": true,
+  "gate_r": null,
+  "note": "blend_path=inprocess (LMCacheConnectorV1 + register_model). prompt_format=chunk_sep required for CacheBlend chunk-id reuse. harness_reorder_gap_ok requires reorder \u22651.15\u00d7 warm ABC and no self-hit pollution. Gate R (blend): cached/retrieved \u22650.7\u00d7 chunk_token_total on reorder; if ENGAGEMENT_FAIL/UNKNOWN do not interpret Gate D/E. Gate E: blend warm_reorder \u2264 0.85 \u00d7 native warm_reorder. Do not cite gate_e if reorder_series_polluted."
+}

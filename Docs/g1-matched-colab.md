@@ -1,18 +1,12 @@
 # G1 matched-pin CacheBlend on Colab
 
 **Goal:** Fair quality-gated CacheBlend on a **pip-matched** pin.  
-**Current verdict:** `INCONCLUSIVE (engagement unproven)` — see experiment-log.
+**Current verdict:** `CLOSED` — engaged @12k but no quality-preserving ≥15% TTFT win
+(see experiment-log 2026-10-23 closeout; artifacts `artifacts/g1-diag-2026-10-23/`).
 
-Next GPU session = **G1-DIAG only** (60 min): prove blend reuse on reorder (**Gate R**)
-before interpreting D/E. Spec:
-[`Docs/Reviews/claude_g1_remaining_gaps_fixes_recommendations.md`](Reviews/claude_g1_remaining_gaps_fixes_recommendations.md)
-
-**Model:** keep `Qwen/Qwen3-8B` — lmcache **0.4.2** ships `LMCQwen3Model`
-([PR #1633](https://github.com/LMCache/LMCache/pull/1633)); not a llama-only pin.
-
-**Blend path (post G1-DIAG #1):** in-process `LMCacheConnectorV1` +
-`VLLMModelTracker.register_model` (#4131) via `scripts/g1_blend_hooks.py`.
-MP-only blend is retired for Gate D/E — it left Gate R at got=0.
+Do **not** reopen matched Colab for G1 unless a new pre-registered question is written.
+Blend path that engaged: in-process `LMCacheConnectorV1` + `g1_blend_hooks.py`
+(Qwen3-8B, vLLM 0.18 / lmcache 0.4.2).
 
 Offline first:
 ```bash

@@ -1,18 +1,18 @@
 # G1-DIAG artifacts — 2026-10-23
 
-Session `cw-g1-diag` (Colab A100). **Full JSON tarball was not collected before
-`colab stop`** — VM disk is gone. Numbers below are reconstructed from the
-operator paste in chat (same session). Treat as **summary-only**, not a full
-reproducible freeze.
+Session `cw-g1-diag-2` (Colab A100). In-process CacheBlend + blend hooks
+(`g1_blend_hooks.py`). Collected **before** stop.
 
 | File | Role |
 |---|---|
-| `g1_diag_summary.json` | Reconstructed Gate B/D/R/E summary from paste |
+| `g1_matched_artifacts_20261023T100338Z.tar.gz` | Session tarball |
+| `g1_diag_pip_freeze.txt` | Exact pin freeze |
+| `g1_matched_env.json` | Matched install pins |
+| `g1_matched_control.json` | Gate C |
+| `g1_matched_blend_abc.json` / `g1_matched_blend_bac.json` | Gate D |
+| `g1_ttft_native_12k_chunks.json` / `g1_ttft_blend_12k_chunks.json` | Stage E / Gate R |
+| `g1_diag_summary.json` | Early paste reconstruction (pre-tarball) |
 
-**Missing (unrecoverable):** `g1_ttft_*_12k_chunks.json`, `g1_matched_*.json`,
-`g1_diag_pip_freeze.txt`, lmcache server logs, per-trial engagement arrays.
-
-- Gate B PASS; Gate D PASS (agree=1.0); Gate R **ENGAGEMENT_FAIL** got=0 need≥8063
-- Gate E SKIPPED (correct)
-- blend warm_abc p50 **188** ms; reorder/cold ≈ **947–955** ms
-- Narrative: `Docs/experiment-log.md` (2026-10-23 G1-DIAG entry)
+**Gate R:** `ENGAGEMENT_FAIL` got=7705 need≥8063 (≈66.9% &lt; 70%) — engagement
+**proven** vs DIAG #1 got=0; formal bar miss. warm_bac≈warm_abc; warm_cba slow.
+Gate E skipped. Narrative: `Docs/experiment-log.md`.

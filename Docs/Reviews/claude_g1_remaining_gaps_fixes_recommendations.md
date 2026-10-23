@@ -162,10 +162,11 @@ Filled **2026-10-23 before G1-DIAG** (do not edit after the diagnostic runs):
 - [x] Blend support for the chosen model confirmed from source/docs (link recorded) —
   lmcache `v0.4.2` `LMCQwen3Model` via PR [#1633](https://github.com/LMCache/LMCache/pull/1633);
   see experiment-log 2026-10-23 Qwen3 entry
-- [ ] Exact pin recorded (`pip freeze`) before launch — confirm `g1_diag_pip_freeze.txt` in artifacts
+- [x] Exact pin recorded — `artifacts/g1-diag-2026-10-23/g1_diag_pip_freeze.txt`
 - [x] Gate R added and pre-registered outcomes written
 - [x] Section 6 decision filled in
-- [ ] GPU session capped at 60 min, instance terminated, artifacts committed
+- [x] GPU session capped / terminated (`cw-g1-diag-2` stopped); artifacts committed
 - [x] G1-DIAG #1: Gate R `ENGAGEMENT_FAIL` got=0 (2026-10-23)
 - [x] Harness fix: in-process `LMCacheConnectorV1` + `register_model` (`g1_blend_hooks.py`)
-- [ ] G1-DIAG #2 re-run (Gate R); collect tarball before stop
+- [x] G1-DIAG #2: engagement proven (bac 7705); Gate R formal FAIL; Gate D bac 0.67;
+  Gate E skipped — **G1 CacheBlend CLOSED** (no recompute sweep)

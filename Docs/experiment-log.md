@@ -2,14 +2,15 @@
 
 ## Current verdict (update when it changes)
 
-- **G1 CacheBlend / EPIC:** `INCONCLUSIVE (mechanism engagement unproven)`
-- Native prefix + reorder harness: **VALID** (post-remediation)
-- Post-remediation CacheBlend D/E at 12k: **INCONCLUSIVE** — blend reorder≈cold≈native
-  miss ⇒ no reuse proof; do not cite as “quality OK / latency miss”
-- EPIC fast-path Mistral @~500 tok: **INCONCLUSIVE (toy scale)** — not a fair close
-- Next: harness fix landed (in-process + `register_model`) → **one** G1-DIAG
-  re-run (Gate R); collect tarball before stop; do not cite D/E until REUSE_OK
-- ResolventKV: still deferred until verified engaged reuse + quality-preserving win
+- **G1 CacheBlend:** `CLOSED` — engaged on A100 @12k (in-process 0.18/0.4.2) but **no
+  quality-preserving ≥15% TTFT win**. BAC reuses (~7705 tok, ≈warm latency); CBA
+  ≈miss (19 tok); Gate D bac agree **0.67**; Gate R formal FAIL (66.9%&lt;70%); Gate E
+  skipped (~1.10×). Skipped §6 optional recompute curve → pivot desk work
+- **G1 EPIC:** `INCONCLUSIVE (toy scale)` — not a fair close; do not reopen for G1
+- Native prefix + reorder harness: **VALID**
+- ResolventKV: **deferred** until a non-prefix path shows verified engagement +
+  quality-preserving ≥15% TTFT win (§6)
+- Next: fingerprint/provenance + cost-model / planner desk work (Phase 0 remainder)
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -438,6 +439,34 @@
   LMCache [#2946](https://github.com/LMCache/LMCache/pull/2946) item. Patched
   `LMCacheLookupClient.lookup` → `list(token_ids)`; also alias
   `get_input_embeddings` → `embed_input_ids` at register_model
+
+## 2026-10-23 — G1-DIAG #2 TTFT: engagement high, Gate R formal FAIL
+
+- **Status:** `INCONCLUSIVE` → engagement **proven**; latency not Gate-E-eligible
+- Env: Colab A100, in-process blend + shims (`a2d90a9`), Qwen3-8B, chunk_sep 12k, n=10
+- Gate R: `ENGAGEMENT_FAIL` **got=7705 need≥8063** (≈**66.9%** of 3×3840=11520;
+  bar is 70%). Contrast DIAG #1 got=**0**. Metric is from **warm_bac** only
+- Engagement by order: bac cached_tokens_p50 **7705**; cba **19** (miss) — explains
+  warm_cba p50 **1065** &gt; cold **930**
+- Latency (blend): warm_abc **619**; warm_bac **622**; warm_cba **1065**; cold 930.
+  native_reorder **924**; blend_reorder **844**; speedup **≈1.10×**. polluted=False
+- Gate D (`blend bac`): **FAIL** contains/agree **0.67** (garbage 0) — quality hit
+  when reorder engages
+- Artifacts: `artifacts/g1-diag-2026-10-23/` (+ freeze + tarball); session stopped
+- Decision: mechanism engaged; formal Gate R miss; CBA no-reuse + quality 0.67 are
+  the binding issues. Do **not** claim Gate E
+- Closeout: see following entry
+
+## 2026-10-23 — G1 CacheBlend closeout (no recompute sweep)
+
+- **Status:** `VALID` (project decision)
+- Applied §6: quality fails when reuse engaged → real quality negative for this
+  config; skip optional recompute-ratio curve; do not open ResolventKV / EPIC /
+  further pin fishing for G1
+- Report negative for: “PIC/CacheBlend wins quality-preserving TTFT on A100 @12k
+  on vLLM 0.18 + lmcache 0.4.2”
+- Artifacts committed under `artifacts/g1-diag-2026-10-23/`
+- Pivot: fingerprint/provenance + cost-model / planner desk work
 
 ## Template for future entries
 
