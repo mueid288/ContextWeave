@@ -3,9 +3,10 @@
 Research harness for a **validity-checked planner** over modular KV-cache reuse
 (prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-**Phase 0 status (2026-10-23): PIVOT** — see [Docs/phase0-exit-decision.md](Docs/phase0-exit-decision.md).  
-G0 demand held; CacheBlend engaged on A100 @12k but **no** quality-preserving ≥15% TTFT win.  
-Phase 1 / G2 / G3 and ResolventKV kernels are **not** opened. GPU only with a new pre-reg.
+**Status (2026-10-23): PAUSED** after Phase 0 **PIVOT** — [Docs/pause.md](Docs/pause.md),
+[Docs/phase0-exit-decision.md](Docs/phase0-exit-decision.md).  
+G0 demand held; CacheBlend engaged @12k but **no** quality-preserving ≥15% TTFT win.  
+Phase 1 / G2 / G3 and ResolventKV are **not** opened. Resume only via a path in `pause.md`.
 
 **Laptop policy:** never download or run models on this machine. See [Docs/local-safety.md](Docs/local-safety.md). Baseline scripts refuse model load unless `CONTEXTWEAVE_ALLOW_MODEL_LOAD=1` on a rented GPU host.
 
@@ -47,7 +48,8 @@ python -c "from contextweave.planner import plan, RequestView; print(plan(Reques
 
 | Doc | Purpose |
 |---|---|
-| [Docs/phase0-exit-decision.md](Docs/phase0-exit-decision.md) | **Current** go/pivot/stop (pivot; no Phase 1) |
+| [Docs/pause.md](Docs/pause.md) | **Current** project state (paused) + how to resume |
+| [Docs/phase0-exit-decision.md](Docs/phase0-exit-decision.md) | Phase 0 go/pivot/stop (pivot; no Phase 1) |
 | [Docs/g1-closeout-thesis.md](Docs/g1-closeout-thesis.md) | Measured G1 thesis restatement |
 | [Docs/pre-reg-epic-12k.md](Docs/pre-reg-epic-12k.md) | Parked optional EPIC@≥6k/12k pre-reg (not started) |
 | [Docs/planner-v0.md](Docs/planner-v0.md) | Rule-based planner v0 |

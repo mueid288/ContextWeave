@@ -1,6 +1,6 @@
 # Phase 0 status
 
-Updated: 2026-10-23
+Updated: 2026-10-23 — **PAUSED** (`Docs/pause.md`)
 
 ## Done (CPU week)
 
@@ -42,6 +42,7 @@ Updated: 2026-10-23
 - [x] Prior-art matrix updated with measured CacheBlend/EPIC gaps (2026-10-23)
 - [ ] Partner log optional (`Docs/partner-ask.md`) — **no partner yet**; non-blocking
 - [x] Optional EPIC@12k pre-reg parked — `Docs/pre-reg-epic-12k.md` (not started)
+- [x] Intentional pause — `Docs/pause.md`
 
 
 ## Explicitly not started

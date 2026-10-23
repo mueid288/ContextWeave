@@ -2,7 +2,8 @@
 
 **Date:** 2026-10-23  
 **Owner:** project (ContextWeave)  
-**Status:** **PIVOT** — Phase 0 desk complete for go/pivot/stop; Phase 1 **not** opened.
+**Status:** **PIVOT** then **PAUSED** — Phase 0 desk complete; Phase 1 **not** opened;
+active work stopped on purpose ([`pause.md`](pause.md)).
 
 Related: [`g1-closeout-thesis.md`](g1-closeout-thesis.md), experiment-log Current verdict,
 §6 in `Reviews/claude_g1_remaining_gaps_fixes_recommendations.md`.
@@ -50,3 +51,4 @@ Do not treat proposed G2/G3 numbers as active.
 - [x] Explicit: Phase 1 / G2 / G3 **not** started
 - [ ] Partner trace (optional, non-blocking) — still none; do not wait
 - [x] Fair EPIC @scale pre-reg written — `Docs/pre-reg-epic-12k.md` (**PARKED**; run only on explicit start)
+- [x] Intentional **pause** recorded — `Docs/pause.md` (2026-10-23)

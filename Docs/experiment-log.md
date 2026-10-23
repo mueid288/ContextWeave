@@ -2,17 +2,13 @@
 
 ## Current verdict (update when it changes)
 
-- **G1 CacheBlend:** `CLOSED` — engaged on A100 @12k (in-process 0.18/0.4.2) but **no
-  quality-preserving ≥15% TTFT win**. BAC reuses (~7705 tok, ≈warm latency); CBA
-  ≈miss (19 tok); Gate D bac agree **0.67**; Gate R formal FAIL (66.9%&lt;70%); Gate E
-  skipped (~1.10×). Skipped §6 optional recompute curve → pivot desk work
-- **G1 EPIC:** `INCONCLUSIVE (toy scale)` — not a fair close; do not reopen for G1
-- Native prefix + reorder harness: **VALID**
-- ResolventKV: **deferred** until a non-prefix path shows verified engagement +
-  quality-preserving ≥15% TTFT win (§6)
-- Next: pause OK; partner optional (none yet); EPIC@12k pre-reg parked at
-  `Docs/pre-reg-epic-12k.md` — run only on explicit start. Exit:
-  `Docs/phase0-exit-decision.md`
+- **Project state:** `PAUSED` (2026-10-23) — see `Docs/pause.md`
+- **Phase 0:** `PIVOT` then pause — `Docs/phase0-exit-decision.md`
+- **G1 CacheBlend:** `CLOSED` — engaged @12k but no quality-preserving ≥15% TTFT win
+- **G1 EPIC:** `INCONCLUSIVE (toy scale)`; fair-scale pre-reg parked
+  (`Docs/pre-reg-epic-12k.md`) — not started
+- ResolventKV: **blocked** until quality-preserving PIC win (§6)
+- **Resume:** pick a path in `Docs/pause.md` first — do not “continue Phase 0”
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -503,6 +499,12 @@
 - **Status:** `VALID` (desk)
 - Wrote `Docs/pre-reg-epic-12k.md` — one question, 90 min cap, Mistral + fast path,
   ≥6k/12k scale; **PARKED** until owner starts a session. Partner still absent (OK)
+
+## 2026-10-23 — Intentional project pause
+
+- **Status:** `VALID` (project state)
+- Owner accepted recommendation to **pause**. No further Phase 0 desk/GPU until a
+  resume path is chosen (`Docs/pause.md`). Partner still none (non-blocking).
 
 ## Template for future entries
 
