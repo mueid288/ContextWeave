@@ -44,7 +44,7 @@ def get_runner(strategy: str) -> BaselineRunner:
         ),
         "cacheblend": NotAvailableOnCpu(
             "cacheblend",
-            "Implement via LMCache CacheBlend path (pins in Docs/runtime-pins.md).",
+            "Implement via LMCache CacheBlend path (pins in Docs/runbooks/runtime-pins.md).",
         ),
         "epic": NotAvailableOnCpu(
             "epic",

@@ -40,7 +40,7 @@ def assert_model_load_allowed(action: str = "load or download a model") -> None:
         f"Refusing to {action} on this machine. "
         "ContextWeave Phase 0 laptop policy: no local model inference. "
         "Use a rented GPU host and set CONTEXTWEAVE_ALLOW_MODEL_LOAD=1 there only. "
-        "See Docs/local-safety.md."
+        "See Docs/runbooks/local-safety.md."
     )
 
 

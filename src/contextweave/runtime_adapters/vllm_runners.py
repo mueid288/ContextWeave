@@ -23,7 +23,7 @@ def _require_vllm():
     except ImportError as exc:  # pragma: no cover - GPU-only
         raise RuntimeError(
             "vllm is not installed. Install only on a GPU host "
-            "(Docs/local-safety.md, Docs/runtime-pins.md)."
+            "(Docs/runbooks/local-safety.md, Docs/runbooks/runtime-pins.md)."
         ) from exc
     from vllm import LLM, SamplingParams
 
