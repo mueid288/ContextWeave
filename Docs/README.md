@@ -15,5 +15,5 @@
 | [`plans/`](plans/) | Implementation plans |
 | [`archive/`](archive/) | Phase 0 kickoff notes |
 
-**Start here:** [`status/phase1-go-memo.md`](status/phase1-go-memo.md) →
-[`status/experiment-log.md`](status/experiment-log.md).
+**Start here:** [`status/pause.md`](status/pause.md) →
+[`status/closeout-g2.md`](status/closeout-g2.md) → [`status/experiment-log.md`](status/experiment-log.md).

@@ -3,10 +3,9 @@
 Research harness for a **validity-checked planner** over modular KV-cache reuse
 (prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-**Status (2026-10-23): Phase 1 G2 FAIL** —
-[Docs/status/pause.md](Docs/status/pause.md),
-[artifacts/phase1-oracle-2026-10-23/](artifacts/phase1-oracle-2026-10-23/).  
-G0 held; CacheBlend **CLOSED**; EPIC fast but **0.70** contains on reorder suite → best fixed **C0**. Phase 2 not opened.
+**Status (2026-10-23): PAUSED** after Phase 1 **G2 FAIL** —
+[Docs/status/closeout-g2.md](Docs/status/closeout-g2.md), [Docs/status/pause.md](Docs/status/pause.md).  
+Best fixed **C0** (C1 if prefix); C3/C4 refused. Phase 2 not opened. Optional later: parked [H3 pre-reg](Docs/pre-reg/pre-reg-h3-order-risk.md).
 
 **Laptop policy:** never download or run models on this machine. See
 [Docs/runbooks/local-safety.md](Docs/runbooks/local-safety.md). Baseline scripts refuse

@@ -2,13 +2,12 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** Phase 1 oracle **G2 FAIL** — thin policy **C0** — `Docs/status/pause.md`
-- **Phase 0:** `PIVOT` complete; Phase 1 scoped go answered
-- **G1:** CacheBlend CLOSED; EPIC single-slice PASS but **reorder suite mean_q=0.70**
-- **Phase 1 / G2:** **FAIL** (`artifacts/phase1-oracle-2026-10-23/`) — oracle upside 0 vs C0
-- Planner: **C3 refused** (quality risk); C4 refused; C1 if prefix else C0
-- Phase 2 / ResolventKV: **not opened**
-- **Next:** `colab stop -s cw-phase1-oracle`; pause unless owner picks H3 desk lane
+- **Project state:** **PAUSED** after G2 FAIL — `Docs/status/closeout-g2.md`, `Docs/status/pause.md`
+- **Phase 0 / 1:** pivot + scoped oracle done; **G2 FAIL**; thin policy **C1 else C0**
+- **G1:** CacheBlend CLOSED; EPIC reorder suite mean_q **0.70**
+- Planner: C3/C4 refused; Phase 2 / ResolventKV closed; **do not re-attack G2**
+- **Resume:** parked H3 only — `Docs/pre-reg/pre-reg-h3-order-risk.md` (mean TTFT, not G2)
+- Colab: stopped (`cw-phase1-oracle`); ~160 CU, 0/hr
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -566,6 +565,13 @@
 - Planner: refuse C3 on quality risk (like C4); default C0 unless C1.
 - **No Phase 2.** Thin policy around C0.
 - Supersedes: “C3 preferred” planner calibration; EPIC as default PIC
+
+## 2026-10-23 — Intentional pause after G2 closeout
+
+- **Status:** `VALID` (project state)
+- Stopped `cw-phase1-oracle` (was still billing). Wrote `Docs/status/closeout-g2.md`;
+  parked H3 pre-reg (mean-TTFT only, not G2 redo). Default = stay paused.
+- Supersedes: open-ended Phase 1 desk
 
 ## Template for future entries
 
