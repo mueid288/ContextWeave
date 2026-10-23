@@ -83,15 +83,42 @@ else
   git -C "$EPIC_DIR" pull --ff-only || true
 fi
 
-SITE_VLLM="$("$EPIC_PYTHON" - <<'PY'
-import vllm, pathlib
-print(pathlib.Path(vllm.__file__).resolve().parent)
+# Resolve site-packages/vllm without importing vllm (import prints INFO logs that
+# pollute capture and make rsync treat the line as a remote host).
+SITE_VLLM="$("$EPIC_PYTHON" - <<'PY' 2>/dev/null
+import pathlib, site
+cands = []
+try:
+    cands.extend(site.getsitepackages())
+except Exception:
+    pass
+try:
+    u = site.getusersitepackages()
+    if u:
+        cands.append(u)
+except Exception:
+    pass
+cands.append(str(pathlib.Path.cwd()))
+for sp in cands:
+    p = pathlib.Path(sp) / "vllm"
+    if (p / "__init__.py").is_file():
+        print(p.resolve())
+        raise SystemExit(0)
+raise SystemExit("vllm package dir not found under site-packages")
 PY
 )"
+if [[ -z "$SITE_VLLM" || ! -d "$SITE_VLLM" ]]; then
+  echo "BLOCK: could not locate installed vllm package directory."
+  exit 7
+fi
 echo "=== overlaying EPIC *.py onto ${SITE_VLLM} (keeping wheel .so) ==="
-# Copy Python sources only; do not overwrite compiled extensions from the wheel.
-rsync -a --include='*/' --include='*.py' --exclude='*' \
-  "${EPIC_DIR}/vllm/" "${SITE_VLLM}/"
+# Local recursive copy of *.py only — avoid rsync remote-path parsing.
+(
+  cd "${EPIC_DIR}/vllm"
+  find . -type f -name '*.py' -print0 \
+    | tar --null -T - -cf - \
+    | tar -C "${SITE_VLLM}" -xf -
+)
 
 echo "=== verify fork markers ==="
 cd "$CW_ROOT"
