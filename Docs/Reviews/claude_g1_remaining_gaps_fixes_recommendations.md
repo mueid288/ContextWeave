@@ -117,7 +117,7 @@ Add a one-line "Current verdict" block at the top of the log, updated whenever a
 **Outcomes and decisions (pre-registered):**
 | Outcome | Meaning | Next step |
 |---|---|---|
-| Retrieved ≈ 0 on reorder | Config/alignment/model-support bug, **not** an algorithm result | Fix per FIX-2, re-run diagnostic once. If still 0, check blend support for Qwen3; try a supported model (e.g. a Llama-family/Mistral model) |
+| Retrieved ≈ 0 on reorder | Config/alignment/harness bug, **not** an algorithm result | Fix per FIX-2 / client blender hooks (`register_model` #4131, MP vs in-worker), re-run diagnostic once. Qwen3 adapter is present on lmcache 0.4.2 — do not switch models for “support” |
 | Retrieved high, TTFT still ≈ native miss | Reuse happens but overhead eats the gain (or recompute ratio too high) | Log as a real negative at this scale; run one sweep of recompute ratio, then close |
 | Retrieved high, TTFT better, quality fails | Matches the earlier "speed only when corrupting" hypothesis | Real quality negative for this config; evaluate recompute ratio tradeoff curve |
 | Retrieved high, TTFT ≥15% better, quality OK | Gate R/D/E pass | G1 CacheBlend provisional PASS; scale n, doc sets, longer contexts |
@@ -131,7 +131,7 @@ Add a one-line "Current verdict" block at the top of the log, updated whenever a
 1. **Relabel now (free, offline):** update the log's verdict to `INCONCLUSIVE: engagement unproven`. Mark pre-remediation Gate D/E and the EPIC "closed" entry accordingly.
 2. **Do FIX-1 and FIX-2 before renting any GPU.** Most of the alignment audit (tokenization, chunk multiples, hash invariance) can run on CPU with just the tokenizer.
 3. **One question per GPU session.** The sprawl (multiple pins, models, methods) is what produced the voided results. G1-DIAG answers one thing.
-4. **Prefer a supported model for the diagnostic if Qwen3 support is unclear.** If the blend path only officially supports llama-family models, testing on Qwen3 may be the root cause of "no reuse" all along. Verify in the LMCache docs/issues/source before the session.
+4. **Qwen3 support confirmed for G1-DIAG (2026-10-23).** lmcache `v0.4.2` includes `LMCQwen3Model` (PR [#1633](https://github.com/LMCache/LMCache/pull/1633) / issue [#1121](https://github.com/LMCache/LMCache/issues/1121)). Keep `Qwen/Qwen3-8B`; if Gate R fails, debug harness engagement, not model eligibility.
 5. **Report intervals, not just p50.** Report p50/p90, min/max, CV. With n=10 an effect needs to be large to claim.
 6. **Do not open ResolventKV kernels** until a non-prefix path shows a verified, quality-preserving win, as the log already says.
 7. **Budget awareness:** Phase 0 GPU planning buffer is 350-400 hours. A single 60-minute diagnostic is cheap relative to that; the cost of another ambiguous run is the real risk, so insist on engagement proof first.
@@ -159,7 +159,9 @@ Filled **2026-10-23 before G1-DIAG** (do not edit after the diagnostic runs):
 - [x] Log verdict relabeled to INCONCLUSIVE; status fields added
 - [x] Engagement instrumentation implemented and tested on CPU where possible
 - [x] Token-level chunk alignment + hash invariance verified offline (FakeTok; re-run with `--model` on GPU host)
-- [ ] Blend support for the chosen model confirmed from source/docs (link recorded)
+- [x] Blend support for the chosen model confirmed from source/docs (link recorded) —
+  lmcache `v0.4.2` `LMCQwen3Model` via PR [#1633](https://github.com/LMCache/LMCache/pull/1633);
+  see experiment-log 2026-10-23 Qwen3 entry
 - [ ] Exact pin recorded (`pip freeze`) before launch
 - [x] Gate R added and pre-registered outcomes written
 - [x] Section 6 decision filled in

@@ -7,7 +7,8 @@
 - Post-remediation CacheBlend D/E at 12k: **INCONCLUSIVE** — blend reorder≈cold≈native
   miss ⇒ no reuse proof; do not cite as “quality OK / latency miss”
 - EPIC fast-path Mistral @~500 tok: **INCONCLUSIVE (toy scale)** — not a fair close
-- Next: offline FIX-1/2 done in tree → one **G1-DIAG** GPU session (Gate R) per
+- Next: Qwen3 blend support confirmed on lmcache 0.4.2 → one **G1-DIAG** GPU session
+  (Gate R, keep `Qwen/Qwen3-8B`) per
   `Docs/Reviews/claude_g1_remaining_gaps_fixes_recommendations.md`
 - ResolventKV: still deferred until verified engaged reuse + quality-preserving win
 
@@ -373,6 +374,22 @@
 - TTFT bench records per-trial `num_cached_tokens` when exposed; `g1_matched_ttft_chunk_e.sh`
   skips Gate E interpretation unless Gate R is `REUSE_OK`
 - Next GPU: **G1-DIAG** only (60 min cap) — engagement on reorder
+
+## 2026-10-23 — Offline: CacheBlend Qwen3 support on lmcache 0.4.2
+
+- **Status:** `VALID` (source check; no GPU)
+- Hypothesis: prior “llama-only blend” claim would force a model switch for G1-DIAG
+- Finding: **Qwen3 is supported on the pinned lmcache 0.4.2**
+  - Issue [#1121](https://github.com/LMCache/LMCache/issues/1121) (“only llama”) closed via
+    PR [#1633](https://github.com/LMCache/LMCache/pull/1633)
+  - Tag `v0.4.2` ships `lmcache/v1/compute/models/qwen3.py` (`LMCQwen3Model`, q/k norm)
+  - `infer_model_from_vllm` maps `Qwen3ForCausalLM` → `LMCQwen3Model` (also maps
+    `Qwen2ForCausalLM` → `LMCLlamaModel`)
+  - Docs: `docs/source/kv_cache_optimizations/blending.rst` + `examples/blend_kv_v1`
+- Decision: **keep `Qwen/Qwen3-8B` for G1-DIAG**; do not switch to Llama/Mistral for
+  model-support reasons. If Gate R still `ENGAGEMENT_FAIL`, treat as harness/config
+  (alignment, `register_model`/#4131, MP vs in-worker blender), not missing Qwen3 adapter
+- Next: G1-DIAG Colab ≤60 min, Gate R on reorder; record `pip freeze`
 
 ## Template for future entries
 

@@ -7,6 +7,9 @@ Next GPU session = **G1-DIAG only** (60 min): prove blend reuse on reorder (**Ga
 before interpreting D/E. Spec:
 [`Docs/Reviews/claude_g1_remaining_gaps_fixes_recommendations.md`](Reviews/claude_g1_remaining_gaps_fixes_recommendations.md)
 
+**Model:** keep `Qwen/Qwen3-8B` — lmcache **0.4.2** ships `LMCQwen3Model`
+([PR #1633](https://github.com/LMCache/LMCache/pull/1633)); not a llama-only pin.
+
 Offline first:
 ```bash
 python scripts/g1_blend_alignment_audit.py --json
