@@ -1,13 +1,15 @@
 # ContextWeave
 
-Research harness for **modular KV-cache composition and context repair** for self-hosted LLM inference.
+Research harness for a **validity-checked planner** over modular KV-cache reuse
+(prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-Phase 0 scope (approved): demand / workload analysis (0A) and prior-art / baseline preparation (0B).  
-No GPU is required for Week 1 CPU work. Do **not** rent GPU time until the G0 note and reproduction runbooks exist.
+**Phase 0 status (2026-10-23): PIVOT** — see [Docs/phase0-exit-decision.md](Docs/phase0-exit-decision.md).  
+G0 demand held; CacheBlend engaged on A100 @12k but **no** quality-preserving ≥15% TTFT win.  
+Phase 1 / G2 / G3 and ResolventKV kernels are **not** opened. GPU only with a new pre-reg.
 
 **Laptop policy:** never download or run models on this machine. See [Docs/local-safety.md](Docs/local-safety.md). Baseline scripts refuse model load unless `CONTEXTWEAVE_ALLOW_MODEL_LOAD=1` on a rented GPU host.
 
-Product requirements (Part II of the PRD) are deferred until Gate G3.
+Product requirements (Part II of the PRD) stay deferred (need G3 if Phase 2 ever opens).
 
 ## Quick start (CPU-only)
 
@@ -36,12 +38,18 @@ python scripts/build_corpus_trace.py --analyze
 
 # Example FR-01 fingerprint from a model YAML (metadata only)
 python scripts/fingerprint_example.py --model-config configs/models/qwen3_8b.yaml
+
+# Planner v0 (CPU): refuses CacheBlend under G1 calibration → full prefill
+python -c "from contextweave.planner import plan, RequestView; print(plan(RequestView(has_validated_nonprefix_artifacts=True)).to_dict())"
 ```
 
 ## Docs
 
 | Doc | Purpose |
 |---|---|
+| [Docs/phase0-exit-decision.md](Docs/phase0-exit-decision.md) | **Current** go/pivot/stop (pivot; no Phase 1) |
+| [Docs/g1-closeout-thesis.md](Docs/g1-closeout-thesis.md) | Measured G1 thesis restatement |
+| [Docs/planner-v0.md](Docs/planner-v0.md) | Rule-based planner v0 |
 | [Docs/project-overview.md](Docs/project-overview.md) | Plain-language + technical overview of the whole project |
 | [Docs/prd/contextweave_prd_v2.md](Docs/prd/contextweave_prd_v2.md) | Research charter + deferred product requirements |
 | [Docs/prd/contextweave_prd_v2.1_amendments.md](Docs/prd/contextweave_prd_v2.1_amendments.md) | Binding Gemini-gap fixes |
@@ -90,5 +98,6 @@ tests/            unit tests (CPU)
 
 ## Gates
 
-- **G0 (provisional on synthetic):** ≥30% of post-prefix-cache prefill tokens are recurring non-prefix; median chunk length ≥512.
-- **G1:** Tier-1 baselines reproduced on GPU (see `Docs/gpu-runbook.md`).
+- **G0:** PASS (provisional on `my_corpus` / synthetic; partner trace optional).
+- **G1:** CacheBlend **closed** (engaged, quality/latency bar miss). EPIC not fair-scaled.
+- **G2 / G3:** **not opened** (see phase0-exit-decision).

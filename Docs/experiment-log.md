@@ -491,6 +491,12 @@
   ResolventKV remains blocked; optional GPU only under a new pre-reg
 - Prior-art Tier 1 CacheBlend/EPIC rows updated with measured gaps
 
+## 2026-10-23 — Sync README / overview / ResolventKV to pivot
+
+- **Status:** `VALID` (docs)
+- Top-level README, project-overview gates, and ResolventKV-adoption gate map
+  now state **PIVOT** / kernels blocked so newcomers don’t treat G1 as “next GPU”
+
 ## Template for future entries
 
 ```

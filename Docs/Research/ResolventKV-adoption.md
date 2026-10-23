@@ -2,7 +2,10 @@
 
 **Source:** [`Foundational AI Technology Research.md`](Foundational%20AI%20Technology%20Research.md)  
 **Date:** 2026-10-20  
-**Rule:** Adopt *insights and evaluation contracts* into Phase 0/1. Do **not** implement ResolventKV kernels until Gate G1 shows existing methods leave a measurable gap.
+**Rule:** Adopt *insights and evaluation contracts* into Phase 0. Do **not** implement
+ResolventKV kernels until a non-prefix path shows **verified engagement +
+quality-preserving ≥15% TTFT win** (project §6). As of 2026-10-23 that bar is
+**not** met (CacheBlend closed) → kernels **blocked**. See `Docs/phase0-exit-decision.md`.
 
 ---
 
@@ -33,15 +36,14 @@ Prefix cache fails when the same docs appear in new orders. Pasting isolated chu
 - Claiming novelty / renaming the product to ResolventKV  
 - Training-based cousins (ATTUNER LoRA, KV Packet wrappers) as the *primary* path (MVP stays training-free)
 
-## Gate mapping
+## Gate mapping (updated 2026-10-23)
 
 ```text
-G0 (done, provisional)  → demand for non-prefix recurrence
-G1 (next, GPU)          → reproduce prefix + CacheBlend + EPIC;
-                          measure answer preservation on multi-hop
-G2                      → is there upside vs best fixed config?
-                          if yes AND token-recompute is the bottleneck
-                          → open ResolventKV as a Phase 2 prototype track
+G0 (done, provisional)     → demand for non-prefix recurrence
+G1 CacheBlend (closed)     → engaged @12k but quality 0.67 / ~1.10× — no bar clear
+G1 EPIC (inconclusive)     → toy scale only; optional new pre-reg
+Phase 1 / G2 (not opened)  → pivot: planner policy, not kernels
+ResolventKV                → BLOCKED until quality-preserving PIC win exists
 ```
 
 ## Smoke / baseline hardware note

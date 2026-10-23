@@ -33,11 +33,11 @@ If you glue saved pieces together carelessly, the model can give worse answers, 
 
 We use **gates** (pass/fail checkpoints):
 
-| Gate | Plain meaning |
-|---|---|
-| **G0** | “Is there enough repeating middle-of-prompt content to bother?” |
-| **G1** | “Can we reproduce today’s best tools and measure them fairly?” |
-| **G2+** | Later: “Does a smart per-request choice beat always using one fixed method?” |
+| Gate | Plain meaning | Status (2026-10-23) |
+|---|---|---|
+| **G0** | “Is there enough repeating middle-of-prompt content to bother?” | **PASS** (provisional) |
+| **G1** | “Can we reproduce today’s best tools and clear a quality-preserving speed bar?” | CacheBlend **closed** (no); EPIC unfinished |
+| **G2+** | Later: “Does a smart per-request choice beat always using one fixed method?” | **Not opened** — Phase 0 **pivot** |
 
 Right now this is a **solo research project**. There is no design partner. Workloads are **synthetic** (fake but realistic request streams) or **corpus replay** (real local documents with a simulated request mix). So G0 results are marked **provisional** (*temporary / not final*) until a real production log exists — or until we explicitly accept provisional evidence for solo research.
 
