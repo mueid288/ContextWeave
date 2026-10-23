@@ -1,30 +1,28 @@
-# Project state after EPIC quality PASS
+# Project state — Phase 1 opened (scoped)
 
-**EPIC@12k:** **PASS** — `artifacts/g1-epic-12k-2026-10-23/`  
-**EPIC multi-fact quality:** **PASS** — `artifacts/g1-epic-quality-2026-10-23/`  
-**Phase 0 decision:** **PIVOT** — [`phase0-exit-decision.md`](phase0-exit-decision.md)  
-**Default now:** stay paused / archive unless owner picks a new path.
+**Phase 1:** **GO** (scoped) — [`phase1-go-memo.md`](phase1-go-memo.md)  
+**EPIC@12k + multi-fact quality:** **PASS**  
+**Phase 0 exit:** PIVOT history kept — [`phase0-exit-decision.md`](phase0-exit-decision.md)
 
-## Frozen
+## Active
 
 | Item | Status |
 |---|---|
-| CacheBlend G1 | CLOSED |
-| Phase 1 / G2 / G3 | Not opened (quality PASS does **not** auto-start Phase 1) |
-| ResolventKV | Blocked (§6) until explicit go |
+| Oracle CPU harness | `contextweave.oracle` + `scripts/phase1/run_oracle_study.py` |
+| GPU oracle collect | Pre-reg READY — [`../pre-reg/pre-reg-phase1-oracle.md`](../pre-reg/pre-reg-phase1-oracle.md) |
+| Config set | **{C0, C1, C3}** only |
+
+## Still frozen
+
+| Item | Status |
+|---|---|
+| CacheBlend G1 / C4 | CLOSED / refused |
+| Phase 2 / G3 | Not opened |
+| ResolventKV | Blocked |
 | Partner ask | Optional |
-
-## Paths
-
-1. **Stay paused / archive** — **default**
-2. EPIC@12k — DONE
-3. EPIC multi-fact quality — DONE; C3 notes updated
-4. Thin planner — only if new calibrations arrive
-5. **Open Phase 1** — only with an explicit go memo (planner-over-EPIC+prefix thesis)
 
 ## Trust
 
+- `Docs/status/phase1-go-memo.md`
 - `artifacts/g1-epic-quality-2026-10-23/`
-- `artifacts/g1-epic-12k-2026-10-23/`
 - `Docs/status/experiment-log.md`
-- `contextweave.planner.v0` (C3 kept; C4 refused)

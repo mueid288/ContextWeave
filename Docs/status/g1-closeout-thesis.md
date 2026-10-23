@@ -3,7 +3,8 @@
 **Date:** 2026-10-23 (updated after EPIC@12k)  
 **Status:** CacheBlend G1 **CLOSED**; EPIC@12k latency **PASS**; multi-fact quality
 **PASS** (city/year/code @12k).  
-**Decision:** **Pivot** (not stop, not Phase 1 build). Per §6 in
+**Decision:** Phase 0 **pivot** held; Phase 1 **GO scoped** —
+[`phase1-go-memo.md`](phase1-go-memo.md). Per §6 in
 `Docs/Reviews/claude_g1_remaining_gaps_fixes_recommendations.md`.
 
 ## What Phase 0 asked
@@ -28,7 +29,7 @@
 | ID | Claim | After G1 |
 |---|---|---|
 | H1 | Enough non-prefix recurrence | **Supported** (G0) |
-| H2 | No single fixed PIC config wins; selection helps | **Open** — CacheBlend fails; EPIC passes one slice; oracle/Phase 1 not started |
+| H2 | No single fixed PIC config wins; selection helps | **In test** — Phase 1 oracle on {C0,C1,C3} |
 | H3/H4 | Risk signal / cost model | **Not tested** on GPU; cost model planning-only |
 | ResolventKV | Beat CacheBlend with our kernels | **Blocked** — §6; prefer verifying EPIC quality breadth first |
 
@@ -42,12 +43,12 @@ when non-prefix artifacts are valid; **C4** (CacheBlend) refused; else **C0**.
 
 | Option | When | Now |
 |---|---|---|
-| Go Phase 1 | G0∧G1 with durable Tier-1 win | **No** — needs explicit go memo (EPIC fork ≠ product runtime) |
-| Pivot | Demand real; baselines mixed | **Yes** |
+| Go Phase 1 | G0∧G1 with durable Tier-1 win | **Yes (scoped)** — [`phase1-go-memo.md`](phase1-go-memo.md) |
+| Pivot | Demand real; baselines mixed | Phase 0 pivot done; now measuring H2 |
 | Stop | Demand unreal | **No** |
 
 ## Next
 
-1. Stay paused / archive unless owner writes a Phase 1 go memo.
-2. Keep planner calibrations in sync.
+1. GPU oracle collect per [`../pre-reg/pre-reg-phase1-oracle.md`](../pre-reg/pre-reg-phase1-oracle.md).
+2. G2 decide; Phase 2 only with a new memo.
 3. Partner trace optional.

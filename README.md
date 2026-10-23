@@ -3,10 +3,10 @@
 Research harness for a **validity-checked planner** over modular KV-cache reuse
 (prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-**Status (2026-10-23): EPIC@12k + multi-fact quality PASS** —
-[Docs/status/pause.md](Docs/status/pause.md),
-[artifacts/g1-epic-quality-2026-10-23/](artifacts/g1-epic-quality-2026-10-23/).  
-G0 held; CacheBlend **CLOSED**; LegoLink-8 ~**2–3.9×** @12k across 3 facts. Phase 1 not opened.
+**Status (2026-10-23): Phase 1 GO (scoped)** —
+[Docs/status/phase1-go-memo.md](Docs/status/phase1-go-memo.md),
+[Docs/pre-reg/pre-reg-phase1-oracle.md](Docs/pre-reg/pre-reg-phase1-oracle.md).  
+G0 held; CacheBlend **CLOSED**; EPIC@12k multi-fact **PASS**. Oracle set **{C0,C1,C3}**. Phase 2 not opened.
 
 **Laptop policy:** never download or run models on this machine. See
 [Docs/runbooks/local-safety.md](Docs/runbooks/local-safety.md). Baseline scripts refuse
@@ -51,6 +51,7 @@ python -c "from contextweave.planner import plan, RequestView; print(plan(Reques
 | Path | Purpose |
 |---|---|
 | [Docs/README.md](Docs/README.md) | Doc folder index |
+| [Docs/status/phase1-go-memo.md](Docs/status/phase1-go-memo.md) | **Phase 1 go** (scoped) |
 | [Docs/status/pause.md](Docs/status/pause.md) | Current project state |
 | [Docs/status/experiment-log.md](Docs/status/experiment-log.md) | Dated experiment notes |
 | [Docs/status/phase0-exit-decision.md](Docs/status/phase0-exit-decision.md) | Phase 0 pivot (no Phase 1) |

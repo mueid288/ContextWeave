@@ -2,13 +2,13 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** EPIC@12k + multi-fact quality **PASS**; default = pause — `Docs/status/pause.md`
-- **Phase 0:** `PIVOT` — `Docs/status/phase0-exit-decision.md` (not reopened)
-- **G1 CacheBlend:** `CLOSED`
-- **G1 EPIC:** **PASS** @12k latency (3.84×) **and** multi-fact quality (city/year/code
-  contains 1.0; min speedup **1.98×**) — `artifacts/g1-epic-quality-2026-10-23/`; **C3** kept
-- ResolventKV / Phase 1: **not opened**
-- **Next:** `colab stop -s cw-epic-quality`; stay paused unless explicit Phase 1 go memo
+- **Project state:** **Phase 1 GO (scoped)** — `Docs/status/phase1-go-memo.md`
+- **Phase 0:** `PIVOT` complete — `Docs/status/phase0-exit-decision.md`
+- **G1 CacheBlend:** `CLOSED`; **G1 EPIC:** quality+latency **PASS** @12k
+- **Phase 1:** oracle harness CPU-ready (`contextweave.oracle`); GPU pre-reg
+  `Docs/pre-reg/pre-reg-phase1-oracle.md` (not started)
+- Config set: **{C0, C1, C3}**; C4/ResolventKV/Phase 2 still closed
+- **Next:** run `cw-phase1-oracle` when owner starts GPU; else desk-idle on harness
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -545,6 +545,15 @@
 - Artifacts: `artifacts/g1-epic-quality-2026-10-23/`.
 - Planner C3 notes + conservative ttft (1/1.98) updated. Phase 1 still not opened.
 - Supersedes: quality pre-reg READY; single-gold-only C3 caveat
+
+## 2026-10-23 — Phase 1 GO (scoped) + oracle CPU harness
+
+- **Status:** `VALID` (desk)
+- Owner move → [`Docs/status/phase1-go-memo.md`](phase1-go-memo.md); G2 thresholds
+  ratified; config set {C0,C1,C3}. Module `contextweave.oracle` +
+  `scripts/phase1/run_oracle_study.py`; pre-reg
+  `Docs/pre-reg/pre-reg-phase1-oracle.md`. GPU not started.
+- Supersedes: pause-as-default after EPIC quality
 
 ## Template for future entries
 
