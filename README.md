@@ -49,6 +49,7 @@ python -c "from contextweave.planner import plan, RequestView; print(plan(Reques
 |---|---|
 | [Docs/phase0-exit-decision.md](Docs/phase0-exit-decision.md) | **Current** go/pivot/stop (pivot; no Phase 1) |
 | [Docs/g1-closeout-thesis.md](Docs/g1-closeout-thesis.md) | Measured G1 thesis restatement |
+| [Docs/pre-reg-epic-12k.md](Docs/pre-reg-epic-12k.md) | Parked optional EPIC@≥6k/12k pre-reg (not started) |
 | [Docs/planner-v0.md](Docs/planner-v0.md) | Rule-based planner v0 |
 | [Docs/project-overview.md](Docs/project-overview.md) | Plain-language + technical overview of the whole project |
 | [Docs/prd/contextweave_prd_v2.md](Docs/prd/contextweave_prd_v2.md) | Research charter + deferred product requirements |

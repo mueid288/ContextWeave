@@ -6,6 +6,9 @@ with LegoLink hooks (`cache_fuse_metadata` / `hack_kv`). Demo focuses on
 
 Do **not** install EPIC into a CacheBlend Colab session (different torch/vLLM).
 
+**Next fair-scale attempt (if any):** use the parked pre-reg
+[`Docs/pre-reg-epic-12k.md`](pre-reg-epic-12k.md) — not an ad-hoc toy rerun.
+
 ## Choose a path (speed)
 
 | Path | Time on Colab A100 | When |

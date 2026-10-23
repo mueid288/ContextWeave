@@ -48,5 +48,5 @@ Do not treat proposed G2/G3 numbers as active.
 - [x] Planner v0 encodes refusal of failing C4
 - [x] Cost-model doc anchored with A100 measurements (not H4)
 - [x] Explicit: Phase 1 / G2 / G3 **not** started
-- [ ] Partner trace (optional, non-blocking)
-- [ ] Fair EPIC @scale (optional new pre-reg only)
+- [ ] Partner trace (optional, non-blocking) — still none; do not wait
+- [x] Fair EPIC @scale pre-reg written — `Docs/pre-reg-epic-12k.md` (**PARKED**; run only on explicit start)

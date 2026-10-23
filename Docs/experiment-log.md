@@ -10,8 +10,9 @@
 - Native prefix + reorder harness: **VALID**
 - ResolventKV: **deferred** until a non-prefix path shows verified engagement +
   quality-preserving ≥15% TTFT win (§6)
-- Next: maintenance desk only; partner optional; GPU only with new pre-reg.
-  Exit memo: `Docs/phase0-exit-decision.md`
+- Next: pause OK; partner optional (none yet); EPIC@12k pre-reg parked at
+  `Docs/pre-reg-epic-12k.md` — run only on explicit start. Exit:
+  `Docs/phase0-exit-decision.md`
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -496,6 +497,12 @@
 - **Status:** `VALID` (docs)
 - Top-level README, project-overview gates, and ResolventKV-adoption gate map
   now state **PIVOT** / kernels blocked so newcomers don’t treat G1 as “next GPU”
+
+## 2026-10-23 — Park EPIC@12k pre-reg (no GPU)
+
+- **Status:** `VALID` (desk)
+- Wrote `Docs/pre-reg-epic-12k.md` — one question, 90 min cap, Mistral + fast path,
+  ≥6k/12k scale; **PARKED** until owner starts a session. Partner still absent (OK)
 
 ## Template for future entries
 

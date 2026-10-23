@@ -41,6 +41,7 @@ Updated: 2026-10-23
 - [x] Phase 0 exit decision — `Docs/phase0-exit-decision.md` (**PIVOT**; Phase 1/G2/G3 not opened)
 - [x] Prior-art matrix updated with measured CacheBlend/EPIC gaps (2026-10-23)
 - [ ] Partner log optional (`Docs/partner-ask.md`) — **no partner yet**; non-blocking
+- [x] Optional EPIC@12k pre-reg parked — `Docs/pre-reg-epic-12k.md` (not started)
 
 
 ## Explicitly not started
