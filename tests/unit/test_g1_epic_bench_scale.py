@@ -75,3 +75,13 @@ def test_help_lists_target_context_tokens():
     )
     assert r.returncode == 0
     assert "--target-context-tokens" in r.stdout
+    assert "--suite" in r.stdout
+
+
+def test_quality_suite_has_three_distinct_golds():
+    mod = _load()
+    assert len(mod.QUALITY_CASES) == 3
+    golds = {c["gold"] for c in mod.QUALITY_CASES}
+    assert golds == {"Karachi", "2019", "ALPHA-9173"}
+    assert mod._contains_gold("1.\n\nKarachi", "Karachi")
+    assert not mod._contains_gold("Lahore", "Karachi")

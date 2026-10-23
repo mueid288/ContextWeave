@@ -1,6 +1,6 @@
 # Phase 0 status
 
-Updated: 2026-10-23 — EPIC@12k **PASS**; Phase 1 still closed (`Docs/pause.md`)
+Updated: 2026-10-23 — EPIC@12k **PASS**; next multi-fact quality (`Docs/pause.md`)
 
 ## Done (CPU week)
 
@@ -43,7 +43,8 @@ Updated: 2026-10-23 — EPIC@12k **PASS**; Phase 1 still closed (`Docs/pause.md`
 - [ ] Partner log optional (`Docs/partner-ask.md`) — **no partner yet**; non-blocking
 - [x] EPIC@12k pre-reg **PASS** — `artifacts/g1-epic-12k-2026-10-23/` (~3.84× @12001 tok)
 - [x] Planner v0 **C3** calibration from EPIC@12k; C4 still refused
-- [x] Pause → resume path 2 closed — `Docs/pause.md`
+- [ ] EPIC multi-fact quality @12k — pre-reg `Docs/pre-reg-epic-quality.md` (desk ready)
+- [x] Pause → path 2 closed; quality lane active — `Docs/pause.md`
 
 
 ## Explicitly not started

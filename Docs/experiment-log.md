@@ -2,13 +2,13 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** path-2 closed — EPIC@12k **PASS**; Phase 1 still not opened — `Docs/pause.md`
+- **Project state:** EPIC@12k **PASS**; next lane = multi-fact quality pre-reg — `Docs/pause.md`
 - **Phase 0:** `PIVOT` — `Docs/phase0-exit-decision.md` (not reopened)
-- **G1 CacheBlend:** `CLOSED` — engaged @12k but no quality-preserving ≥15% TTFT win
-- **G1 EPIC:** **PASS @12k** (12001 tok, LegoLink-8 **3.84×** vs full, gold OK) —
-  `artifacts/g1-epic-12k-2026-10-23/`; planner **C3** calibrated
-- ResolventKV: **blocked** until broader quality-preserving PIC win (§6)
-- **Next:** `colab stop -s cw-epic-12k`; stay paused unless owner picks a new path
+- **G1 CacheBlend:** `CLOSED`
+- **G1 EPIC:** **PASS @12k** (3.84×, gold OK) → planner **C3**; multi-fact suite
+  **READY** (`Docs/pre-reg-epic-quality.md`, `--suite quality`)
+- ResolventKV / Phase 1: **not opened**
+- **Next:** run `cw-epic-quality` when owner starts GPU; else stay desk-idle
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -527,6 +527,14 @@
 - Planner: added **C3** calibration (`G1_EPIC_A100_12K`); C4 still refused.
 - **Not** Phase 1 / ResolventKV open. Stop GPU when collect done.
 - Supersedes: toy-scale EPIC INCONCLUSIVE; pre-reg PARKED/READY
+
+## 2026-10-23 — EPIC multi-fact quality lane (desk)
+
+- **Status:** `VALID` (desk)
+- Next recommended task after push: broader EPIC quality before Phase 1.
+- Added `--suite quality` (city/year/code) to `g1_epic_bench.py`; pre-reg
+  `Docs/pre-reg-epic-quality.md`. CPU tests updated. GPU not started.
+- Supersedes: “stay paused” as default next action
 
 ## Template for future entries
 

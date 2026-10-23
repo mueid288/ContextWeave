@@ -28,6 +28,26 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 
+# Multi-fact suite (same docs, different questions) — EPIC quality pre-reg.
+QUALITY_CASES: tuple[dict[str, str], ...] = (
+    {
+        "id": "city",
+        "question": "Which city is named in Document Beta? Reply with only the city name.",
+        "gold": "Karachi",
+    },
+    {
+        "id": "year",
+        "question": "Which year is stated in Document Gamma? Reply with only the year.",
+        "gold": "2019",
+    },
+    {
+        "id": "code",
+        "question": "What is the secret code in Document Alpha? Reply with only the code.",
+        "gold": "ALPHA-9173",
+    },
+)
+
+
 def _docs(*, filler_chars: int, order: tuple[str, ...]) -> list[str]:
     fill = ("epic filler. " * max(1, (filler_chars // 12) + 1))[:filler_chars]
     blocks = {
@@ -36,6 +56,16 @@ def _docs(*, filler_chars: int, order: tuple[str, ...]) -> list[str]:
         "C": f"### Document Gamma\nStated year: 2019.\n{fill}\n",
     }
     return [blocks[k] for k in order]
+
+
+def _contains_gold(text: str, gold: str) -> bool:
+    return gold.lower() in (text or "").lower()
+
+
+def _p90(samples: list[float]) -> float:
+    if not samples:
+        return 0.0
+    return sorted(samples)[max(0, int(0.9 * (len(samples) - 1)))]
 
 
 def _prompt_text(*, system: str, docs: list[str], question: str) -> str:
@@ -188,6 +218,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--runs", type=int, default=5, help="Timed runs after 1 warmup (PRD G1).")
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.80)
     parser.add_argument("--out", type=Path, default=None)
+    parser.add_argument(
+        "--suite",
+        choices=("single", "quality"),
+        default="single",
+        help="single=city gold only; quality=3 facts (city/year/code) for broader quality.",
+    )
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
@@ -237,9 +273,10 @@ def main(argv: list[str] | None = None) -> int:
         "You are a careful assistant. Use only the documents. "
         "Prefer a short answer."
     )
-    question = "Which city is named in Document Beta? Reply with only the city name."
-    gold = "Karachi"
+    cases = list(QUALITY_CASES) if args.suite == "quality" else [QUALITY_CASES[0]]
     order = ("B", "C", "A")
+    # Scale against the longest question so all suite prompts stay ≥ target.
+    scale_question = max((c["question"] for c in cases), key=len)
     filler_chars = args.filler_chars
     if args.target_context_tokens is not None:
         if args.target_context_tokens + args.max_tokens + 8 > args.max_model_len:
@@ -252,7 +289,7 @@ def main(argv: list[str] | None = None) -> int:
         filler_chars = _filler_chars_for_target(
             tokenizer,
             system=system,
-            question=question,
+            question=scale_question,
             order=order,
             target_context_tokens=args.target_context_tokens,
         )
@@ -261,16 +298,25 @@ def main(argv: list[str] | None = None) -> int:
             flush=True,
         )
     docs_bca = _docs(filler_chars=filler_chars, order=order)
-    full_prompt = _prompt_text(system=system, docs=docs_bca, question=question)
-    prompt_tokens = len(tokenizer.encode(full_prompt, add_special_tokens=True))
+    prompt_tokens_by_case: dict[str, int] = {}
+    for c in cases:
+        pt = len(
+            tokenizer.encode(
+                _prompt_text(system=system, docs=docs_bca, question=c["question"]),
+                add_special_tokens=True,
+            )
+        )
+        prompt_tokens_by_case[c["id"]] = pt
+    prompt_tokens = min(prompt_tokens_by_case.values())
     print(
-        f"EPIC bench model={args.model} recomp={args.recomp_num} "
-        f"prompt_tokens={prompt_tokens} filler_chars={filler_chars}",
+        f"EPIC bench model={args.model} suite={args.suite} recomp={args.recomp_num} "
+        f"prompt_tokens_min={prompt_tokens} filler_chars={filler_chars}",
         flush=True,
     )
-    if prompt_tokens + args.max_tokens > args.max_model_len:
+    if max(prompt_tokens_by_case.values()) + args.max_tokens > args.max_model_len:
         print(
-            f"prompt_tokens={prompt_tokens} exceeds max_model_len={args.max_model_len}",
+            f"prompt_tokens exceed max_model_len={args.max_model_len}: "
+            f"{prompt_tokens_by_case}",
             file=sys.stderr,
         )
         return 2
@@ -285,69 +331,107 @@ def main(argv: list[str] | None = None) -> int:
     if hasattr(llm, "set_tokenizer"):
         llm.set_tokenizer(tokenizer)
 
+    warmup_prompt = _prompt_text(
+        system=system, docs=docs_bca, question=cases[0]["question"]
+    )
     print("  [warmup full prefill] discarded", flush=True)
-    _full_prefill(llm, full_prompt, max_tokens=args.max_tokens)
+    _full_prefill(llm, warmup_prompt, max_tokens=args.max_tokens)
 
-    fr_samples: list[float] = []
-    fr_text = ""
-    for i in range(args.runs):
-        print(f"  [full prefill BCA] {i + 1}/{args.runs} …", flush=True)
-        fr_ms, fr_text = _full_prefill(llm, full_prompt, max_tokens=args.max_tokens)
-        fr_samples.append(fr_ms)
-        print(f"  [full prefill BCA] {fr_ms:.0f} ms", flush=True)
+    case_results: list[dict] = []
+    for c in cases:
+        full_prompt = _prompt_text(system=system, docs=docs_bca, question=c["question"])
+        fr_samples: list[float] = []
+        fr_text = ""
+        for i in range(args.runs):
+            print(f"  [{c['id']} full] {i + 1}/{args.runs} …", flush=True)
+            fr_ms, fr_text = _full_prefill(llm, full_prompt, max_tokens=args.max_tokens)
+            fr_samples.append(fr_ms)
+            print(f"  [{c['id']} full] {fr_ms:.0f} ms", flush=True)
 
-    link_samples: list[float] = []
-    link_text = ""
-    for i in range(args.runs):
-        print(f"  [kvlink-{args.recomp_num} BCA] {i + 1}/{args.runs} …", flush=True)
-        link_ms, link_text = _collect_and_link(
-            llm,
-            tokenizer,
-            system=system,
-            docs=docs_bca,
-            question=question,
-            recomp_num=args.recomp_num,
-            max_tokens=args.max_tokens,
+        link_samples: list[float] = []
+        link_text = ""
+        for i in range(args.runs):
+            print(f"  [{c['id']} kvlink-{args.recomp_num}] {i + 1}/{args.runs} …", flush=True)
+            link_ms, link_text = _collect_and_link(
+                llm,
+                tokenizer,
+                system=system,
+                docs=docs_bca,
+                question=c["question"],
+                recomp_num=args.recomp_num,
+                max_tokens=args.max_tokens,
+            )
+            link_samples.append(link_ms)
+            print(f"  [{c['id']} kvlink-{args.recomp_num}] {link_ms:.0f} ms", flush=True)
+
+        fr_med = statistics.median(fr_samples)
+        link_med = statistics.median(link_samples)
+        case_results.append(
+            {
+                "id": c["id"],
+                "gold": c["gold"],
+                "prompt_tokens": prompt_tokens_by_case[c["id"]],
+                "full_prefill_ms": fr_med,
+                "full_prefill_p90_ms": _p90(fr_samples),
+                "kvlink_ms": link_med,
+                "kvlink_p90_ms": _p90(link_samples),
+                "full_prefill_samples_ms": fr_samples,
+                "kvlink_samples_ms": link_samples,
+                "full_vs_kvlink_speedup": fr_med / link_med if link_med > 0 else None,
+                "outputs": {"full_prefill": fr_text, "kvlink": link_text},
+                "full_contains": _contains_gold(fr_text, c["gold"]),
+                "kvlink_contains": _contains_gold(link_text, c["gold"]),
+                "latency_ok": link_med < 0.85 * fr_med,
+            }
         )
-        link_samples.append(link_ms)
-        print(f"  [kvlink-{args.recomp_num} BCA] {link_ms:.0f} ms", flush=True)
 
     try:
         del llm
     except Exception:  # noqa: BLE001
         pass
-    fr_ms = statistics.median(fr_samples)
-    link_ms = statistics.median(link_samples)
-    fr_p90 = sorted(fr_samples)[max(0, int(0.9 * (len(fr_samples) - 1)))]
-    link_p90 = sorted(link_samples)[max(0, int(0.9 * (len(link_samples) - 1)))]
-    quality_ok = gold.lower() in fr_text.lower() and gold.lower() in link_text.lower()
-    # Link should beat full prefill on TTFT for this PIC workload (paper claim).
-    latency_ok = link_ms < 0.85 * fr_ms
+
+    n = len(case_results)
+    full_hits = sum(1 for r in case_results if r["full_contains"])
+    link_hits = sum(1 for r in case_results if r["kvlink_contains"])
+    contains_rate_full = full_hits / n
+    contains_rate_kvlink = link_hits / n
+    quality_ok = contains_rate_full >= 0.9 and contains_rate_kvlink >= 0.9
+    # Latency bar: every case must clear ≥15% (strict; avoids one easy case carrying).
+    latency_ok = all(r["latency_ok"] for r in case_results)
+    # Headline numbers from city (or sole) case for continuity with EPIC@12k.
+    head = case_results[0]
     payload = {
         "gate": "G1-step4-epic",
-        "pre_reg": "Docs/pre-reg-epic-12k.md",
+        "suite": args.suite,
+        "pre_reg": (
+            "Docs/pre-reg-epic-quality.md"
+            if args.suite == "quality"
+            else "Docs/pre-reg-epic-12k.md"
+        ),
         "model": args.model,
         "recomp_num": args.recomp_num,
         "runs": args.runs,
         "filler_chars": filler_chars,
         "target_context_tokens": args.target_context_tokens,
-        "prompt_tokens": prompt_tokens,
+        "prompt_tokens": head["prompt_tokens"],
+        "prompt_tokens_by_case": prompt_tokens_by_case,
         "max_model_len": args.max_model_len,
-        "full_prefill_ms": fr_ms,
-        "full_prefill_p90_ms": fr_p90,
-        "kvlink_ms": link_ms,
-        "kvlink_p90_ms": link_p90,
-        "full_prefill_samples_ms": fr_samples,
-        "kvlink_samples_ms": link_samples,
-        "full_vs_kvlink_speedup": fr_ms / link_ms if link_ms > 0 else None,
-        "outputs": {"full_prefill": fr_text, "kvlink": link_text},
-        "gold": gold,
+        "cases": case_results,
+        "contains_rate_full": contains_rate_full,
+        "contains_rate_kvlink": contains_rate_kvlink,
+        "full_prefill_ms": head["full_prefill_ms"],
+        "full_prefill_p90_ms": head["full_prefill_p90_ms"],
+        "kvlink_ms": head["kvlink_ms"],
+        "kvlink_p90_ms": head["kvlink_p90_ms"],
+        "full_vs_kvlink_speedup": head["full_vs_kvlink_speedup"],
+        "outputs": head["outputs"],
+        "gold": head["gold"],
         "latency_ok": latency_ok,
         "quality_ok": quality_ok,
         "pass_heuristic": latency_ok and quality_ok,
         "note": (
-            "LegoLink-N on EPIC fork. pass ⇒ kvlink ≥15% faster than full AND "
-            "both answers contain gold. Use --target-context-tokens for ≥6k/12k."
+            "LegoLink-N on EPIC fork. single: city gold. quality suite: ≥0.9 contains "
+            "on both arms across cases AND every case ≥15% TTFT win."
         ),
     }
     if args.out:
@@ -357,9 +441,11 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(payload, indent=2))
     else:
         print(
-            f"fr={fr_ms:.0f} kvlink={link_ms:.0f} "
-            f"speedup={payload['full_vs_kvlink_speedup']:.2f}x "
-            f"prompt_tokens={prompt_tokens} pass={payload['pass_heuristic']}"
+            f"suite={args.suite} fr={head['full_prefill_ms']:.0f} "
+            f"kvlink={head['kvlink_ms']:.0f} "
+            f"speedup={head['full_vs_kvlink_speedup']:.2f}x "
+            f"contains_kvlink={contains_rate_kvlink:.2f} "
+            f"pass={payload['pass_heuristic']}"
         )
     code = 0 if payload["pass_heuristic"] else 4
     print("exiting (hard) to avoid CUDA teardown hang", flush=True)

@@ -1,36 +1,30 @@
-# Project pause → resume
+# Project state after EPIC@12k
 
-**Effective pause:** 2026-10-23  
-**Resume path 2 result:** EPIC@12k **PASS** — `artifacts/g1-epic-12k-2026-10-23/`  
-**Prior decision:** Phase 0 **PIVOT** — [`phase0-exit-decision.md`](phase0-exit-decision.md)  
-**Pre-reg:** [`pre-reg-epic-12k.md`](pre-reg-epic-12k.md) (**answered**)
+**Prior pause:** 2026-10-23  
+**Path 2:** EPIC@12k **PASS** — `artifacts/g1-epic-12k-2026-10-23/`  
+**Active next:** **EPIC multi-fact quality** — [`pre-reg-epic-quality.md`](pre-reg-epic-quality.md)  
+**Phase 0 decision:** **PIVOT** — [`phase0-exit-decision.md`](phase0-exit-decision.md)
 
-## Why we paused
-
-Phase 0’s go/pivot/stop question was answered with measured evidence. Pause was
-intentional; resume is only via an explicit path below.
-
-## What stays frozen
+## Frozen
 
 | Item | Status |
 |---|---|
-| CacheBlend G1 | CLOSED — do not reopen |
-| Phase 1 / G2 / G3 | Not opened (EPIC pass does **not** auto-start Phase 1) |
-| ResolventKV kernels | Blocked (§6) — need broader quality evidence than one gold case |
-| Partner ask | Parked (optional forever) |
+| CacheBlend G1 | CLOSED |
+| Phase 1 / G2 / G3 | Not opened |
+| ResolventKV | Blocked (§6) |
+| Partner ask | Optional |
 
-## Resume paths
+## Paths
 
-1. **Stay paused / archive** — default after path-2 closeout unless owner picks below.
-2. **Run EPIC@12k** — **DONE** (PASS @12001 tok, ~3.84×, quality OK).
-3. **Thin planner maintenance** — C3 calibration row landed in `planner.v0`.
-4. **Open Phase 1** — only after an explicit go memo.
+1. Stay paused — after quality pre-reg answered or declined.
+2. EPIC@12k — **DONE**.
+3. Thin planner — C3 landed; update notes after quality run.
+4. Phase 1 — explicit go memo only.
+5. **EPIC quality suite** — **ACTIVE desk**; GPU when owner starts `cw-epic-quality`.
 
-## Active artifacts to trust
+## Trust
 
 - `artifacts/g1-epic-12k-2026-10-23/`
-- `Docs/phase0-exit-decision.md`
-- `Docs/g1-closeout-thesis.md`
-- `artifacts/g1-diag-2026-10-23/`
-- `docs/experiment-log.md` Current verdict
-- `contextweave.planner.v0` (C3 EPIC calibrated; C4 still refused)
+- `Docs/pre-reg-epic-quality.md`
+- `docs/experiment-log.md`
+- `contextweave.planner.v0`
