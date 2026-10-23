@@ -49,6 +49,8 @@ CHUNK_FACTS = {
 }
 
 DEFAULT_BLEND_SPECIAL = " # # "
+# G1-DIAG re-run: in-process connector + register_model (not MP-only).
+BLEND_PATH = "inprocess"
 QUESTION = (
     "Which city is named in Document Beta? Reply with only the city name.\n/no_think"
 )
@@ -144,14 +146,16 @@ def _chunk_tokens_for_target(
     return _align_down(usable // 3, 256)
 
 
+def _prepare_blend_worker(*, blend_special_str: str) -> None:
+    """In-process LMCBlender: env + VLLMModelTracker.register_model (#4131)."""
+    from g1_blend_hooks import prepare_blend_worker
+
+    prepare_blend_worker(blend_special_str=blend_special_str)
+
+
 def _setup_blend_client_env(*, blend_special_str: str) -> None:
-    """Activate in-worker blending hooks expected by LMCache CacheBlend."""
-    os.environ.setdefault("LMCACHE_CHUNK_SIZE", "256")
-    os.environ["LMCACHE_ENABLE_BLENDING"] = "True"
-    os.environ["LMCACHE_BLEND_SPECIAL_STR"] = blend_special_str
-    os.environ.setdefault("LMCACHE_USE_LAYERWISE", "True")
-    os.environ.setdefault("LMCACHE_BLEND_CHECK_LAYERS", "1")
-    os.environ.setdefault("LMCACHE_BLEND_RECOMPUTE_RATIOS", "0.15")
+    """Backward-compatible alias → ``_prepare_blend_worker``."""
+    _prepare_blend_worker(blend_special_str=blend_special_str)
 
 
 def _cv(samples: list[float]) -> float | None:
@@ -361,7 +365,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     if args.backend == "blend":
-        _setup_blend_client_env(blend_special_str=args.blend_special_str)
+        _prepare_blend_worker(blend_special_str=args.blend_special_str)
 
     from transformers import AutoTokenizer
     from vllm import LLM, SamplingParams
@@ -449,37 +453,15 @@ def main(argv: list[str] | None = None) -> int:
     if args.backend == "native_prefix":
         kwargs["enable_prefix_caching"] = True
     else:
-        from vllm.config import KVTransferConfig
+        from g1_blend_hooks import blend_kv_transfer_config
 
-        host = os.environ.get("LMCACHE_MP_HOST", "127.0.0.1")
-        port = int(os.environ.get("LMCACHE_MP_PORT", "5555"))
         kwargs["enable_prefix_caching"] = False
-        import importlib.util
-
-        extra = {
-            "lmcache.mp.host": f"tcp://{host}",
-            "lmcache.mp.port": port,
-            "lmcache.mp.mq_timeout": float(os.environ.get("LMCACHE_MP_MQ_TIMEOUT", "300")),
-            "lmcache.mp.heartbeat_interval": float(
-                os.environ.get("LMCACHE_MP_HEARTBEAT_INTERVAL", "60")
-            ),
-            "lmcache.mp.mp_transfer_mode": os.environ.get(
-                "LMCACHE_MP_TRANSFER_MODE", "lmcache_driven"
-            ),
-        }
-        ktc_kwargs: dict = {
-            "kv_connector": "LMCacheMPConnector",
-            "kv_role": "kv_both",
-            "kv_connector_extra_config": extra,
-        }
-        mp_mod = "lmcache.integration.vllm.lmcache_mp_connector"
-        if importlib.util.find_spec(mp_mod) is not None:
-            ktc_kwargs["kv_connector_module_path"] = mp_mod
-        kwargs["kv_transfer_config"] = KVTransferConfig(**ktc_kwargs)
+        kwargs["kv_transfer_config"] = blend_kv_transfer_config()
 
     print(
-        f"matched TTFT backend={args.backend} runs={args.runs} "
-        f"target_tokens={args.target_prefix_tokens} chunk_tokens={chunk_tokens}",
+        f"matched TTFT backend={args.backend} blend_path={BLEND_PATH} "
+        f"runs={args.runs} target_tokens={args.target_prefix_tokens} "
+        f"chunk_tokens={chunk_tokens}",
         flush=True,
     )
     llm = LLM(**kwargs)
@@ -617,6 +599,7 @@ def main(argv: list[str] | None = None) -> int:
         "model": args.model,
         "runs": args.runs,
         "prompt_format": "chunk_sep",
+        "blend_path": BLEND_PATH if args.backend == "blend" else None,
         "blend_special_str": args.blend_special_str,
         "chunk_tokens": chunk_tokens,
         "chunk_tokens_aligned_256": chunk_tokens % 256 == 0,
@@ -653,6 +636,7 @@ def main(argv: list[str] | None = None) -> int:
         "harness_reorder_gap_ok": harness_reorder_gap_ok and prefix_cache_reset_ok,
         "gate_r": gate_r_payload,
         "note": (
+            "blend_path=inprocess (LMCacheConnectorV1 + register_model). "
             "prompt_format=chunk_sep required for CacheBlend chunk-id reuse. "
             "harness_reorder_gap_ok requires reorder ≥1.15× warm ABC and no "
             "self-hit pollution. "

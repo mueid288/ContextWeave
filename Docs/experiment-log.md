@@ -7,9 +7,8 @@
 - Post-remediation CacheBlend D/E at 12k: **INCONCLUSIVE** — blend reorder≈cold≈native
   miss ⇒ no reuse proof; do not cite as “quality OK / latency miss”
 - EPIC fast-path Mistral @~500 tok: **INCONCLUSIVE (toy scale)** — not a fair close
-- Next: Qwen3 blend support confirmed on lmcache 0.4.2 → one **G1-DIAG** GPU session
-  (Gate R, keep `Qwen/Qwen3-8B`) per
-  `Docs/Reviews/claude_g1_remaining_gaps_fixes_recommendations.md`
+- Next: harness fix landed (in-process + `register_model`) → **one** G1-DIAG
+  re-run (Gate R); collect tarball before stop; do not cite D/E until REUSE_OK
 - ResolventKV: still deferred until verified engaged reuse + quality-preserving win
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
@@ -390,6 +389,33 @@
   model-support reasons. If Gate R still `ENGAGEMENT_FAIL`, treat as harness/config
   (alignment, `register_model`/#4131, MP vs in-worker blender), not missing Qwen3 adapter
 - Next: G1-DIAG Colab ≤60 min, Gate R on reorder; record `pip freeze`
+
+## 2026-10-23 — G1-DIAG: Gate R ENGAGEMENT_FAIL (got=0)
+
+- **Status:** `INCONCLUSIVE` (harness/config; **not** algorithm negative)
+- Env: Colab A100 `cw-g1-diag`, matched pin, `Qwen/Qwen3-8B`, chunk_sep 12k, n=10
+- Gates: B PASS; D PASS (agree=1.0 — full prefill can still answer); **R FAIL**
+  `got=0 need≥8063`; E correctly SKIPPED
+- Engagement evidence: reorder `num_cached_tokens`/retrieved = **0**; latency agrees —
+  blend warm_abc p50 **188** ms (same-order hit) vs warm_bac/cba/cold ≈ **947–955** ms
+  (reorder ≡ cold miss). native_reorder ≈ 931 ms; speedup ≈ 0.98×
+- polluted=False; prompt_format=chunk_sep
+- Decision (pre-registered): treat as config/harness — MP `LMCacheMPConnector` +
+  client `ENABLE_BLENDING` without proven in-worker `LMCBlender`/`register_model`
+  (#4131). **One** fix then one DIAG re-run. Do not switch model; do not open EPIC
+- Artifacts: session stopped **without** `g1_collect_artifacts.sh` — full JSONs /
+  `pip freeze` unrecoverable. Banked paste reconstruction under
+  `artifacts/g1-diag-2026-10-23/` (`artifact_kind=reconstructed_from_chat_paste`)
+- Next: harness fix in tree → one DIAG re-run; collect tarball **before** stop
+
+## 2026-10-23 — Harness: matched blend → in-process + register_model
+
+- **Status:** `VALID` (harness; CPU-tested)
+- Change: `scripts/g1_blend_hooks.py`; matched quality/TTFT blend arm uses
+  `LMCacheConnectorV1` + `VLLM_ENABLE_V1_MULTIPROCESSING=0` + `#4131` patch
+- Shells: Gate D / Stage E no longer start `lmcache server --engine-type blend`
+- Control (Gate C) still uses MP + default engine
+- Next: push → Colab G1-DIAG #2 (Gate R only question); collect before stop
 
 ## Template for future entries
 

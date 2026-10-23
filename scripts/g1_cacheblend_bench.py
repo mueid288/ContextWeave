@@ -35,58 +35,23 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+SCRIPTS = ROOT / "scripts"
+for p in (SRC, SCRIPTS):
+    if str(p) not in sys.path:
+        sys.path.insert(0, str(p))
 
 
 def _setup_blend_env(*, blend_special_str: str, cpu_gb: float) -> None:
-    os.environ["LMCACHE_CHUNK_SIZE"] = "256"
-    os.environ["LMCACHE_ENABLE_BLENDING"] = "True"
-    os.environ["LMCACHE_BLEND_SPECIAL_STR"] = blend_special_str
-    os.environ["LMCACHE_USE_LAYERWISE"] = "True"
-    os.environ["LMCACHE_BLEND_CHECK_LAYERS"] = "1"
-    os.environ["LMCACHE_BLEND_RECOMPUTE_RATIOS"] = "0.15"
-    os.environ["LMCACHE_LOCAL_CPU"] = "True"
-    os.environ["LMCACHE_MAX_LOCAL_CPU_SIZE"] = str(cpu_gb)
+    from g1_blend_hooks import setup_blend_env
+
+    setup_blend_env(blend_special_str=blend_special_str, cpu_gb=cpu_gb)
 
 
 def _patch_vllm_register_model_for_blend() -> None:
-    """Stock vLLM never calls VLLMModelTracker.register_model (LMCache #4131).
+    """Stock vLLM never calls VLLMModelTracker.register_model (LMCache #4131)."""
+    from g1_blend_hooks import patch_vllm_register_model_for_blend
 
-    CacheBlend's blender then fails with: ``vllm model for vllm-instance not found``.
-    Hook ``GPUModelRunner.load_model`` so registration happens before KV init.
-    Must run in the same process as the worker — we disable V1 multiprocessing.
-    """
-    import importlib
-
-    from lmcache.integration.vllm.utils import ENGINE_NAME
-    from lmcache.v1.compute.models.utils import VLLMModelTracker
-
-    for mod_name in (
-        "vllm.v1.worker.gpu_model_runner",
-        "vllm.v1.worker.gpu.model_runner",
-    ):
-        try:
-            mod = importlib.import_module(mod_name)
-        except Exception:
-            continue
-        cls = getattr(mod, "GPUModelRunner", None)
-        if cls is None:
-            continue
-        orig = cls.load_model
-        if getattr(orig, "_cw_blend_patched", False):
-            continue
-
-        def load_model(self, *args, _orig=orig, **kwargs):  # noqa: ANN001
-            out = _orig(self, *args, **kwargs)
-            model_obj = getattr(self, "model", None)
-            if model_obj is not None:
-                VLLMModelTracker.register_model(ENGINE_NAME, model_obj)
-            return out
-
-        load_model._cw_blend_patched = True  # type: ignore[attr-defined]
-        cls.load_model = load_model  # type: ignore[method-assign]
-        print(f"patched {mod_name}.GPUModelRunner.load_model for CacheBlend", flush=True)
+    patch_vllm_register_model_for_blend()
 
 
 @contextlib.contextmanager

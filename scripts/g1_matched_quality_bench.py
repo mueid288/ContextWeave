@@ -8,7 +8,7 @@ So cases 2..N are not exact prefix hits on case 1's body.
 Modes:
   native  — no LMCache (sanity)
   control — LMCacheMPConnector, default engine
-  blend   — LMCacheMPConnector + client blend env vs ``--engine-type blend``
+  blend   — in-process ``LMCacheConnectorV1`` + register_model (#4131)
 
   export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
   python scripts/g1_matched_quality_bench.py --mode control --json | tee g1_matched_control.json
@@ -28,11 +28,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+SCRIPTS = ROOT / "scripts"
+for p in (SRC, SCRIPTS):
+    if str(p) not in sys.path:
+        sys.path.insert(0, str(p))
 
 DEFAULT_BLEND_SPECIAL = " # # "
 CHUNK_BLOCK = 256
+BLEND_PATH = "inprocess"
 
 
 def _load_scoring():
@@ -134,13 +137,15 @@ ORDERS = {
 }
 
 
+def _prepare_blend_worker(*, blend_special_str: str) -> None:
+    from g1_blend_hooks import prepare_blend_worker
+
+    prepare_blend_worker(blend_special_str=blend_special_str)
+
+
 def _setup_blend_client_env(*, blend_special_str: str) -> None:
-    os.environ.setdefault("LMCACHE_CHUNK_SIZE", "256")
-    os.environ["LMCACHE_ENABLE_BLENDING"] = "True"
-    os.environ["LMCACHE_BLEND_SPECIAL_STR"] = blend_special_str
-    os.environ.setdefault("LMCACHE_USE_LAYERWISE", "True")
-    os.environ.setdefault("LMCACHE_BLEND_CHECK_LAYERS", "1")
-    os.environ.setdefault("LMCACHE_BLEND_RECOMPUTE_RATIOS", "0.15")
+    """Backward-compatible alias → ``_prepare_blend_worker``."""
+    _prepare_blend_worker(blend_special_str=blend_special_str)
 
 
 def _align_chunk_tokens(n: int, block: int = CHUNK_BLOCK) -> int:
@@ -254,7 +259,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     if args.mode == "blend":
-        _setup_blend_client_env(blend_special_str=args.blend_special_str)
+        _prepare_blend_worker(blend_special_str=args.blend_special_str)
 
     host = os.environ.get("LMCACHE_MP_HOST", "127.0.0.1")
     port = int(os.environ.get("LMCACHE_MP_PORT", "5555"))
@@ -300,13 +305,18 @@ def main(argv: list[str] | None = None) -> int:
         "enforce_eager": True,
         "enable_prefix_caching": args.mode == "native",
     }
-    if args.mode in ("control", "blend"):
+    if args.mode == "control":
         kwargs["enable_prefix_caching"] = False
         kwargs["kv_transfer_config"] = _kv_transfer_config(host, port)
+    elif args.mode == "blend":
+        from g1_blend_hooks import blend_kv_transfer_config
+
+        kwargs["enable_prefix_caching"] = False
+        kwargs["kv_transfer_config"] = blend_kv_transfer_config()
 
     print(
-        f"matched quality mode={args.mode} order={args.order} "
-        f"n={len(CASES)} chunk_tokens={chunk_tokens} format=chunk_sep",
+        f"matched quality mode={args.mode} blend_path={BLEND_PATH if args.mode == 'blend' else 'n/a'} "
+        f"order={args.order} n={len(CASES)} chunk_tokens={chunk_tokens} format=chunk_sep",
         flush=True,
     )
     llm = LLM(**kwargs)
@@ -408,10 +418,11 @@ def main(argv: list[str] | None = None) -> int:
         "order": args.order,
         "model": args.model,
         "prompt_format": "chunk_sep",
+        "blend_path": BLEND_PATH if args.mode == "blend" else None,
         "blend_special_str": args.blend_special_str,
         "chunk_tokens": chunk_tokens,
         "protocol": "per_case: reset → seed_abc → measure order+question",
-        "lmcache_mp": {"host": host, "port": port} if args.mode != "native" else None,
+        "lmcache_mp": {"host": host, "port": port} if args.mode == "control" else None,
         "blend_client_env": args.mode == "blend",
         "n_cases": n,
         "cases": cases_out,
@@ -425,7 +436,8 @@ def main(argv: list[str] | None = None) -> int:
         "pass_heuristic": pass_h,
         "note": (
             "Gate C (control): contains≥0.9 garbage≤0.05. "
-            "Gate D (blend): + agree_with_control≥0.9 when --control-json set. "
+            "Gate D (blend): inprocess LMCacheConnectorV1 + register_model; "
+            "+ agree_with_control≥0.9 when --control-json set. "
             "chunk_sep + per-case ABC seed required for real blend/reorder probe."
         ),
     }

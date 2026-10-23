@@ -259,3 +259,25 @@ def test_g1_matched_quality_helpers(monkeypatch: pytest.MonkeyPatch):
     assert any(c.get("hop") == 2 for c in mod.CASES)
     monkeypatch.delenv("CONTEXTWEAVE_ALLOW_MODEL_LOAD", raising=False)
     assert mod.main(["--mode", "control", "--json"]) == 1
+
+
+def test_g1_blend_hooks_prepare_disables_v1_mp(monkeypatch: pytest.MonkeyPatch):
+    """G1-DIAG #1: MP+ENABLE_BLENDING without register_model → got=0 reuse."""
+    hooks = _load_script("g1_blend_hooks.py")
+    monkeypatch.delenv("VLLM_ENABLE_V1_MULTIPROCESSING", raising=False)
+    hooks.prepare_blend_worker(blend_special_str=" # # ")
+    assert os.environ.get("VLLM_ENABLE_V1_MULTIPROCESSING") == "0"
+    assert os.environ.get("LMCACHE_ENABLE_BLENDING") == "True"
+    assert os.environ.get("LMCACHE_BLEND_SPECIAL_STR") == " # # "
+    assert os.environ.get("LMCACHE_USE_LAYERWISE") == "True"
+    assert callable(hooks.patch_vllm_register_model_for_blend)
+    assert hooks.BLEND_KV_CONNECTOR == "LMCacheConnectorV1"
+
+
+def test_g1_matched_benches_use_inprocess_blend_hooks():
+    ttft = _load_script("g1_matched_ttft_bench.py")
+    quality = _load_script("g1_matched_quality_bench.py")
+    assert ttft.BLEND_PATH == "inprocess"
+    assert quality.BLEND_PATH == "inprocess"
+    assert callable(ttft._prepare_blend_worker)
+    assert callable(quality._prepare_blend_worker)

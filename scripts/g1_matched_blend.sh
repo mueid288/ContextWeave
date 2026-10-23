@@ -93,8 +93,15 @@ python scripts/g1_matched_quality_bench.py --mode control --order abc \
   --out g1_matched_control.json
 python -c "import json,sys; p=json.load(open('g1_matched_control.json')); sys.exit(0 if p.get('gate_c_pass') or p.get('pass_heuristic') else 3)"
 
-# --- Gate D: blend engine + reorder ---
-start_server blend
+# --- Gate D: in-process blend (LMCacheConnectorV1 + register_model); stop MP server ---
+if [[ -n "${SERVER_PID:-}" ]] && kill -0 "$SERVER_PID" 2>/dev/null; then
+  kill "$SERVER_PID" 2>/dev/null || true
+  wait "$SERVER_PID" 2>/dev/null || true
+  SERVER_PID=""
+fi
+pkill -f 'lmcache' 2>/dev/null || true
+sleep 1
+echo "=== Gate D blend (inprocess; no lmcache MP server) ==="
 # Pass --control-json on abc too so set -e does not treat missing agree_rate as fail.
 python scripts/g1_matched_quality_bench.py --mode blend --order abc \
   --control-json g1_matched_control.json \

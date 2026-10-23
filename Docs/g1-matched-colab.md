@@ -10,6 +10,10 @@ before interpreting D/E. Spec:
 **Model:** keep `Qwen/Qwen3-8B` — lmcache **0.4.2** ships `LMCQwen3Model`
 ([PR #1633](https://github.com/LMCache/LMCache/pull/1633)); not a llama-only pin.
 
+**Blend path (post G1-DIAG #1):** in-process `LMCacheConnectorV1` +
+`VLLMModelTracker.register_model` (#4131) via `scripts/g1_blend_hooks.py`.
+MP-only blend is retired for Gate D/E — it left Gate R at got=0.
+
 Offline first:
 ```bash
 python scripts/g1_blend_alignment_audit.py --json

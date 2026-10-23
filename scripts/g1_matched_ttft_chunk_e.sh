@@ -34,37 +34,10 @@ python scripts/g1_matched_ttft_bench.py --backend native_prefix --runs "$RUNS" \
   --gpu-memory-utilization "$GPU_UTIL" \
   --out g1_ttft_native_12k_chunks.json
 
+# Blend arm is in-process LMCacheConnectorV1 + register_model (no MP server).
 pkill -f 'lmcache' 2>/dev/null || true
-sleep 2
-rm -f "$LOG"
-SERVER_PID="$(start_lmcache_server blend "$LOG" 127.0.0.1 "$LMCACHE_MP_PORT" "$HTTP_PORT" "${LMCACHE_L1_GB:-32}")"
-if [[ -z "$SERVER_PID" ]]; then
-  echo "failed to start lmcache:"; cat "$LOG" || true; exit 2
-fi
-ready=0
-deadline=$((SECONDS + READY_TIMEOUT_S))
-while (( SECONDS < deadline )); do
-  if ! kill -0 "$SERVER_PID" 2>/dev/null; then
-    echo "lmcache server exited (pid=$SERVER_PID):"; cat "$LOG" || true; exit 2
-  fi
-  if grep -qiE 'unrecognized arguments|Address already in use|Traceback \(most recent call last\)' "$LOG" 2>/dev/null; then
-    echo "lmcache server error:"; cat "$LOG" || true; exit 2
-  fi
-  if grep -qE 'ZMQ cache server is running|LMCache cache server is running|Uvicorn running|Application startup complete' "$LOG" 2>/dev/null; then
-    ready=1; break
-  fi
-  if curl -fsS "http://127.0.0.1:${HTTP_PORT}/api/healthcheck" >/dev/null 2>&1 \
-    || curl -fsS "http://127.0.0.1:${HTTP_PORT}/healthcheck" >/dev/null 2>&1; then
-    ready=1; break
-  fi
-  sleep 1
-done
-if [[ "$ready" -ne 1 ]]; then
-  echo "not ready after ${READY_TIMEOUT_S}s:"; cat "$LOG" || true; exit 2
-fi
-echo "lmcache ready pid=$SERVER_PID"
-
-echo "=== blend chunk_sep TTFT ==="
+sleep 1
+echo "=== blend chunk_sep TTFT (inprocess; no lmcache MP server) ==="
 python scripts/g1_matched_ttft_bench.py --backend blend --runs "$RUNS" \
   --max-model-len "$MAX_LEN" --target-prefix-tokens "$TARGET" \
   --gpu-memory-utilization "$GPU_UTIL" \
