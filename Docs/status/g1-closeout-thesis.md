@@ -49,6 +49,6 @@ when non-prefix artifacts are valid; **C4** (CacheBlend) refused; else **C0**.
 
 ## Next
 
-1. Thin policy: **C1** if prefix else **C0** (C3/C4 refused).
-2. Optional later: H3 order-aware risk signal pre-reg — only if reviving C3.
+1. Policy: **C1** / **C3 iff workload-local slice-cal safe** / else **C0** (C4 refused).
+2. H3 order-only: **FAIL** on confirm. H3 slice-cal LOO: **PASS** (local only).
 3. Phase 2 / ResolventKV still closed.

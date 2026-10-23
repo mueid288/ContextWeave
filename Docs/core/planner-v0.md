@@ -3,18 +3,25 @@
 PRD §7.6 rule-based planner. **No model load.**
 
 ```bash
-python -c "from contextweave.planner import plan, RequestView; print(plan(RequestView(has_validated_nonprefix_artifacts=True, chunk_order='BCA')).to_dict())"
+python -c "
+from contextweave.planner import plan, RequestView
+from contextweave.risk import SliceCalibration
+cal = SliceCalibration.from_c3_observations([('BCA','year',1.0)])
+print(plan(RequestView(
+    has_validated_nonprefix_artifacts=True,
+    chunk_order='BCA', fact_type='year', slice_calibration=cal,
+)).to_dict())
+"
 ```
 
 ## Rules (short)
 
 1. Invalid / unknown artifacts → no non-prefix reuse.
 2. Exact prefix → **C1**.
-3. Else consider calibrated methods; discard on quality / latency policy.
-4. **C3 (EPIC):** refused after H3 GPU confirm FAIL (order-only gate does not
-   generalize). `chunk_order` may still be passed for experiments.
-5. **C4 (CacheBlend):** refused (G1 quality).
-6. Else → **C0** full prefill.
+3. **C3 (EPIC):** only if `slice_calibration.is_safe(order, fact)`; else refuse.
+   No table ⇒ refuse (H3 order-only confirm FAIL; slice-cal is workload-local).
+4. **C4 (CacheBlend):** refused (G1 quality).
+5. Else → **C0** full prefill.
 
 Module: `src/contextweave/planner/v0.py`.  
-Evidence: `artifacts/phase1-oracle-2026-10-23/`, `artifacts/h3-confirm-2026-10-23/`.
+Evidence: `artifacts/h3-slice-cal-2026-10-23/`, `artifacts/h3-confirm-2026-10-23/`.

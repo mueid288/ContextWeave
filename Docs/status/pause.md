@@ -1,25 +1,28 @@
-# Project pause (H3 confirm FAIL)
+# Project status (H3 slice-cal PASS)
 
 **Effective:** 2026-10-23  
-**State:** **PAUSED**  
-**G2:** FAIL · **H3 replay:** suite-only · **H3 GPU confirm:** **FAIL**
+**State:** **ACTIVE (desk)** — not paused  
+**G2:** FAIL · **H3 order GPU confirm:** FAIL · **H3 slice-cal:** **PASS**
 
 ## Policy (shipped)
 
-**C1** if exact prefix, else **C0**. C3 and C4 refused.
+1. **C1** if exact prefix  
+2. Else **C3** only if workload-local `SliceCalibration` marks `(order, fact)` safe  
+3. Else **C0** · **C4** refused  
 
-## Why
+Without a calibration table → same as before (C1 else C0).
 
-Order∈{ACB,BAC} predicted Phase1 fails but **does not transfer** to fresh golds
-(`artifacts/h3-confirm-2026-10-23/`). Do not trust order-only H3 for routing.
+## Evidence
+
+- Same-suite LOO PASS: `artifacts/h3-slice-cal-2026-10-23/`
+- Cross-suite transfer fails → do not ship a global order/fact rule
 
 ## Frozen
 
-Phase 2, ResolventKV, G2 re-attack, further EPIC order-rule fishing without a
-new signal class (and new pre-reg).
+Phase 2, ResolventKV, G2 re-attack, order-only ACB/BAC as production gate.
 
-## Resume
+## Next
 
-1. Stay paused / archive — **default**  
-2. New pre-reg only if a **different** risk feature is proposed (not ACB/BAC redo)  
-3. Partner trace — optional  
+1. Optional: GPU confirm of calibrate-then-serve on **same** gold distribution  
+2. Partner trace — optional  
+3. Desk-idle — fine; C3 stays off until a table is supplied  

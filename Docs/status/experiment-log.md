@@ -2,11 +2,12 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** **PAUSED** — H3 GPU confirm **FAIL**; G2 FAIL stands — `Docs/status/pause.md`
+- **Project state:** **ACTIVE (desk)** — H3 slice-cal **PASS**; G2 FAIL stands —
+  `Docs/status/pause.md`
 - **Phase 0 / 1:** G2 FAIL; best fixed C0; **do not re-attack G2**
-- **H3:** replay looked good in-sample; **confirm FAIL** on fresh golds
-  (`artifacts/h3-confirm-2026-10-23/` — C3 mean_q 0.5; rule precision 0.5)
-- Planner: **C1 else C0**; C3/C4 refused (order-only H3 not trusted)
+- **H3:** order-only confirm **FAIL**; **slice-cal LOO PASS** (local tables only;
+  cross-suite transfer 0.33–0.50) — `artifacts/h3-slice-cal-2026-10-23/`
+- Planner: **C1** / **C3 iff SliceCalibration safe** / else **C0**; C4 refused
 - Phase 2 / ResolventKV: **not opened**; Colab idle
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
@@ -600,6 +601,16 @@
 - Artifacts: `artifacts/h3-confirm-2026-10-23/`. Planner reverts to blanket C3 refuse.
 - Stopped Colab. **PAUSED.** No Phase 2.
 - Supersedes: H3 order gate as production policy
+
+## 2026-10-23 — H3 slice calibration PASS (CPU)
+
+- **Status:** `VALID`
+- Pre-reg `Docs/pre-reg/pre-reg-h3-slice-cal.md`. Workload-local
+  `(order, fact_type)` LOO on Phase1 + confirm suites: prec **1.0**, mean_q **1.0**,
+  mean TTFT red **41% / 34%**. Cross-suite transfer prec **0.33–0.50** (expected).
+- Module `contextweave.risk.slice_calibration`; planner enables C3 only with table.
+- Artifacts: `artifacts/h3-slice-cal-2026-10-23/`. **Unpaused** (desk). No Phase 2.
+- Supersedes: “stay paused” default after order confirm FAIL
 
 ## Template for future entries
 

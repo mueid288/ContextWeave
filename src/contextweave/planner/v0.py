@@ -7,11 +7,11 @@ explicit reason codes.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import Enum
 from typing import Any
 
-from contextweave.risk.order_signal import predict_c3_quality_fail
+from contextweave.risk.slice_calibration import SliceCalibration
 
 
 class ConfigId(str, Enum):
@@ -64,8 +64,11 @@ class RequestView:
     # Validated non-prefix chunk artifacts available for blend-style reuse.
     has_validated_nonprefix_artifacts: bool = False
     artifacts_valid: bool = True
-    # Doc permutation for H3 EPIC risk (e.g. "BCA"). None ⇒ fail-closed for C3.
+    # Doc permutation / fact slice for workload-local H3 calibration.
     chunk_order: str | None = None
+    fact_type: str | None = None
+    # None ⇒ blanket C3 refuse (default). Safe cells only when table present.
+    slice_calibration: SliceCalibration | None = None
 
 
 @dataclass
@@ -97,17 +100,16 @@ G1_CACHEBLEND_A100_12K = MethodCalibration(
     ),
 )
 
-# EPIC: H3 order rule failed GPU confirm on fresh golds (2026-10-23).
-# artifacts/h3-confirm-2026-10-23/ — C3 mean_q=0.5; ACB/BAC rule precision 0.5.
-# Blanket refuse until a signal that generalizes (not order-only).
+# EPIC: default blanket refuse. C3 only when RequestView.slice_calibration
+# marks (order, fact_type) safe (H3 offline slice-cal; see pre-reg-h3-slice-cal).
 G1_EPIC_A100_12K = MethodCalibration(
     config=ConfigId.C3_EPIC,
     ttft_vs_prefill=1.0 / 1.9813145219210888,
-    quality_delta_points=-50.0,  # confirm suite mean contains 0.5
+    quality_delta_points=-50.0,  # no workload table ⇒ refuse
     supported=True,
     notes=(
-        "H3 GPU confirm FAIL: order∈{ACB,BAC} does not transfer (code fails on "
-        "CAB/CBA; ACB city OK). Blanket refuse C3. G2 FAIL stands."
+        "Default refuse C3. Enable per-request via SliceCalibration safe cells "
+        "(workload-local; order-only H3 confirm FAIL)."
     ),
 )
 
@@ -169,11 +171,19 @@ def plan(
         if not request.has_validated_nonprefix_artifacts:
             discard(cfg, ReasonCode.ARTIFACT_INVALID.value)
             continue
-        # Order gate kept for experiments but C3 calibration refuses on quality
-        # after H3 confirm FAIL; gate alone is not trusted for production policy.
-        if cfg == ConfigId.C3_EPIC and predict_c3_quality_fail(request.chunk_order):
-            discard(cfg, ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value)
-            continue
+        # Workload-local slice table: only path that may clear C3 quality bar.
+        if cfg == ConfigId.C3_EPIC:
+            scal = request.slice_calibration
+            if scal is None or not scal.is_safe(
+                request.chunk_order, request.fact_type
+            ):
+                discard(cfg, ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value)
+                continue
+            cal = replace(
+                cal,
+                quality_delta_points=0.0,
+                notes=(cal.notes + " | slice_cal safe").strip(" |"),
+            )
         if cal.quality_delta_points is None and policy.refuse_unknown_quality:
             discard(cfg, ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value)
             continue
