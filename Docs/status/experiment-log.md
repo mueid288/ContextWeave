@@ -2,13 +2,12 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** **PAUSED** — H3 slice-cal GPU confirm **FAIL**; G2 FAIL stands —
-  `Docs/status/pause.md`
+- **Project state:** **ACTIVE (desk)** — H3 **keydev** pre-reg ready; G2 FAIL stands —
+  `Docs/status/pause.md`, `Docs/pre-reg/pre-reg-h3-keydev.md`
 - **Phase 0 / 1:** G2 FAIL; best fixed C0; **do not re-attack G2**
-- **H3:** order confirm FAIL; slice-cal LOO PASS (same-filler); seed99→100
-  **FAIL** (prec 0.33, policy_q 0.83) — `artifacts/h3-slice-cal-gpu-2026-10-23/`
-- Planner: **C1 else C0** by default; C3 only with table from **exact** serve distro
-- Phase 2 / ResolventKV: **not opened**; Colab idle
+- **H3:** static transfers FAIL; next = runtime Layer-0 seam keydev (fit 99 → test 100)
+- Planner: **C1 else C0**; C3 via keydev threshold or exact-distro slice table
+- Phase 2 / ResolventKV: **not opened**
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -629,6 +628,15 @@
 - Flips: ABC/city 1→0; CAB/CBA code 0→1. Same golds ≠ transferable table.
 - Artifacts: `artifacts/h3-slice-cal-gpu-2026-10-23/`. Stopped Colab. **PAUSED.**
 - Supersedes: cross-filler reuse of slice-cal tables
+
+## 2026-10-23 — H3 runtime keydev pre-reg (desk)
+
+- **Status:** `VALID` (desk)
+- Pre-reg `Docs/pre-reg/pre-reg-h3-keydev.md`: Layer-0 seam keydev (isolated vs
+  joint), fit T on filler-seed 99, eval on seed 100 same Lisbon golds.
+- Code: `contextweave.risk.keydev`, `collect_h3_keydev.py`, `eval_h3_keydev.py`,
+  EPIC `_collect_and_link(..., return_keydev=True)`. Session not started.
+- Supersedes: “stay paused” after slice-cal GPU FAIL
 
 ## Template for future entries
 

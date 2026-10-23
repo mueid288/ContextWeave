@@ -11,6 +11,7 @@ from dataclasses import dataclass, field, replace
 from enum import Enum
 from typing import Any
 
+from contextweave.risk.keydev import predict_c3_quality_fail as keydev_refuse
 from contextweave.risk.slice_calibration import SliceCalibration
 
 
@@ -68,7 +69,10 @@ class RequestView:
     chunk_order: str | None = None
     fact_type: str | None = None
     # None ⇒ blanket C3 refuse (default). Safe cells only when table present.
+    # Prefer runtime keydev when both are set (Stage-1 bailout).
     slice_calibration: SliceCalibration | None = None
+    keydev_score: float | None = None
+    keydev_threshold: float | None = None
 
 
 @dataclass
@@ -171,19 +175,30 @@ def plan(
         if not request.has_validated_nonprefix_artifacts:
             discard(cfg, ReasonCode.ARTIFACT_INVALID.value)
             continue
-        # Workload-local slice table: only path that may clear C3 quality bar.
+        # C3 quality clear: runtime keydev (preferred) or exact-distro slice table.
         if cfg == ConfigId.C3_EPIC:
-            scal = request.slice_calibration
-            if scal is None or not scal.is_safe(
-                request.chunk_order, request.fact_type
-            ):
-                discard(cfg, ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value)
-                continue
-            cal = replace(
-                cal,
-                quality_delta_points=0.0,
-                notes=(cal.notes + " | slice_cal safe").strip(" |"),
-            )
+            cleared = False
+            if request.keydev_threshold is not None:
+                if keydev_refuse(request.keydev_score, request.keydev_threshold):
+                    discard(cfg, ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value)
+                    continue
+                cleared = True
+                note = "keydev ok"
+            else:
+                scal = request.slice_calibration
+                if scal is None or not scal.is_safe(
+                    request.chunk_order, request.fact_type
+                ):
+                    discard(cfg, ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value)
+                    continue
+                cleared = True
+                note = "slice_cal safe"
+            if cleared:
+                cal = replace(
+                    cal,
+                    quality_delta_points=0.0,
+                    notes=(cal.notes + f" | {note}").strip(" |"),
+                )
         if cal.quality_delta_points is None and policy.refuse_unknown_quality:
             discard(cfg, ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value)
             continue
