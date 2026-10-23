@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# Fast EPIC path: prebuilt vllm==0.7.0 CUDA wheel + overlay DerekHJH/epic Python patches.
+# Avoids the multi-hour nvcc build of `pip install -e /content/epic`.
+#
+# EPIC's LegoLink hooks (cache_fuse_metadata / hack_kv / kvlink) live in Python;
+# README diffs against vLLM 0.7.0. If probe fails after overlay, fall back to
+# scripts/g1_epic_install.sh (full source build) or a high-CPU host.
+set -euo pipefail
+
+if [[ "${CONTEXTWEAVE_ALLOW_MODEL_LOAD:-}" != "1" ]]; then
+  echo "Refusing: set CONTEXTWEAVE_ALLOW_MODEL_LOAD=1 on the GPU host only."
+  exit 1
+fi
+if [[ "${CONTEXTWEAVE_ALLOW_EPIC_REINSTALL:-}" != "1" ]]; then
+  echo "Refusing: set CONTEXTWEAVE_ALLOW_EPIC_REINSTALL=1 on a dedicated session."
+  exit 1
+fi
+
+EPIC_DIR="${EPIC_DIR:-/content/epic}"
+EPIC_REPO="${EPIC_REPO:-https://github.com/DerekHJH/epic.git}"
+EPIC_VENV="${EPIC_VENV:-/content/epic-venv}"
+EPIC_PY_TARGET="${EPIC_PY_TARGET:-3.11}"
+VLLM_WHEEL_PIN="${VLLM_WHEEL_PIN:-0.7.0}"
+CW_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+[[ -d /content/ContextWeave ]] && CW_ROOT=/content/ContextWeave
+
+_py_minor() {
+  "$1" - <<'PY'
+import sys
+print(f"{sys.version_info.major}.{sys.version_info.minor}")
+PY
+}
+
+ensure_epic_python() {
+  local minor
+  minor="$(python - <<'PY'
+import sys
+print(f"{sys.version_info.major}.{sys.version_info.minor}")
+PY
+)"
+  case "$minor" in
+    3.10|3.11|3.12)
+      EPIC_PYTHON="$(command -v python)"
+      return 0
+      ;;
+  esac
+  if [[ -x "${EPIC_VENV}/bin/python" ]]; then
+    case "$(_py_minor "${EPIC_VENV}/bin/python")" in
+      3.10|3.11|3.12)
+        # shellcheck disable=SC1091
+        source "${EPIC_VENV}/bin/activate"
+        EPIC_PYTHON="${EPIC_VENV}/bin/python"
+        return 0
+        ;;
+    esac
+  fi
+  if ! command -v uv >/dev/null 2>&1; then
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="${HOME}/.local/bin:${PATH}"
+  fi
+  uv python install "$EPIC_PY_TARGET"
+  uv venv "$EPIC_VENV" --python "$EPIC_PY_TARGET" --seed
+  # shellcheck disable=SC1091
+  source "${EPIC_VENV}/bin/activate"
+  EPIC_PYTHON="${EPIC_VENV}/bin/python"
+}
+
+ensure_epic_python
+export PATH="$(dirname "$EPIC_PYTHON"):${PATH}"
+
+echo "=== fast EPIC: torch 2.5.1 + vllm==${VLLM_WHEEL_PIN} wheel (no source CUDA build) ==="
+"$EPIC_PYTHON" -m pip install -U pip setuptools wheel
+"$EPIC_PYTHON" -m pip install \
+  "torch==2.5.1" "torchvision==0.20.1" \
+  --index-url https://download.pytorch.org/whl/cu124
+"$EPIC_PYTHON" -m pip uninstall -y vllm || true
+"$EPIC_PYTHON" -m pip install "vllm==${VLLM_WHEEL_PIN}"
+
+echo "=== cloning EPIC for Python overlay ==="
+if [[ ! -d "$EPIC_DIR/.git" ]]; then
+  git clone --depth 1 "$EPIC_REPO" "$EPIC_DIR"
+else
+  git -C "$EPIC_DIR" pull --ff-only || true
+fi
+
+SITE_VLLM="$("$EPIC_PYTHON" - <<'PY'
+import vllm, pathlib
+print(pathlib.Path(vllm.__file__).resolve().parent)
+PY
+)"
+echo "=== overlaying EPIC *.py onto ${SITE_VLLM} (keeping wheel .so) ==="
+# Copy Python sources only; do not overwrite compiled extensions from the wheel.
+rsync -a --include='*/' --include='*.py' --exclude='*' \
+  "${EPIC_DIR}/vllm/" "${SITE_VLLM}/"
+
+echo "=== verify fork markers ==="
+cd "$CW_ROOT"
+"$EPIC_PYTHON" scripts/g1_epic_probe.py --json | tee g1_epic_probe.json
+
+if ! "$EPIC_PYTHON" - <<'PY'
+import json
+p=json.load(open("g1_epic_probe.json"))
+raise SystemExit(0 if p.get("epic_fork_detected") else 1)
+PY
+then
+  echo "FAST PATH FAILED: probe did not see EPIC markers after overlay."
+  echo "Next: high-CPU full build (scripts/g1_epic_install.sh) or skip EPIC."
+  exit 6
+fi
+
+cat <<EOF
+
+=== fast EPIC ready ===
+  source ${EPIC_VENV}/bin/activate
+  export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
+  # Paper default model (llama-family hooks). Qwen3 is NOT patched in the demo fork.
+  export SMOKE_MODEL=mistralai/Mistral-7B-Instruct-v0.2
+  python scripts/g1_epic_bench.py --json | tee g1_epic.json
+EOF

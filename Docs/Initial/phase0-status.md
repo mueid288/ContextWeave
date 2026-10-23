@@ -31,7 +31,7 @@ Updated: 2026-10-22
 - [x] G1 matched-pin Stage A harness — benches/scripts/pre-reg (`Docs/g1-matched-colab.md`)
 - [x] G1 matched-pin B–E — prior runs **CONFOUNDED** (antigravity Round-2); harness remediation landed
 - [x] G1 matched re-run (vLLM 0.18 / lmcache 0.4.2, `cw-g1-r2`) — **C/D PASS**, **E FAIL** fair @12k (blend reorder≈cold); CacheBlend closed
-- [ ] G1 step 4 EPIC — Colab OK via nested **uv Py3.11** venv (`g1_epic_install.sh`); GPU re-run pending
+- [ ] G1 step 4 EPIC — prefer **`g1_epic_install_fast.sh`** (vllm 0.7.0 wheel + EPIC py overlay); full nvcc build only if probe fails
 
 
 - [ ] Partner log optional (`docs/partner-ask.md`)

@@ -339,6 +339,17 @@
 - Do not install EPIC into system 3.13; activate venv before `g1_epic_bench.py`
 - Status: pending GPU re-run with updated installer
 
+## 2026-10-23 — EPIC full CUDA build too slow on Colab; prefer fast overlay
+
+- Full `pip install -e epic` reached `[3/242]` (paged_attention) after long waits; Colab
+  CPU-bound nvcc; session stopped for the day
+- Mitigations already in full installer: `TORCH_CUDA_ARCH_LIST=8.0`, `MAX_JOBS=4`, nvcc apt
+- **New preferred path:** `scripts/g1_epic_install_fast.sh` — install prebuilt `vllm==0.7.0`
+  wheel, overlay EPIC `*.py` (LegoLink hooks are Python; fork tracks vLLM 0.7.0)
+- Bench default model for EPIC: **Mistral-7B-Instruct-v0.2** (demo patches llama-family;
+  Qwen3 unlikely)
+- Fallback if fast probe fails: high-CPU host full build, or skip EPIC / close G1
+
 ## Template for future entries
 
 ```
