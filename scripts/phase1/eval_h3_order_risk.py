@@ -29,7 +29,7 @@ from contextweave.risk.order_signal import predict_c3_quality_fail  # noqa: E402
 
 
 def _order_from_rid(rid: str) -> str:
-    # r00_ABC_city → ABC
+    # r00_ABC_city or h00_ABC_city → ABC; prefer explicit chunk_order in JSON if present
     parts = rid.split("_")
     return parts[1] if len(parts) >= 3 else ""
 
@@ -61,7 +61,7 @@ def main(argv: list[str] | None = None) -> int:
         c0, c3 = cfgs.get("C0"), cfgs.get("C3")
         if not c0 or not c3:
             continue
-        order = _order_from_rid(rid)
+        order = str(c3.get("chunk_order") or c0.get("chunk_order") or _order_from_rid(rid))
         actual_fail = c3["quality"] < 1.0
         pred_fail = predict_c3_quality_fail(order)
         if pred_fail and actual_fail:

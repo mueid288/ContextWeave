@@ -7,7 +7,8 @@
 - **H3:** refuse C3 on orders ACB/BAC (unknown fail-closed) → mean TTFT **−40%** vs C0,
   quality 1.0 — `artifacts/h3-order-risk-2026-10-23/`
 - Planner: C1 if prefix; else C3 if safe order + artifacts; else C0; C4 refused
-- Phase 2 / ResolventKV: **not opened**; GPU idle
+- Phase 2 / ResolventKV: **not opened**
+- **Next:** H3 GPU confirm — `Docs/pre-reg/pre-reg-h3-gpu-confirm.md` (`cw-h3-confirm`)
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -582,6 +583,14 @@
 - Artifacts: `artifacts/h3-order-risk-2026-10-23/`. Module `contextweave.risk.order_signal`;
   planner `RequestView.chunk_order` wired. Phase 2 still closed.
 - Supersedes: blanket C3 refuse after G2
+
+## 2026-10-23 — H3 GPU confirm pre-reg (desk)
+
+- **Status:** `VALID` (desk)
+- Fresh golds (Lisbon/2021/BETA-4242) + filler-seed 99 collector
+  `scripts/phase1/collect_h3_confirm.py`; pre-reg
+  `Docs/pre-reg/pre-reg-h3-gpu-confirm.md`. GPU not started.
+- Supersedes: in-sample-only H3 as final word
 
 ## Template for future entries
 

@@ -3,9 +3,9 @@
 Research harness for a **validity-checked planner** over modular KV-cache reuse
 (prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-**Status (2026-10-23): H3 PASS (replay)**; G2 FAIL stands —
-[Docs/status/pause.md](Docs/status/pause.md), [artifacts/h3-order-risk-2026-10-23/](artifacts/h3-order-risk-2026-10-23/).  
-Planner: C1 if prefix; C3 if safe doc order; else C0. Phase 2 not opened.
+**Status (2026-10-23): H3 replay PASS**; next = GPU confirm —
+[Docs/pre-reg/pre-reg-h3-gpu-confirm.md](Docs/pre-reg/pre-reg-h3-gpu-confirm.md).  
+G2 FAIL stands. Planner: C1 / safe-order C3 / else C0. Phase 2 not opened.
 
 **Laptop policy:** never download or run models on this machine. See
 [Docs/runbooks/local-safety.md](Docs/runbooks/local-safety.md). Baseline scripts refuse
