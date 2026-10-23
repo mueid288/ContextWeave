@@ -11,7 +11,7 @@ REPO = Path(__file__).resolve().parents[2]
 
 
 def _load():
-    path = REPO / "scripts" / "g1_epic_bench.py"
+    path = REPO / "scripts" / "g1" / "epic" / "g1_epic_bench.py"
     spec = importlib.util.spec_from_file_location("g1_epic_bench", path)
     assert spec and spec.loader
     mod = importlib.util.module_from_spec(spec)
@@ -68,7 +68,7 @@ def test_help_lists_target_context_tokens():
     import sys
 
     r = subprocess.run(
-        [sys.executable, str(REPO / "scripts" / "g1_epic_bench.py"), "--help"],
+        [sys.executable, str(REPO / "scripts" / "g1" / "epic" / "g1_epic_bench.py"), "--help"],
         capture_output=True,
         text=True,
         cwd=REPO,

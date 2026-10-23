@@ -9,7 +9,7 @@ REPO = Path(__file__).resolve().parents[2]
 
 
 def _load():
-    path = REPO / "scripts" / "g1_scoring.py"
+    path = REPO / "scripts" / "g1" / "common" / "g1_scoring.py"
     spec = importlib.util.spec_from_file_location("g1_scoring", path)
     assert spec and spec.loader
     mod = importlib.util.module_from_spec(spec)

@@ -5,7 +5,7 @@
 **Rule:** Adopt *insights and evaluation contracts* into Phase 0. Do **not** implement
 ResolventKV kernels until a non-prefix path shows **verified engagement +
 quality-preserving ≥15% TTFT win** (project §6). As of 2026-10-23 that bar is
-**not** met (CacheBlend closed) → kernels **blocked**. See `Docs/phase0-exit-decision.md`.
+**not** met (CacheBlend closed) → kernels **blocked**. See `Docs/status/phase0-exit-decision.md`.
 
 ---
 

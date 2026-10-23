@@ -42,8 +42,8 @@ Stage A (CPU)          Stage B–F (Colab A100, ≤90 min)
 
 ## Deliverables (Stage A)
 
-- `scripts/g1_matched_quality_bench.py` — ≥10 cases, extract/score, control|blend
-- `scripts/g1_matched_ttft_bench.py` — streaming TTFT, n≥10, p50/p90
-- `scripts/g1_matched_install.sh`, `g1_matched_smoke.sh`, `g1_matched_blend.sh`, `g1_collect_artifacts.sh`
+- `scripts/g1/matched/g1_matched_quality_bench.py` — ≥10 cases, extract/score, control|blend
+- `scripts/g1/matched/g1_matched_ttft_bench.py` — streaming TTFT, n≥10, p50/p90
+- `scripts/g1/matched/g1_matched_install.sh`, `g1_matched_smoke.sh`, `g1_matched_blend.sh`, `g1_collect_artifacts.sh`
 - Unit tests for scorer/garbage
-- Experiment-log pre-registration + `Docs/g1-matched-colab.md`
+- Experiment-log pre-registration + `Docs/gates/g1/g1-matched-colab.md`

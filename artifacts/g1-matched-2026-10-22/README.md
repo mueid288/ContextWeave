@@ -33,4 +33,4 @@ Colab session `cw-matched`. Stack: vLLM **0.32.0**, lmcache **0.5.3**.
 | `g1_ttft_native_12k_chunks.json` | Native `chunk_sep` @~12k PASS (reorder≈4.68×) |
 | `g1_ttft_blend_12k_chunks.json` | Gate E FAIL fair (blend 1503≈cold; 0.78× vs native 1173) |
 
-Narrative: `Docs/experiment-log.md`. Runbook: `Docs/Reviews/claude_g1_cacheblend_matched_image_runbook.md`.
+Narrative: `Docs/status/experiment-log.md`. Runbook: `Docs/Reviews/claude_g1_cacheblend_matched_image_runbook.md`.

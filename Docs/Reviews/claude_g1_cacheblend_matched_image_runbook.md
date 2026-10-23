@@ -63,7 +63,7 @@ Do all of this BEFORE starting a GPU session.
   - Exact blend flags/env vars from the docs (e.g. `LMCACHE_ENABLE_BLENDING`, blend engine type, transfer mode)
   - Model: `Qwen/Qwen3-8B` (Qwen3 has `rope_scaling: null`, which is why it is preferred)
 
-### A2. Upgrade the quality bench (`scripts/g1_quality_bench.py`)
+### A2. Upgrade the quality bench (`scripts/g1/cacheblend/g1_quality_bench.py`)
 Requirements:
 - At least **10 cases** (target 12-20).
 - Each case: several documents with distinct ids (e.g. `DOC-A7`) and planted facts; a question whose gold answer is a short extractable string (a year, city name, doc id).
@@ -74,7 +74,7 @@ Requirements:
 - Metrics reported: `contains_rate`, `agree_with_control_rate` (extracted-answer agreement vs control), `garbage_rate` (outputs that are empty, pure echo, or contain no gold and no coherent answer).
 - Must support a `--mode` flag: `control` (LMCache connected, blending OFF) and `blend` (blending ON), plus ability to run documents in original order and reordered.
 
-### A3. Upgrade the TTFT bench (`scripts/g1_reorder_gap_bench.py` or new)
+### A3. Upgrade the TTFT bench (`scripts/g1/cacheblend/g1_reorder_gap_bench.py` or new)
 - Measure TTFT with streaming (time to first token), not total latency.
 - Scenarios, each with **1 discarded warmup + n >= 10 measured runs**, report p50 and p90:
   1. Cold ABC (first time, nothing cached)
@@ -87,9 +87,9 @@ Requirements:
 - Output JSON.
 
 ### A4. Scripts to prepare
-- `scripts/g1_matched_smoke.sh`: launches the container's vLLM, waits for ready (poll, timeout 120 s), sends one request, checks sane output.
-- `scripts/g1_matched_blend.sh`: launches with blend flags per the docs; polls readiness up to 90 s; refuses to continue if the server process dies; kills nothing that is still initializing.
-- A single `scripts/g1_collect_artifacts.sh` that tars all JSON outputs + logs into one file for download.
+- `scripts/g1/matched/g1_matched_smoke.sh`: launches the container's vLLM, waits for ready (poll, timeout 120 s), sends one request, checks sane output.
+- `scripts/g1/matched/g1_matched_blend.sh`: launches with blend flags per the docs; polls readiness up to 90 s; refuses to continue if the server process dies; kills nothing that is still initializing.
+- A single `scripts/g1/matched/g1_collect_artifacts.sh` that tars all JSON outputs + logs into one file for download.
 - Dry-run the Python scripts on CPU where possible (syntax, argument parsing, scorer unit tests with fabricated outputs, including a garbage-output case that must score as failure).
 
 ### A5. Pre-registration (write before the run)
@@ -215,7 +215,7 @@ Run a **post-latency quality spot check**: re-run a subset (e.g. 5 cases) of the
 
 ## 10. Decision tree (after the session)
 
-- **Gate C failed** (control broken): image/config problem. Next: try a different matched tag, or the dedicated EPIC fork session (`Docs/g1-epic.md`). Do not conclude anything about CacheBlend.
+- **Gate C failed** (control broken): image/config problem. Next: try a different matched tag, or the dedicated EPIC fork session (`Docs/gates/g1/g1-epic.md`). Do not conclude anything about CacheBlend.
 - **Gate D failed** (control OK, blend garbage/disagrees): real negative result for CacheBlend as shipped on Qwen3-8B. Next: decide whether to (a) sweep blend recompute ratio in one more session, (b) go to EPIC, or (c) report the negative result and reconsider ResolventKV as a post-G1 candidate. **Decide the project impact of this outcome before the run, not after.**
 - **Gate D passed, Gate E failed** (quality OK, no real speedup): non-prefix reuse isn't paying off at this scale on this stack; consider longer contexts (needs 80GB) before concluding.
 - **Both passed:** G1 CacheBlend provisional PASS. Next: scale n, more documents, longer contexts, then proceed per the PRD's gate sequence. ResolventKV kernels still only after G1 is formally closed.

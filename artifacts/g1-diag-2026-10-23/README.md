@@ -15,4 +15,4 @@ Session `cw-g1-diag-2` (Colab A100). In-process CacheBlend + blend hooks
 
 **Gate R:** `ENGAGEMENT_FAIL` got=7705 need≥8063 (≈66.9% &lt; 70%) — engagement
 **proven** vs DIAG #1 got=0; formal bar miss. warm_bac≈warm_abc; warm_cba slow.
-Gate E skipped. Narrative: `Docs/experiment-log.md`.
+Gate E skipped. Narrative: `Docs/status/experiment-log.md`.

@@ -13,9 +13,28 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 
+_SCRIPT_DIRS = {
+    "g1_ttft_bench.py": ("g1", "cacheblend"),
+    "g1_cacheblend_bench.py": ("g1", "cacheblend"),
+    "g1_quality_bench.py": ("g1", "cacheblend"),
+    "g1_reorder_gap_bench.py": ("g1", "cacheblend"),
+    "g1_epic_probe.py": ("g1", "epic"),
+    "g1_epic_bench.py": ("g1", "epic"),
+    "g1_matched_quality_bench.py": ("g1", "matched"),
+    "g1_matched_ttft_bench.py": ("g1", "matched"),
+    "g1_blend_hooks.py": ("g1", "common"),
+    "g1_engagement.py": ("g1", "common"),
+    "g1_scoring.py": ("g1", "common"),
+}
+
+
+def _script_path(name: str) -> Path:
+    parts = _SCRIPT_DIRS.get(name, ())
+    return REPO / "scripts" / Path(*parts) / name if parts else REPO / "scripts" / name
+
 
 def _load_script(name: str):
-    path = REPO / "scripts" / name
+    path = _script_path(name)
     spec = importlib.util.spec_from_file_location(name.replace(".py", ""), path)
     assert spec and spec.loader
     mod = importlib.util.module_from_spec(spec)
@@ -61,7 +80,7 @@ def test_g1_ttft_refuses_without_allow_flag(monkeypatch: pytest.MonkeyPatch):
 
 def test_g1_ttft_help():
     result = subprocess.run(
-        [sys.executable, str(REPO / "scripts" / "g1_ttft_bench.py"), "--help"],
+        [sys.executable, str(REPO / "scripts" / "g1" / "cacheblend" / "g1_ttft_bench.py"), "--help"],
         capture_output=True,
         text=True,
         cwd=REPO,
@@ -97,7 +116,7 @@ def test_g1_cacheblend_refuses_without_allow_flag(monkeypatch: pytest.MonkeyPatc
 
 def test_g1_cacheblend_help():
     result = subprocess.run(
-        [sys.executable, str(REPO / "scripts" / "g1_cacheblend_bench.py"), "--help"],
+        [sys.executable, str(REPO / "scripts" / "g1" / "cacheblend" / "g1_cacheblend_bench.py"), "--help"],
         capture_output=True,
         text=True,
         cwd=REPO,
@@ -134,7 +153,7 @@ def test_g1_quality_scoring_and_docs():
 
 def test_g1_quality_help():
     result = subprocess.run(
-        [sys.executable, str(REPO / "scripts" / "g1_quality_bench.py"), "--help"],
+        [sys.executable, str(REPO / "scripts" / "g1" / "cacheblend" / "g1_quality_bench.py"), "--help"],
         capture_output=True,
         text=True,
         cwd=REPO,
@@ -161,7 +180,7 @@ def test_g1_reorder_docs_change_order():
 
 def test_g1_epic_probe_help_and_no_crash_without_vllm():
     result = subprocess.run(
-        [sys.executable, str(REPO / "scripts" / "g1_epic_probe.py"), "--help"],
+        [sys.executable, str(REPO / "scripts" / "g1" / "epic" / "g1_epic_probe.py"), "--help"],
         capture_output=True,
         text=True,
         cwd=REPO,

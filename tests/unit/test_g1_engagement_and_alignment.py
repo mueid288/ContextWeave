@@ -11,13 +11,21 @@ from types import SimpleNamespace
 REPO = Path(__file__).resolve().parents[2]
 
 
+_SCRIPT_DIRS = {
+    "g1_engagement.py": ("g1", "common"),
+    "g1_blend_alignment_audit.py": ("g1", "common"),
+}
+
+
 def _load(name: str):
-    path = REPO / "scripts" / name
+    parts = _SCRIPT_DIRS.get(name, ())
+    path = REPO / "scripts" / Path(*parts) / name if parts else REPO / "scripts" / name
     spec = importlib.util.spec_from_file_location(name.replace(".py", ""), path)
     assert spec and spec.loader
     mod = importlib.util.module_from_spec(spec)
     # Ensure sibling imports (g1_matched_ttft_bench) resolve for alignment audit.
-    sys.path.insert(0, str(REPO / "scripts"))
+    sys.path.insert(0, str(REPO / "scripts" / "g1" / "matched"))
+    sys.path.insert(0, str(REPO / "scripts" / "g1" / "common"))
     spec.loader.exec_module(mod)
     return mod
 
@@ -63,7 +71,7 @@ def test_alignment_audit_fake_tokenizer_passes():
 
 def test_alignment_audit_cli():
     result = subprocess.run(
-        [sys.executable, str(REPO / "scripts" / "g1_blend_alignment_audit.py"), "--json"],
+        [sys.executable, str(REPO / "scripts" / "g1" / "common" / "g1_blend_alignment_audit.py"), "--json"],
         capture_output=True,
         text=True,
         cwd=REPO,

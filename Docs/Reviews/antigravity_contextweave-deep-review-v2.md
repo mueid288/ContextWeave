@@ -30,13 +30,13 @@ Since the previous review, the project has made a major leap from CPU-only simul
 
 ### CRIT-1 · Gate D Quality Benchmark (`g1_matched_quality_bench.py`) Never Triggered CacheBlend
 
-**Files:** [`scripts/g1_matched_quality_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_quality_bench.py#L62-L86), [`scripts/g1_matched_blend.sh`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_blend.sh#L79-L85), [`artifacts/g1-matched-2026-10-22/g1_matched_blend_bac.json`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_matched_blend_bac.json)
+**Files:** [`scripts/g1/matched/g1_matched_quality_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_quality_bench.py#L62-L86), [`scripts/g1/matched/g1_matched_blend.sh`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_blend.sh#L79-L85), [`artifacts/g1-matched-2026-10-22/g1_matched_blend_bac.json`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_matched_blend_bac.json)
 
 The experiment log concludes: *"Gate D PASS (`contains=1.0`, `garbage=0.0`, `agree_with_control=1.0`) — quality OK on this pin."*  
-Inspecting [`g1_matched_quality_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_quality_bench.py#L62-L86) and the artifact latencies proves **CacheBlend was never active during Gate D**:
+Inspecting [`g1_matched_quality_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_quality_bench.py#L62-L86) and the artifact latencies proves **CacheBlend was never active during Gate D**:
 
-1. **No blend separator in prompts:** [`_doc_block()`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_quality_bench.py#L62-L64) formats documents as markdown (`### DOC-A7\n...`) and joins them with `"\n"`. The CacheBlend delimiter (`" # # "`) is completely absent from `g1_matched_quality_bench.py`.
-2. **All 12 cases in `g1_matched_blend_bac.json` share an identical `bac` prefix:** In [`main()`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_quality_bench.py#L133-L135), all 12 prompts are built with the exact same `body` (`order="bac"`), differing only in the trailing `question`. Thus, Case 1 (`code_a7`) is a full-prefill miss on `bac`, and Cases 2–12 are **exact prefix hits on `bac`**, not blended reorders of `abc`.
+1. **No blend separator in prompts:** [`_doc_block()`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_quality_bench.py#L62-L64) formats documents as markdown (`### DOC-A7\n...`) and joins them with `"\n"`. The CacheBlend delimiter (`" # # "`) is completely absent from `g1_matched_quality_bench.py`.
+2. **All 12 cases in `g1_matched_blend_bac.json` share an identical `bac` prefix:** In [`main()`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_quality_bench.py#L133-L135), all 12 prompts are built with the exact same `body` (`order="bac"`), differing only in the trailing `question`. Thus, Case 1 (`code_a7`) is a full-prefill miss on `bac`, and Cases 2–12 are **exact prefix hits on `bac`**, not blended reorders of `abc`.
 3. **Artifact latencies confirm ~3.3s of decode dominates:** Every case in [`g1_matched_control.json`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_matched_control.json), [`g1_matched_blend_abc.json`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_matched_blend_abc.json), and [`g1_matched_blend_bac.json`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_matched_blend_bac.json) takes `3466–3917 ms` because Qwen3 generates 96 tokens of repetitive text (`"Kepler\n\nKepler\n\n..."`), except `id_d2` in `bac` (`289 ms`, which stopped after 4 tokens).
 
 > [!CAUTION]
@@ -46,26 +46,26 @@ Inspecting [`g1_matched_quality_bench.py`](file:///Users/apple/Code/Context%20We
 
 ### CRIT-2 · Why Gate E (`chunk_sep`) Showed Zero Non-Prefix Reuse (`1503 ms ≈ 1507 ms` Cold)
 
-**Files:** [`scripts/g1_matched_ttft_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_bench.py#L119-L139), [`scripts/g1_matched_ttft_chunk_e.sh`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_chunk_e.sh#L36-L70), [`artifacts/g1-matched-2026-10-22/g1_ttft_blend_12k_chunks.json`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_ttft_blend_12k_chunks.json)
+**Files:** [`scripts/g1/matched/g1_matched_ttft_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_bench.py#L119-L139), [`scripts/g1/matched/g1_matched_ttft_chunk_e.sh`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_chunk_e.sh#L36-L70), [`artifacts/g1-matched-2026-10-22/g1_ttft_blend_12k_chunks.json`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_ttft_blend_12k_chunks.json)
 
 In [`g1_ttft_blend_12k_chunks.json`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_ttft_blend_12k_chunks.json), `warm_abc` drops from `1506.9 ms` (cold) to `776.1 ms` (proving `LMCacheMPConnector` prefix hits work), whereas `warm_bac` (`1506.3 ms`) and `warm_cba` (`1499.7 ms`) are 100% cold misses. Three reasons in the harness explain this:
 
 1. **Architecture mismatch (`LMCacheMPConnector` vs in-worker `LMCBlender`):**  
    `LMCacheMPConnector` (vLLM V1 external ZMQ connector) transfers KV blocks between vLLM and `lmcache server`. However, vLLM stores KV **post-RoPE**. Reusing chunk `B` at token offset `19` when it was cached at token offset `4002` requires **in-model-runner layerwise intervention** (`LMCBlender`: RoPE delta rotation + layer-1 attention filtering + 15% token recompute). A passive out-of-process ZMQ KV store (`lmcache server`) cannot mutate vLLM's internal attention forward pass unless the client worker activates `LMCBlender`.
 2. **Missing blend environment variables on the client:**  
-   Unlike [`g1_cacheblend_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1_cacheblend_bench.py#L42-L50) (which exports `LMCACHE_ENABLE_BLENDING=True`, `LMCACHE_BLEND_SPECIAL_STR=" # # "`, `LMCACHE_USE_LAYERWISE=True`), neither [`g1_matched_ttft_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_bench.py#L395-L411) nor [`g1_matched_ttft_chunk_e.sh`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_chunk_e.sh) sets `LMCACHE_ENABLE_BLENDING` or `LMCACHE_BLEND_SPECIAL_STR` for the vLLM worker process.
+   Unlike [`g1_cacheblend_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1/cacheblend/g1_cacheblend_bench.py#L42-L50) (which exports `LMCACHE_ENABLE_BLENDING=True`, `LMCACHE_BLEND_SPECIAL_STR=" # # "`, `LMCACHE_USE_LAYERWISE=True`), neither [`g1_matched_ttft_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_bench.py#L395-L411) nor [`g1_matched_ttft_chunk_e.sh`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_chunk_e.sh) sets `LMCACHE_ENABLE_BLENDING` or `LMCACHE_BLEND_SPECIAL_STR` for the vLLM worker process.
 3. **256-token block misalignment (`chunk_tokens = 3981`):**  
-   Even for block-level lookup in `LMCacheMPConnector` (`--chunk-size 256`), [`_chunk_tokens_for_target()`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_bench.py#L119-L139) computes `usable // 3 = 3981` (`3981 % 256 = 141`), and `len(system) + len(sep)` is not a multiple of 256. When flat `prompt_token_ids` are sliced into 256-token pages from index 0, moving chunk `B` before chunk `A` shifts every 256-token boundary by `(3981 + len(sep)) % 256` tokens, guaranteeing 0% block-hash overlap.
+   Even for block-level lookup in `LMCacheMPConnector` (`--chunk-size 256`), [`_chunk_tokens_for_target()`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_bench.py#L119-L139) computes `usable // 3 = 3981` (`3981 % 256 = 141`), and `len(system) + len(sep)` is not a multiple of 256. When flat `prompt_token_ids` are sliced into 256-token pages from index 0, moving chunk `B` before chunk `A` shifts every 256-token boundary by `(3981 + len(sep)) % 256` tokens, guaranteeing 0% block-hash overlap.
 
 ---
 
 ### CRIT-3 · TTFT Benchmark Measures 16-Token Decode + Asymmetric `enforce_eager` (+332 ms Handicap)
 
-**Files:** [`scripts/g1_matched_ttft_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_bench.py#L164-L175), [`scripts/g1_matched_ttft_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_bench.py#L391-L403), [`src/contextweave/runtime_adapters/vllm_runners.py`](file:///Users/apple/Code/Context%20Weave/src/contextweave/runtime_adapters/vllm_runners.py#L61-L70)
+**Files:** [`scripts/g1/matched/g1_matched_ttft_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_bench.py#L164-L175), [`scripts/g1/matched/g1_matched_ttft_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_bench.py#L391-L403), [`src/contextweave/runtime_adapters/vllm_runners.py`](file:///Users/apple/Code/Context%20Weave/src/contextweave/runtime_adapters/vllm_runners.py#L61-L70)
 
 Despite the runbook requirement ([`claude_g1_cacheblend_matched_image_runbook.md#L78`](file:///Users/apple/Code/Context%20Weave/Docs/Reviews/claude_g1_cacheblend_matched_image_runbook.md#L78): *"Measure TTFT with streaming (time to first token), not total latency"*), every benchmark script calls synchronous `llm.generate()` with `max_tokens=16` (or `24`/`32`) and records total wall-clock time:
 
-- In [`g1_matched_ttft_bench.py#L392-L402`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_bench.py#L392-L402), `--backend native_prefix` ignores `--enforce-eager` and runs with **CUDA graphs enabled (`enforce_eager=False`)**, whereas `--backend blend` runs with **`enforce_eager=True`**.
+- In [`g1_matched_ttft_bench.py#L392-L402`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_bench.py#L392-L402), `--backend native_prefix` ignores `--enforce-eager` and runs with **CUDA graphs enabled (`enforce_eager=False`)**, whereas `--backend blend` runs with **`enforce_eager=True`**.
 - Comparing cold 12k-token runs in [`g1_ttft_native_12k_chunks.json`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_ttft_native_12k_chunks.json) (`1174.7 ms`) vs [`g1_ttft_blend_12k_chunks.json`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_ttft_blend_12k_chunks.json) (`1506.9 ms`), `blend` is **332 ms (+28.3%) slower on identical cold work** purely from `enforce_eager=True` + 16 eager decode steps + ZMQ store overhead.
 - **Fix:** Set `--max-tokens 1` (or read `outs[0].metrics.first_token_time - outs[0].metrics.arrival_time` when available) for all TTFT benchmarks, and enforce identical `enforce_eager` settings across both backends when comparing latency in Gate E.
 
@@ -73,14 +73,14 @@ Despite the runbook requirement ([`claude_g1_cacheblend_matched_image_runbook.md
 
 ### CRIT-4 · `g1_matched_blend.sh` Fails with Exit Code 4 on Line 80 Under `set -euo pipefail`
 
-**Files:** [`scripts/g1_matched_blend.sh#L80-L85`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_blend.sh#L80-L85), [`scripts/g1_matched_quality_bench.py#L212-L249`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_quality_bench.py#L212-L249)
+**Files:** [`scripts/g1/matched/g1_matched_blend.sh#L80-L85`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_blend.sh#L80-L85), [`scripts/g1/matched/g1_matched_quality_bench.py#L212-L249`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_quality_bench.py#L212-L249)
 
-In [`g1_matched_blend.sh#L80-L81`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_blend.sh#L80-L81):
+In [`g1_matched_blend.sh#L80-L81`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_blend.sh#L80-L81):
 ```bash
-python scripts/g1_matched_quality_bench.py --mode blend --order abc \
+python scripts/g1/matched/g1_matched_quality_bench.py --mode blend --order abc \
   --out g1_matched_blend_abc.json
 ```
-Because `--control-json` is omitted on this first `blend` call, `agree_rate` is `None` in [`g1_matched_quality_bench.py#L209-L217`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_quality_bench.py#L209-L217), causing `gate_d = False`, `pass_heuristic = False`, and `sys.exit(4)` (confirmed in [`artifacts/g1-matched-2026-10-22/g1_matched_blend_abc.json#L163-L164`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_matched_blend_abc.json#L163-L164): `"gate_d_pass": false, "pass_heuristic": false`). Because `g1_matched_blend.sh` sets `set -euo pipefail`, the script aborts at line 80 before ever running the `bac` reorder check on line 82.
+Because `--control-json` is omitted on this first `blend` call, `agree_rate` is `None` in [`g1_matched_quality_bench.py#L209-L217`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_quality_bench.py#L209-L217), causing `gate_d = False`, `pass_heuristic = False`, and `sys.exit(4)` (confirmed in [`artifacts/g1-matched-2026-10-22/g1_matched_blend_abc.json#L163-L164`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_matched_blend_abc.json#L163-L164): `"gate_d_pass": false, "pass_heuristic": false`). Because `g1_matched_blend.sh` sets `set -euo pipefail`, the script aborts at line 80 before ever running the `bac` reorder check on line 82.
 
 **Fix:** Pass `--control-json g1_matched_control.json` on line 80 of `g1_matched_blend.sh` (or allow `--mode blend` without `--control-json` to use `gate_c` bars when seeding).
 
@@ -100,16 +100,16 @@ This issue from Round 1 was not fixed: [`hash_build_context()`](file:///Users/ap
 
 ### MAJ-1 · Salted TTFT Loop Pushes ~31 GB of KV into an 8 GB LMCache L1 Server
 
-**Files:** [`scripts/g1_matched_ttft_bench.py#L360-L383`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_bench.py#L360-L383), [`scripts/g1_matched_ttft_chunk_e.sh#L42`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_chunk_e.sh#L42)
+**Files:** [`scripts/g1/matched/g1_matched_ttft_bench.py#L360-L383`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_bench.py#L360-L383), [`scripts/g1/matched/g1_matched_ttft_chunk_e.sh#L42`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_chunk_e.sh#L42)
 
-In [`g1_matched_ttft_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_bench.py#L360-L383), each of the 10 `warm_bac` and 10 `warm_cba` trials generates uniquely salted 12k-token prompts (`abc_i` + `reorder_i`). For Qwen3-8B (`128 KiB/token`), each 12k prompt is **~1.57 GB of KV**. Across 1 seed + 10 `bac` pairs + 10 `cba` pairs + 10 `cold` runs, the benchmark streams **>30 GB of unique KV blocks** into an `lmcache server` started with `--l1-size-gb 8` ([`g1_matched_ttft_chunk_e.sh#L42`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_chunk_e.sh#L42)), causing continuous LRU eviction churn during measurement.
+In [`g1_matched_ttft_bench.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_bench.py#L360-L383), each of the 10 `warm_bac` and 10 `warm_cba` trials generates uniquely salted 12k-token prompts (`abc_i` + `reorder_i`). For Qwen3-8B (`128 KiB/token`), each 12k prompt is **~1.57 GB of KV**. Across 1 seed + 10 `bac` pairs + 10 `cba` pairs + 10 `cold` runs, the benchmark streams **>30 GB of unique KV blocks** into an `lmcache server` started with `--l1-size-gb 8` ([`g1_matched_ttft_chunk_e.sh#L42`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_chunk_e.sh#L42)), causing continuous LRU eviction churn during measurement.
 - Additionally, look at [`g1_ttft_blend_12k_chunks.json#L21-L23`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_ttft_blend_12k_chunks.json#L21-L23): in `warm_abc`, Trial 1 (immediately after `[seed abc]`) took **`1063.0 ms`**, while Trials 2–10 took **`764–785 ms`**. Seeding `abc_i` once and immediately querying `reorder_i` in `_measure_reorder_after_abc` does not even give `abc_i` the 2nd-access warm state seen in `warm_abc`.
 
 ---
 
 ### MAJ-2 · Cold Nonce Prepending Duplicates BOS Token & Leaks into Model Output
 
-**Files:** [`scripts/g1_matched_ttft_bench.py#L318`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_bench.py#L318), [`scripts/g1_matched_ttft_bench.py#L469-L477`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_bench.py#L469-L477), [`artifacts/g1-matched-2026-10-22/g1_ttft_native_12k_chunks.json#L91`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_ttft_native_12k_chunks.json#L91)
+**Files:** [`scripts/g1/matched/g1_matched_ttft_bench.py#L318`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_bench.py#L318), [`scripts/g1/matched/g1_matched_ttft_bench.py#L469-L477`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_bench.py#L469-L477), [`artifacts/g1-matched-2026-10-22/g1_ttft_native_12k_chunks.json#L91`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_ttft_native_12k_chunks.json#L91)
 
 `prompts["abc"]` begins with `system = tokenizer.encode(SYSTEM_TEXT, add_special_tokens=True)` (which starts with `bos_token_id`). In the `cold_abc` loop:
 ```python
@@ -124,9 +124,9 @@ Prepending `nonce` before `prompts["abc"]` places raw tokens *before* the BOS to
 
 ### MAJ-3 · `g1_epic_bench.py` Times KV Collection + Cloning Inside the Benchmark Loop (`_collect_and_link`)
 
-**File:** [`scripts/g1_epic_bench.py#L54-L125`](file:///Users/apple/Code/Context%20Weave/scripts/g1_epic_bench.py#L54-L125)
+**File:** [`scripts/g1/epic/g1_epic_bench.py#L54-L125`](file:///Users/apple/Code/Context%20Weave/scripts/g1/epic/g1_epic_bench.py#L54-L125)
 
-In [`_collect_and_link()`](file:///Users/apple/Code/Context%20Weave/scripts/g1_epic_bench.py#L54-L125):
+In [`_collect_and_link()`](file:///Users/apple/Code/Context%20Weave/scripts/g1/epic/g1_epic_bench.py#L54-L125):
 1. Only `n=1` run is performed (no warmup, no p50/CV over $\ge 5$ runs as required by Gate G1).
 2. Line 71 encodes each doc with `add_special_tokens=True` (`[tokenizer.encode(d, add_special_tokens=True) for d in docs]`), injecting a BOS token at the start of **every document chunk** in `input_ids`, whereas `_full_prefill` encodes the concatenated string with a single BOS token.
 3. Line 107 (`if i == len(start_offset) - 2:`) assumes the last element of `token_ids` is the question tail, which works for 5 segments (`[system, docB, docC, docA, q]`), but if `recomp_num` exceeds a chunk's length (`start_offset[i] + recomp_num > start_offset[i+1]`), `meta["kvlink"]` produces duplicate/overlapping token indices.
@@ -135,7 +135,7 @@ In [`_collect_and_link()`](file:///Users/apple/Code/Context%20Weave/scripts/g1_e
 
 ### MAJ-4 · Scorer Substring & `<thinking>` Tag Vulnerabilities in `g1_scoring.py`
 
-**Files:** [`scripts/g1_scoring.py#L8-L30`](file:///Users/apple/Code/Context%20Weave/scripts/g1_scoring.py#L8-L30), [`artifacts/g1-matched-2026-10-22/g1_matched_control.json#L100`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_matched_control.json#L100)
+**Files:** [`scripts/g1/common/g1_scoring.py#L8-L30`](file:///Users/apple/Code/Context%20Weave/scripts/g1/common/g1_scoring.py#L8-L30), [`artifacts/g1-matched-2026-10-22/g1_matched_control.json#L100`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_matched_control.json#L100)
 
 1. **Unclosed `<think>` / `<thinking>` tags:** Look at [`g1_matched_control.json#L100`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_matched_control.json#L100): Qwen3 emitted `<thinking>\nOkay, let me try to figure this out...` (using `<thinking>`, not `<think>`, and truncated by `max_tokens=96` before any closing tag!). `_THINK_RE = re.compile(r"<think>[\s\S]*?</think>", re.IGNORECASE)` misses both `<thinking>` and unclosed `<think>` blocks truncated by `max_tokens`.
 2. **Substring match without word boundaries:** `gold.lower() in cleaned.lower()` (line 25 & 80) matches `"2019"` inside `"20190"` or `"ID-2019-X"`, and in `extract_answer(cleaned, gold=gold)`, if the model echoes all documents or says `"It is NOT Karachi, it is Lahore"`, `extract_answer` returns `"Karachi"` and marks `exact=True, contains=True, agrees_with_control=True`!
@@ -144,18 +144,18 @@ In [`_collect_and_link()`](file:///Users/apple/Code/Context%20Weave/scripts/g1_e
 
 ### MAJ-5 · PRD Gate G1 Requirements vs Current G1 Evidence
 
-**Files:** [`Docs/prd/contextweave_prd_v2.md`](file:///Users/apple/Code/Context%20Weave/Docs/prd/contextweave_prd_v2.md), [`Docs/prd/contextweave_prd_v2.1_amendments.md`](file:///Users/apple/Code/Context%20Weave/Docs/prd/contextweave_prd_v2.1_amendments.md), [`Docs/assumptions.md`](file:///Users/apple/Code/Context%20Weave/Docs/assumptions.md)
+**Files:** [`Docs/prd/contextweave_prd_v2.md`](file:///Users/apple/Code/Context%20Weave/Docs/prd/contextweave_prd_v2.md), [`Docs/prd/contextweave_prd_v2.1_amendments.md`](file:///Users/apple/Code/Context%20Weave/Docs/prd/contextweave_prd_v2.1_amendments.md), [`Docs/core/assumptions.md`](file:///Users/apple/Code/Context%20Weave/Docs/core/assumptions.md)
 
 Checking the formal PRD G1 gate criteria against what has been run:
 - **Primary model (`Llama-3.1-8B-Instruct` with `llama3` scaled RoPE):** Not run yet (only `Qwen/Qwen3-8B` has been tested on GPU).
 - **CV of p50 TTFT $\le 10\%$ over $\ge 5$ runs:** The early G1 step 1 (`g1_ttft_bench.py`) and step 2b (`g1_reorder_gap_bench.py`) used $n=3$ and $n=1$ respectively (and their JSON files were not checked into `artifacts/`). The later `g1_matched_ttft_bench.py` runs use $n=10$ with very tight variance (e.g., native 12k warm_abc p50 `250.5 ms`, p90 `250.6 ms`), but none of the scripts compute or report the **Coefficient of Variation (CV)** required by the PRD.
-- **Multi-hop receiver-necessary evaluation:** [`Docs/Research/ResolventKV-adoption.md#L25`](file:///Users/apple/Code/Context%20Weave/Docs/Research/ResolventKV-adoption.md#L25) and [`Docs/assumptions.md#L24`](file:///Users/apple/Code/Context%20Weave/Docs/assumptions.md#L24) specify **multi-hop** answer preservation (where answering requires combining facts across $\ge 2$ reordered chunks). Both `g1_quality_bench.py` and `g1_matched_quality_bench.py` are **single-hop** needle-in-a-haystack lookups (`"What is the secret code in DOC-A7?"`), which do not test cross-chunk causal closure.
+- **Multi-hop receiver-necessary evaluation:** [`Docs/Research/ResolventKV-adoption.md#L25`](file:///Users/apple/Code/Context%20Weave/Docs/Research/ResolventKV-adoption.md#L25) and [`Docs/core/assumptions.md#L24`](file:///Users/apple/Code/Context%20Weave/Docs/core/assumptions.md#L24) specify **multi-hop** answer preservation (where answering requires combining facts across $\ge 2$ reordered chunks). Both `g1_quality_bench.py` and `g1_matched_quality_bench.py` are **single-hop** needle-in-a-haystack lookups (`"What is the secret code in DOC-A7?"`), which do not test cross-chunk causal closure.
 
 ---
 
 ### MAJ-6 · `g1_matched_install.sh` Did Not Actually Downgrade vLLM to Match `lmcache==0.5.3`
 
-**Files:** [`scripts/g1_matched_install.sh#L22-L28`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_install.sh#L22-L28), [`artifacts/g1-matched-2026-10-22/g1_matched_env.json`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_matched_env.json)
+**Files:** [`scripts/g1/matched/g1_matched_install.sh#L22-L28`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_install.sh#L22-L28), [`artifacts/g1-matched-2026-10-22/g1_matched_env.json`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/g1_matched_env.json)
 
 The goal of `g1_matched_install.sh` was to avoid the `vLLM 0.32.0` + `lmcache` mismatch by matching the `lmcache/vllm-openai:v0.5.3` era. However, because `VLLM_PIN` defaults to `""`:
 ```bash
@@ -168,15 +168,15 @@ python -c "import vllm" 2>/dev/null || pip install "vllm"
 
 ### MAJ-7 · `g1_matched_smoke.sh` Re-Introduces Unquoted Here-Doc Interpolation (`CRIT-4` Regression)
 
-**File:** [`scripts/g1_matched_smoke.sh#L15-L28`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_smoke.sh#L15-L28)
+**File:** [`scripts/g1/matched/g1_matched_smoke.sh#L15-L28`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_smoke.sh#L15-L28)
 
-While `scripts/smoke_remote.sh` was hardened in Round 1 to use a quoted `<<'PY'` here-doc and `os.environ`, the newly created [`scripts/g1_matched_smoke.sh`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_smoke.sh#L15-L28) uses an unquoted `<<PY` with `"${MODEL}"` interpolated directly into Python source (`model = os.environ.get("SMOKE_MODEL", "${MODEL}")`), and passes if `"ok" in text.lower()` (which matches almost any English sentence containing the letters `"ok"`, such as `"token"` or `"book"`!).
+While `scripts/smoke/smoke_remote.sh` was hardened in Round 1 to use a quoted `<<'PY'` here-doc and `os.environ`, the newly created [`scripts/g1/matched/g1_matched_smoke.sh`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_smoke.sh#L15-L28) uses an unquoted `<<PY` with `"${MODEL}"` interpolated directly into Python source (`model = os.environ.get("SMOKE_MODEL", "${MODEL}")`), and passes if `"ok" in text.lower()` (which matches almost any English sentence containing the letters `"ok"`, such as `"token"` or `"book"`!).
 
 ---
 
 ### MAJ-8 · `g1_collect_artifacts.sh` Misses Half of the Generated Artifact Files
 
-**File:** [`scripts/g1_collect_artifacts.sh#L8-L16`](file:///Users/apple/Code/Context%20Weave/scripts/g1_collect_artifacts.sh#L8-L16)
+**File:** [`scripts/g1/matched/g1_collect_artifacts.sh#L8-L16`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_collect_artifacts.sh#L8-L16)
 
 `FILES=(...)` hardcodes only 7 filenames (`g1_matched_ttft_native.json`, etc.) and misses all the newer files produced by `g1_matched_ttft_chunk_e.sh` and the 6k/12k runs (`g1_ttft_native_fixed.json`, `g1_ttft_blend_fixed.json`, `g1_ttft_native_12k.json`, `g1_ttft_blend_12k_salted.json`, `g1_ttft_native_12k_chunks.json`, `g1_ttft_blend_12k_chunks.json`).
 
@@ -187,11 +187,11 @@ While `scripts/smoke_remote.sh` was hardened in Round 1 to use a quoted `<<'PY'`
 | ID | Location | Finding |
 |---|---|---|
 | **MIN-1** | [`tests/unit/test_g1_benches.py#L26`](file:///Users/apple/Code/Context%20Weave/tests/unit/test_g1_benches.py#L26), [`#L204`](file:///Users/apple/Code/Context%20Weave/tests/unit/test_g1_benches.py#L204) | `class _FakeTok:` is defined **twice** in the same file (line 26 and line 204), with the second definition shadowing the first. |
-| **MIN-2** | [`scripts/g1_*.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1_matched_ttft_bench.py#L34-L35), [`tests/unit/test_g1_*.py`](file:///Users/apple/Code/Context%20Weave/tests/unit/test_g1_benches.py#L17-L23) | 9 scripts live in `scripts/` as standalone ~200–550 LOC programs instead of under `src/contextweave/`, forcing `sys.path.insert` and `importlib.util.spec_from_file_location` hacks across scripts and tests. |
-| **MIN-3** | [`Docs/project-overview.md#L173-L185`](file:///Users/apple/Code/Context%20Weave/Docs/project-overview.md#L173-L185), [`Docs/assumptions.md#L16`](file:///Users/apple/Code/Context%20Weave/Docs/assumptions.md#L16) | Stale statements: `assumptions.md` still says `"GPU: None yet — rent only after G0 note + reproduction runbooks exist"`, and `project-overview.md` omits the G1 GPU harnesses and Colab A100 experimental artifacts that now exist in the repo. |
-| **MIN-4** | [`Docs/experiment-log.md#L179-L255`](file:///Users/apple/Code/Context%20Weave/Docs/experiment-log.md#L179-L255) | Chronological order inversion: `2026-10-22` entries (lines 179–236) appear *before* the `2026-10-21 — G1 Colab pin closeout` entry (line 237), followed by more `2026-10-22` entries (lines 258–308). |
-| **MIN-5** | [`src/contextweave/safety.py#L43`](file:///Users/apple/Code/Context%20Weave/src/contextweave/safety.py#L43), [`base.py#L72`](file:///Users/apple/Code/Context%20Weave/src/contextweave/runtime_adapters/base.py#L72), [`registry.py#L47`](file:///Users/apple/Code/Context%20Weave/src/contextweave/runtime_adapters/registry.py#L47), [`run_baseline.py#L22`](file:///Users/apple/Code/Context%20Weave/scripts/run_baseline.py#L22) | 5 error strings in Python source still reference lowercase `docs/...` instead of `Docs/...`. |
-| **MIN-6** | [`README.md#L43-L74`](file:///Users/apple/Code/Context%20Weave/README.md#L43-L74) | `README.md` Docs table is missing links to the new G1 docs and artifacts: [`Docs/g1-epic.md`](file:///Users/apple/Code/Context%20Weave/Docs/g1-epic.md), [`Docs/g1-matched-colab.md`](file:///Users/apple/Code/Context%20Weave/Docs/g1-matched-colab.md), [`Docs/Reviews/claude_g1_cacheblend_matched_image_runbook.md`](file:///Users/apple/Code/Context%20Weave/Docs/Reviews/claude_g1_cacheblend_matched_image_runbook.md), and [`artifacts/g1-matched-2026-10-22/README.md`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/README.md). |
+| **MIN-2** | [`scripts/g1_*.py`](file:///Users/apple/Code/Context%20Weave/scripts/g1/matched/g1_matched_ttft_bench.py#L34-L35), [`tests/unit/test_g1_*.py`](file:///Users/apple/Code/Context%20Weave/tests/unit/test_g1_benches.py#L17-L23) | 9 scripts live in `scripts/` as standalone ~200–550 LOC programs instead of under `src/contextweave/`, forcing `sys.path.insert` and `importlib.util.spec_from_file_location` hacks across scripts and tests. |
+| **MIN-3** | [`Docs/core/project-overview.md#L173-L185`](file:///Users/apple/Code/Context%20Weave/Docs/core/project-overview.md#L173-L185), [`Docs/core/assumptions.md#L16`](file:///Users/apple/Code/Context%20Weave/Docs/core/assumptions.md#L16) | Stale statements: `assumptions.md` still says `"GPU: None yet — rent only after G0 note + reproduction runbooks exist"`, and `project-overview.md` omits the G1 GPU harnesses and Colab A100 experimental artifacts that now exist in the repo. |
+| **MIN-4** | [`Docs/status/experiment-log.md#L179-L255`](file:///Users/apple/Code/Context%20Weave/Docs/status/experiment-log.md#L179-L255) | Chronological order inversion: `2026-10-22` entries (lines 179–236) appear *before* the `2026-10-21 — G1 Colab pin closeout` entry (line 237), followed by more `2026-10-22` entries (lines 258–308). |
+| **MIN-5** | [`src/contextweave/safety.py#L43`](file:///Users/apple/Code/Context%20Weave/src/contextweave/safety.py#L43), [`base.py#L72`](file:///Users/apple/Code/Context%20Weave/src/contextweave/runtime_adapters/base.py#L72), [`registry.py#L47`](file:///Users/apple/Code/Context%20Weave/src/contextweave/runtime_adapters/registry.py#L47), [`run_baseline.py#L22`](file:///Users/apple/Code/Context%20Weave/scripts/workloads/run_baseline.py#L22) | 5 error strings in Python source still reference lowercase `docs/...` instead of `Docs/...`. |
+| **MIN-6** | [`README.md#L43-L74`](file:///Users/apple/Code/Context%20Weave/README.md#L43-L74) | `README.md` Docs table is missing links to the new G1 docs and artifacts: [`Docs/gates/g1/g1-epic.md`](file:///Users/apple/Code/Context%20Weave/Docs/gates/g1/g1-epic.md), [`Docs/gates/g1/g1-matched-colab.md`](file:///Users/apple/Code/Context%20Weave/Docs/gates/g1/g1-matched-colab.md), [`Docs/Reviews/claude_g1_cacheblend_matched_image_runbook.md`](file:///Users/apple/Code/Context%20Weave/Docs/Reviews/claude_g1_cacheblend_matched_image_runbook.md), and [`artifacts/g1-matched-2026-10-22/README.md`](file:///Users/apple/Code/Context%20Weave/artifacts/g1-matched-2026-10-22/README.md). |
 | **MIN-7** | [`src/contextweave/`](file:///Users/apple/Code/Context%20Weave/src/contextweave/) | 7 empty stub subpackages (`api`, `artifacts`, `compatibility`, `planner`, `repair`, `rope`, `telemetry`) and `.tmp/` local directory remain from Phase 0 scaffolding. |
 
 ---

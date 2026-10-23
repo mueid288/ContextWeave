@@ -16,12 +16,12 @@
 ### Task 1: Shared answer scoring helpers
 
 **Files:**
-- Create: `scripts/g1_scoring.py`
+- Create: `scripts/g1/common/g1_scoring.py`
 - Test: `tests/unit/test_g1_scoring.py`
 
 **Step 1:** Write failing tests for `strip_think`, `extract_answer`, `score_output`, `is_garbage` (echo/`# #`/empty/no-gold).
 
-**Step 2:** Implement helpers in `scripts/g1_scoring.py`.
+**Step 2:** Implement helpers in `scripts/g1/common/g1_scoring.py`.
 
 **Step 3:** `pytest tests/unit/test_g1_scoring.py -q` → PASS; commit.
 
@@ -30,7 +30,7 @@
 ### Task 2: Matched quality bench (≥10 cases)
 
 **Files:**
-- Create: `scripts/g1_matched_quality_bench.py`
+- Create: `scripts/g1/matched/g1_matched_quality_bench.py`
 - Modify: `tests/unit/test_g1_benches.py`
 
 **Step 1:** Cases with DOC-ids + planted facts; `--mode {native,control,blend}`; `--order {abc,bac,cba}`; JSON with contains/agree/garbage.
@@ -44,7 +44,7 @@
 ### Task 3: Matched TTFT bench
 
 **Files:**
-- Create: `scripts/g1_matched_ttft_bench.py`
+- Create: `scripts/g1/matched/g1_matched_ttft_bench.py`
 
 **Step 1:** Streaming TTFT when available; else wall-clock first-token proxy documented in JSON `ttft_method`.
 
@@ -57,9 +57,9 @@
 ### Task 4: Colab scripts + docs + pre-reg
 
 **Files:**
-- Create: `scripts/g1_matched_install.sh`, `g1_matched_smoke.sh`, `g1_matched_blend.sh`, `g1_collect_artifacts.sh`
-- Create: `Docs/g1-matched-colab.md`
-- Modify: `Docs/experiment-log.md`, `Docs/Initial/phase0-status.md`, `Docs/runtime-pins.md`
+- Create: `scripts/g1/matched/g1_matched_install.sh`, `g1_matched_smoke.sh`, `g1_matched_blend.sh`, `g1_collect_artifacts.sh`
+- Create: `Docs/gates/g1/g1-matched-colab.md`
+- Modify: `Docs/status/experiment-log.md`, `Docs/archive/phase0-initial/phase0-status.md`, `Docs/runbooks/runtime-pins.md`
 
 **Step 1:** Install pins `lmcache==0.5.3` + sibling vLLM; record versions to `g1_matched_env.json`.
 

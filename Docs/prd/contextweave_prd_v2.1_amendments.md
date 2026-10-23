@@ -142,7 +142,7 @@ Use a **paired bootstrap** (or paired permutation test) over identical queries f
 | G0 working-set | `analyze_trace.py --cache-budget-gb` (default on) |
 | Repair roofline | `costmodel/breakeven.py` (`repair_time_roofline_s`, `max_tolerable_bailout_rate`) |
 | Boundaries + block size | `tokenization/boundaries.py` (boundary **then** pad), generators |
-| Mode A | `provenance/trust.py`, `Docs/fingerprints.md` |
+| Mode A | `provenance/trust.py`, `Docs/core/fingerprints.md` |
 | Gemini disposition | `Docs/Reviews/Gemini_1_response.md`, `Gemini_2_response.md`, `Gemini_3_response.md` |
 
 ---
