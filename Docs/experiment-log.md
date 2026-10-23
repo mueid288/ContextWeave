@@ -433,6 +433,11 @@
   `ensure_flashinfer_sparse_compat()` (sparse unused for our Gate R path)
 - Risk after shims: same-class `IndexError` as 0.32 in-process (log if seen);
   if import moles continue, bump `LMCACHE_PIN=0.5.3` (lazy sparse) + reinstall
+- Same session later: blender **inits**; case 1 dies
+  `TypeError: Encoding objects of type ConstantList is unsupported` — exact
+  LMCache [#2946](https://github.com/LMCache/LMCache/pull/2946) item. Patched
+  `LMCacheLookupClient.lookup` → `list(token_ids)`; also alias
+  `get_input_embeddings` → `embed_input_ids` at register_model
 
 ## Template for future entries
 

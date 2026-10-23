@@ -7,6 +7,10 @@ Stock vLLM never calls ``register_model`` (LMCache #4131). CacheBlend's
 in-worker ``LMCBlender`` then cannot load the model for RoPE / layer-1 filter.
 Fix: disable V1 worker multiprocessing, patch ``GPUModelRunner.load_model``,
 and use in-process ``LMCacheConnectorV1`` for the blend arm.
+
+G1-DIAG #2 pin moles vs lmcache 0.4.2 + vLLM 0.18 (also LMCache PR #2946):
+``vllm.attention`` move, eager flashinfer sparse import, ``ConstantList``
+msgspec encode, ``get_input_embeddings`` → ``embed_input_ids``.
 """
 
 from __future__ import annotations
@@ -20,13 +24,7 @@ BLEND_KV_CONNECTOR = "LMCacheConnectorV1"
 
 
 def ensure_vllm_attention_compat() -> bool:
-    """Alias ``vllm.attention.Attention`` for lmcache ≤0.4.2 on vLLM ≥0.17.
-
-    lmcache 0.4.2 does ``from vllm.attention import Attention``. vLLM 0.18 moved
-    the class to ``vllm.model_executor.layers.attention.attention`` (lmcache
-    ≥0.5.0 already try/excepts this). Without the alias, in-process blend dies
-    at ``Creating blender`` with ``ModuleNotFoundError: vllm.attention``.
-    """
+    """Alias ``vllm.attention.Attention`` for lmcache ≤0.4.2 on vLLM ≥0.17."""
     try:
         importlib.import_module("vllm.attention")
         return True
@@ -86,6 +84,21 @@ def setup_blend_env(*, blend_special_str: str, cpu_gb: float | None = None) -> N
         os.environ.setdefault("LMCACHE_MAX_LOCAL_CPU_SIZE", "40")
 
 
+def _alias_get_input_embeddings(model_obj) -> None:
+    """vLLM V1 dropped ``get_input_embeddings`` (LMCache #2946)."""
+    if hasattr(model_obj, "get_input_embeddings"):
+        return
+    inner = getattr(model_obj, "model", None)
+    if inner is None or not hasattr(inner, "embed_input_ids"):
+        return
+
+    def get_input_embeddings(input_ids):  # noqa: ANN001
+        return inner.embed_input_ids(input_ids)
+
+    model_obj.get_input_embeddings = get_input_embeddings  # type: ignore[method-assign]
+    print("aliased model.get_input_embeddings → model.embed_input_ids", flush=True)
+
+
 def patch_vllm_register_model_for_blend() -> None:
     """Hook ``GPUModelRunner.load_model`` → ``VLLMModelTracker.register_model``.
 
@@ -113,6 +126,7 @@ def patch_vllm_register_model_for_blend() -> None:
             out = _orig(self, *args, **kwargs)
             model_obj = getattr(self, "model", None)
             if model_obj is not None:
+                _alias_get_input_embeddings(model_obj)
                 VLLMModelTracker.register_model(ENGINE_NAME, model_obj)
             return out
 
@@ -122,15 +136,7 @@ def patch_vllm_register_model_for_blend() -> None:
 
 
 def ensure_flashinfer_sparse_compat() -> bool:
-    """Satisfy lmcache 0.4.2's eager ``flash_infer_sparse`` import.
-
-    ``attention/utils.py`` imports ``LMCFlashInferSparseBackend`` even when
-    ``enable_sparse=False``. That module needs
-    ``flashinfer.page.block_sparse_indices_to_vector_sparse_offsets``, which
-    newer/older flashinfer wheels may lack. Stub the symbol so non-sparse
-    FlashAttention CacheBlend can load; calling the stub raises if sparse is
-    actually enabled.
-    """
+    """Satisfy lmcache 0.4.2's eager ``flash_infer_sparse`` import."""
     name = "block_sparse_indices_to_vector_sparse_offsets"
     try:
         import flashinfer.page as page
@@ -151,13 +157,39 @@ def ensure_flashinfer_sparse_compat() -> bool:
     return True
 
 
+def patch_lmcache_constant_list_tokens() -> bool:
+    """Convert vLLM ``ConstantList`` token ids before msgspec encode (LMCache #2946)."""
+    try:
+        from lmcache.v1.lookup_client.lmcache_lookup_client import LMCacheLookupClient
+    except Exception as exc:  # noqa: BLE001
+        print(f"WARN: ConstantList lookup patch skipped ({exc})", flush=True)
+        return False
+
+    orig = LMCacheLookupClient.lookup
+    if getattr(orig, "_cw_constant_list_patched", False):
+        return True
+
+    def lookup(self, token_ids, *args, **kwargs):  # noqa: ANN001
+        if token_ids is not None and not isinstance(token_ids, list):
+            token_ids = list(token_ids)
+        return orig(self, token_ids, *args, **kwargs)
+
+    lookup._cw_constant_list_patched = True  # type: ignore[attr-defined]
+    LMCacheLookupClient.lookup = lookup  # type: ignore[method-assign]
+    print("patched LMCacheLookupClient.lookup for ConstantList→list", flush=True)
+    return True
+
+
 def prepare_blend_worker(*, blend_special_str: str, cpu_gb: float | None = None) -> None:
-    """Env + register_model patch so in-worker LMCBlender can engage."""
-    # In-process worker so the monkeypatch is visible (not a forked child).
+    """Env + shims + register_model so in-worker LMCBlender can engage."""
     os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
     setup_blend_env(blend_special_str=blend_special_str, cpu_gb=cpu_gb)
     ensure_vllm_attention_compat()
     ensure_flashinfer_sparse_compat()
+    try:
+        patch_lmcache_constant_list_tokens()
+    except Exception as exc:  # noqa: BLE001
+        print(f"WARN: ConstantList patch failed ({exc})", flush=True)
     try:
         patch_vllm_register_model_for_blend()
     except Exception as exc:  # noqa: BLE001 — lmcache may be absent on CPU CI
