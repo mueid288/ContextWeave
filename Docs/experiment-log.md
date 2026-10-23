@@ -350,6 +350,18 @@
   Qwen3 unlikely)
 - Fallback if fast probe fails: high-CPU host full build, or skip EPIC / close G1
 
+## 2026-10-23 — G1 EPIC fast-path bench: quality OK / latency FAIL
+
+- Env: Colab A100, uv Py3.11 venv, `vllm==0.7.0` wheel + EPIC `*.py` overlay,
+  `transformers<4.50`, `Mistral-7B-Instruct-v0.2`, recomp=8, n=5, filler≈2000 chars
+- full_prefill p50-ish **~235 ms**; kvlink-8 **~332 ms**; speedup **0.71×** (slower)
+- Outputs both contain gold `Karachi` → `quality_ok true`, `latency_ok false`,
+  **`pass_heuristic false`**
+- Interpretation: open demo LegoLink path runs and preserves answer at this scale, but
+  does **not** beat full prefill TTFT (authors note demo is functionality-focused)
+- **G1 EPIC closed** (fair negative on latency). Do not expand matrix / retune recomp
+  this session. ResolventKV still deferred until a non-prefix path wins latency.
+
 ## Template for future entries
 
 ```
