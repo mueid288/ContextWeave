@@ -25,7 +25,8 @@ JSONL, can a rule predict C3 failures with precision ≥0.9 such that
 Fit and evaluated on the same 20-request suite (pattern is deterministic there).
 Production needs the real doc permutation exposed to the planner.
 
-## Next
+## Next (done — superseded for policy)
 
-Planner v0 uses the gate (`RequestView.chunk_order`). Still **no Phase 2**.
-Optional: GPU confirm on a fresh seed — separate pre-reg if owner wants.
+GPU confirm on fresh golds: **FAIL** —
+`Docs/pre-reg/pre-reg-h3-gpu-confirm.md`, `artifacts/h3-confirm-2026-10-23/`.
+Order-only H3 is **not** production policy. Planner: C1 else C0. **PAUSED.**
