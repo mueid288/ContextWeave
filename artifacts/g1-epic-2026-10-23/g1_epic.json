@@ -1,0 +1,70 @@
+INFO 10-23 07:20:02 __init__.py:183] Automatically detected platform cuda.
+EPIC bench model=mistralai/Mistral-7B-Instruct-v0.2 recomp=8
+=== loading EPIC-fork LLM ===
+INFO 10-23 07:20:10 config.py:520] This model supports multiple tasks: {'reward', 'score', 'classify', 'generate', 'embed'}. Defaulting to 'generate'.
+WARNING 10-23 07:20:10 cuda.py:100] To see benefits of async output processing, enable CUDA graph. Since, enforce-eager is enabled, async output processor cannot be used
+WARNING 10-23 07:20:10 config.py:656] Async output processing is not supported on the current platform type cuda.
+INFO 10-23 07:20:10 llm_engine.py:232] Initializing an LLM engine (v0.7.0) with config: model='mistralai/Mistral-7B-Instruct-v0.2', speculative_config=None, tokenizer='mistralai/Mistral-7B-Instruct-v0.2', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, override_neuron_config=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=8192, download_dir=None, load_format=LoadFormat.AUTO, tensor_parallel_size=1, pipeline_parallel_size=1, disable_custom_all_reduce=False, quantization=None, enforce_eager=True, kv_cache_dtype=auto,  device_config=cuda, decoding_config=DecodingConfig(guided_decoding_backend='xgrammar'), observability_config=ObservabilityConfig(otlp_traces_endpoint=None, collect_model_forward_time=False, collect_model_execute_time=False), seed=0, served_model_name=mistralai/Mistral-7B-Instruct-v0.2, num_scheduler_steps=1, multi_step_stream_outputs=True, enable_prefix_caching=False, chunked_prefill_enabled=False, use_async_output_proc=False, disable_mm_preprocessor_cache=False, mm_processor_kwargs=None, pooler_config=None, compilation_config={"splitting_ops":[],"compile_sizes":[],"cudagraph_capture_sizes":[],"max_capture_size":0}, use_cached_outputs=False, 
+INFO 10-23 07:20:11 cuda.py:163] Using XFormers backend.
+INFO 10-23 07:20:12 model_runner.py:1110] Starting to load model mistralai/Mistral-7B-Instruct-v0.2...
+INFO 10-23 07:20:12 weight_utils.py:251] Using model weights format ['*.safetensors']
+INFO 10-23 07:20:54 model_runner.py:1115] Loading model weights took 13.4967 GB
+INFO 10-23 07:20:55 worker.py:266] Memory profiling takes 1.01 seconds
+INFO 10-23 07:20:55 worker.py:266] the current vLLM instance can use total_gpu_memory (39.49GiB) x gpu_memory_utilization (0.80) = 31.59GiB
+INFO 10-23 07:20:55 worker.py:266] model weights take 13.50GiB; non_torch_memory takes 0.09GiB; PyTorch activation peak memory takes 0.85GiB; the rest of the memory reserved for KV Cache is 17.15GiB.
+INFO 10-23 07:20:55 executor_base.py:108] # CUDA blocks: 8783, # CPU blocks: 2048
+INFO 10-23 07:20:55 executor_base.py:113] Maximum concurrency for 8192 tokens per request: 17.15x
+INFO 10-23 07:20:57 llm_engine.py:429] init engine (profile, create kv cache, warmup model) took 3.24 seconds
+  [warmup full prefill] discarded
+  [full prefill BCA] 1/5 …
+  [full prefill BCA] 234 ms
+  [full prefill BCA] 2/5 …
+  [full prefill BCA] 233 ms
+  [full prefill BCA] 3/5 …
+  [full prefill BCA] 237 ms
+  [full prefill BCA] 4/5 …
+  [full prefill BCA] 238 ms
+  [full prefill BCA] 5/5 …
+  [full prefill BCA] 235 ms
+  [kvlink-8 BCA] 1/5 …
+  [kvlink-8 BCA] 355 ms
+  [kvlink-8 BCA] 2/5 …
+  [kvlink-8 BCA] 328 ms
+  [kvlink-8 BCA] 3/5 …
+  [kvlink-8 BCA] 330 ms
+  [kvlink-8 BCA] 4/5 …
+  [kvlink-8 BCA] 332 ms
+  [kvlink-8 BCA] 5/5 …
+  [kvlink-8 BCA] 334 ms
+{
+  "gate": "G1-step4-epic",
+  "model": "mistralai/Mistral-7B-Instruct-v0.2",
+  "recomp_num": 8,
+  "runs": 5,
+  "full_prefill_ms": 234.90444599997318,
+  "kvlink_ms": 332.0674340000096,
+  "full_prefill_samples_ms": [
+    234.0569120000282,
+    233.27763899999354,
+    237.35700500003531,
+    237.60414799994578,
+    234.90444599997318
+  ],
+  "kvlink_samples_ms": [
+    354.6674230000235,
+    327.59650900004544,
+    330.42656899999656,
+    332.0674340000096,
+    333.6388260000831
+  ],
+  "full_vs_kvlink_speedup": 0.7073998289153715,
+  "outputs": {
+    "full_prefill": "Karachi",
+    "kvlink": "I. The city named in Document Beta is Karachi."
+  },
+  "gold": "Karachi",
+  "latency_ok": false,
+  "quality_ok": true,
+  "pass_heuristic": false,
+  "note": "LegoLink-N on EPIC fork. pass \u21d2 kvlink \u226515% faster than full AND both answers contain gold."
+}
