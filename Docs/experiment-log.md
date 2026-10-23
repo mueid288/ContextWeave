@@ -2,13 +2,13 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** `PAUSED` (2026-10-23) — see `Docs/pause.md`
-- **Phase 0:** `PIVOT` then pause — `Docs/phase0-exit-decision.md`
+- **Project state:** path-2 closed — EPIC@12k **PASS**; Phase 1 still not opened — `Docs/pause.md`
+- **Phase 0:** `PIVOT` — `Docs/phase0-exit-decision.md` (not reopened)
 - **G1 CacheBlend:** `CLOSED` — engaged @12k but no quality-preserving ≥15% TTFT win
-- **G1 EPIC:** `INCONCLUSIVE (toy scale)`; fair-scale pre-reg parked
-  (`Docs/pre-reg-epic-12k.md`) — not started
-- ResolventKV: **blocked** until quality-preserving PIC win (§6)
-- **Resume:** pick a path in `Docs/pause.md` first — do not “continue Phase 0”
+- **G1 EPIC:** **PASS @12k** (12001 tok, LegoLink-8 **3.84×** vs full, gold OK) —
+  `artifacts/g1-epic-12k-2026-10-23/`; planner **C3** calibrated
+- ResolventKV: **blocked** until broader quality-preserving PIC win (§6)
+- **Next:** `colab stop -s cw-epic-12k`; stay paused unless owner picks a new path
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -505,6 +505,28 @@
 - **Status:** `VALID` (project state)
 - Owner accepted recommendation to **pause**. No further Phase 0 desk/GPU until a
   resume path is chosen (`Docs/pause.md`). Partner still none (non-blocking).
+
+## 2026-10-23 — Resume path 2: EPIC@12k offline prep
+
+- **Status:** `VALID` (desk)
+- Pause lifted via resume path **2**. Added `--target-context-tokens` /
+  `--out` / hard exit to `scripts/g1_epic_bench.py`; CPU tests
+  `tests/unit/test_g1_epic_bench_scale.py` pass (3). Pre-reg CLI filled in.
+- GPU session **not** started yet — next: `cw-epic-12k` per pre-reg.
+- Supersedes: pause hold on EPIC lane only (CacheBlend stays CLOSED)
+
+## 2026-10-23 — EPIC@12k pre-reg PASS (Colab A100)
+
+- **Status:** `VALID`
+- Session `cw-epic-12k`; Path A fast install; Mistral-7B-Instruct-v0.2;
+  `--target-context-tokens 12000` → `prompt_tokens=12001`.
+- Full prefill p50 **1021 ms** / p90 **1022 ms**; LegoLink-8 p50 **266 ms** /
+  p90 **266 ms**; speedup **3.84×**; gold `Karachi` in both outputs;
+  `pass_heuristic: true`.
+- Artifacts: `artifacts/g1-epic-12k-2026-10-23/{g1_epic_12k.json,pip_freeze.txt}`.
+- Planner: added **C3** calibration (`G1_EPIC_A100_12K`); C4 still refused.
+- **Not** Phase 1 / ResolventKV open. Stop GPU when collect done.
+- Supersedes: toy-scale EPIC INCONCLUSIVE; pre-reg PARKED/READY
 
 ## Template for future entries
 

@@ -29,15 +29,50 @@ if str(SRC) not in sys.path:
 
 
 def _docs(*, filler_chars: int, order: tuple[str, ...]) -> list[str]:
+    fill = ("epic filler. " * max(1, (filler_chars // 12) + 1))[:filler_chars]
     blocks = {
-        "A": f"### Document Alpha\nSecret code: ALPHA-9173.\n"
-        f"{('epic filler. ' * 200)[:filler_chars]}\n",
-        "B": f"### Document Beta\nNamed city: Karachi.\n"
-        f"{('epic filler. ' * 200)[:filler_chars]}\n",
-        "C": f"### Document Gamma\nStated year: 2019.\n"
-        f"{('epic filler. ' * 200)[:filler_chars]}\n",
+        "A": f"### Document Alpha\nSecret code: ALPHA-9173.\n{fill}\n",
+        "B": f"### Document Beta\nNamed city: Karachi.\n{fill}\n",
+        "C": f"### Document Gamma\nStated year: 2019.\n{fill}\n",
     }
     return [blocks[k] for k in order]
+
+
+def _prompt_text(*, system: str, docs: list[str], question: str) -> str:
+    return system + "\n\n" + "\n".join(docs) + "\n" + question
+
+
+def _filler_chars_for_target(
+    tokenizer,
+    *,
+    system: str,
+    question: str,
+    order: tuple[str, ...],
+    target_context_tokens: int,
+) -> int:
+    """Grow per-doc filler chars until full prompt token length ≥ target."""
+    lo, hi = 64, 2_000_000
+    best: int | None = None
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        docs = _docs(filler_chars=mid, order=order)
+        n = len(
+            tokenizer.encode(
+                _prompt_text(system=system, docs=docs, question=question),
+                add_special_tokens=True,
+            )
+        )
+        if n < target_context_tokens:
+            lo = mid + 1
+        else:
+            best = mid
+            hi = mid - 1
+    if best is None:
+        raise ValueError(
+            f"Could not reach target_context_tokens={target_context_tokens} "
+            f"(max filler search exhausted)"
+        )
+    return best
 
 
 def _get_cache_fuse(llm):
@@ -142,10 +177,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--model", default=os.environ.get("SMOKE_MODEL", "Qwen/Qwen3-8B"))
     parser.add_argument("--max-model-len", type=int, default=8192)
     parser.add_argument("--filler-chars", type=int, default=2000)
+    parser.add_argument(
+        "--target-context-tokens",
+        type=int,
+        default=None,
+        help="If set, ignore --filler-chars and grow docs until prompt ≈ this many tokens.",
+    )
     parser.add_argument("--max-tokens", type=int, default=24)
     parser.add_argument("--recomp-num", type=int, default=8, help="LegoLink-N")
     parser.add_argument("--runs", type=int, default=5, help="Timed runs after 1 warmup (PRD G1).")
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.80)
+    parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
@@ -195,12 +237,43 @@ def main(argv: list[str] | None = None) -> int:
         "You are a careful assistant. Use only the documents. "
         "Prefer a short answer."
     )
-    docs_bca = _docs(filler_chars=args.filler_chars, order=("B", "C", "A"))
     question = "Which city is named in Document Beta? Reply with only the city name."
     gold = "Karachi"
-    full_prompt = system + "\n\n" + "\n".join(docs_bca) + "\n" + question
-
-    print(f"EPIC bench model={args.model} recomp={args.recomp_num}", flush=True)
+    order = ("B", "C", "A")
+    filler_chars = args.filler_chars
+    if args.target_context_tokens is not None:
+        if args.target_context_tokens + args.max_tokens + 8 > args.max_model_len:
+            print(
+                f"target-context-tokens={args.target_context_tokens} + decode "
+                f"exceeds max-model-len={args.max_model_len}",
+                file=sys.stderr,
+            )
+            return 2
+        filler_chars = _filler_chars_for_target(
+            tokenizer,
+            system=system,
+            question=question,
+            order=order,
+            target_context_tokens=args.target_context_tokens,
+        )
+        print(
+            f"  scaled filler_chars={filler_chars} for target≈{args.target_context_tokens}",
+            flush=True,
+        )
+    docs_bca = _docs(filler_chars=filler_chars, order=order)
+    full_prompt = _prompt_text(system=system, docs=docs_bca, question=question)
+    prompt_tokens = len(tokenizer.encode(full_prompt, add_special_tokens=True))
+    print(
+        f"EPIC bench model={args.model} recomp={args.recomp_num} "
+        f"prompt_tokens={prompt_tokens} filler_chars={filler_chars}",
+        flush=True,
+    )
+    if prompt_tokens + args.max_tokens > args.max_model_len:
+        print(
+            f"prompt_tokens={prompt_tokens} exceeds max_model_len={args.max_model_len}",
+            file=sys.stderr,
+        )
+        return 2
     print("=== loading EPIC-fork LLM ===", flush=True)
     llm = LLM(
         model=args.model,
@@ -239,19 +312,31 @@ def main(argv: list[str] | None = None) -> int:
         link_samples.append(link_ms)
         print(f"  [kvlink-{args.recomp_num} BCA] {link_ms:.0f} ms", flush=True)
 
-    del llm
+    try:
+        del llm
+    except Exception:  # noqa: BLE001
+        pass
     fr_ms = statistics.median(fr_samples)
     link_ms = statistics.median(link_samples)
+    fr_p90 = sorted(fr_samples)[max(0, int(0.9 * (len(fr_samples) - 1)))]
+    link_p90 = sorted(link_samples)[max(0, int(0.9 * (len(link_samples) - 1)))]
     quality_ok = gold.lower() in fr_text.lower() and gold.lower() in link_text.lower()
     # Link should beat full prefill on TTFT for this PIC workload (paper claim).
     latency_ok = link_ms < 0.85 * fr_ms
     payload = {
         "gate": "G1-step4-epic",
+        "pre_reg": "Docs/pre-reg-epic-12k.md",
         "model": args.model,
         "recomp_num": args.recomp_num,
         "runs": args.runs,
+        "filler_chars": filler_chars,
+        "target_context_tokens": args.target_context_tokens,
+        "prompt_tokens": prompt_tokens,
+        "max_model_len": args.max_model_len,
         "full_prefill_ms": fr_ms,
+        "full_prefill_p90_ms": fr_p90,
         "kvlink_ms": link_ms,
+        "kvlink_p90_ms": link_p90,
         "full_prefill_samples_ms": fr_samples,
         "kvlink_samples_ms": link_samples,
         "full_vs_kvlink_speedup": fr_ms / link_ms if link_ms > 0 else None,
@@ -262,18 +347,23 @@ def main(argv: list[str] | None = None) -> int:
         "pass_heuristic": latency_ok and quality_ok,
         "note": (
             "LegoLink-N on EPIC fork. pass ⇒ kvlink ≥15% faster than full AND "
-            "both answers contain gold."
+            "both answers contain gold. Use --target-context-tokens for ≥6k/12k."
         ),
     }
+    if args.out:
+        args.out.write_text(json.dumps(payload, indent=2) + "\n")
+        print(f"Wrote {args.out}", flush=True)
     if args.json:
         print(json.dumps(payload, indent=2))
     else:
         print(
             f"fr={fr_ms:.0f} kvlink={link_ms:.0f} "
             f"speedup={payload['full_vs_kvlink_speedup']:.2f}x "
-            f"pass={payload['pass_heuristic']}"
+            f"prompt_tokens={prompt_tokens} pass={payload['pass_heuristic']}"
         )
-    return 0 if payload["pass_heuristic"] else 4
+    code = 0 if payload["pass_heuristic"] else 4
+    print("exiting (hard) to avoid CUDA teardown hang", flush=True)
+    os._exit(code)
 
 
 if __name__ == "__main__":

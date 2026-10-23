@@ -1,0 +1,39 @@
+{
+  "gate": "G1-step4-epic",
+  "pre_reg": "Docs/pre-reg-epic-12k.md",
+  "model": "mistralai/Mistral-7B-Instruct-v0.2",
+  "recomp_num": 8,
+  "runs": 5,
+  "filler_chars": 12899,
+  "target_context_tokens": 12000,
+  "prompt_tokens": 12001,
+  "max_model_len": 16384,
+  "full_prefill_ms": 1021.0984770000096,
+  "full_prefill_p90_ms": 1021.8577949999599,
+  "kvlink_ms": 265.9329320000552,
+  "kvlink_p90_ms": 266.4307819999294,
+  "full_prefill_samples_ms": [
+    1017.8911200000584,
+    1019.9002430000519,
+    1022.390378999944,
+    1021.0984770000096,
+    1021.8577949999599
+  ],
+  "kvlink_samples_ms": [
+    283.036458999959,
+    262.51743199998145,
+    265.9329320000552,
+    265.4324869999982,
+    266.4307819999294
+  ],
+  "full_vs_kvlink_speedup": 3.8396841990212693,
+  "outputs": {
+    "full_prefill": "Karachi",
+    "kvlink": "1.\n\nKarachi"
+  },
+  "gold": "Karachi",
+  "latency_ok": true,
+  "quality_ok": true,
+  "pass_heuristic": true,
+  "note": "LegoLink-N on EPIC fork. pass \u21d2 kvlink \u226515% faster than full AND both answers contain gold. Use --target-context-tokens for \u22656k/12k."
+}

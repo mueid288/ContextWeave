@@ -15,6 +15,7 @@ from typing import Any
 class ConfigId(str, Enum):
     C0_FULL_PREFILL = "C0"
     C1_EXACT_PREFIX = "C1"
+    C3_EPIC = "C3"  # EPIC LegoLink (dedicated fork stack)
     C4_CACHEBLEND = "C4"  # CacheBlend-style selective recompute
 
 
@@ -92,6 +93,19 @@ G1_CACHEBLEND_A100_12K = MethodCalibration(
     ),
 )
 
+# EPIC@12k pre-reg (2026-10-23) A100, Mistral-7B-Instruct-v0.2, fast-path fork.
+# artifacts/g1-epic-12k-2026-10-23/g1_epic_12k.json — single gold-contains case.
+G1_EPIC_A100_12K = MethodCalibration(
+    config=ConfigId.C3_EPIC,
+    ttft_vs_prefill=1.0 / 3.8396841990212693,  # p50 full/kvlink
+    quality_delta_points=0.0,  # gold contains on both arms; not a multi-task suite
+    supported=True,
+    notes=(
+        "EPIC@12k PASS: prompt_tokens=12001; LegoLink-8 p50 266ms vs full 1021ms; "
+        "requires EPIC vLLM fork runtime (not CacheBlend pins)."
+    ),
+)
+
 
 def default_calibrations() -> dict[ConfigId, MethodCalibration]:
     return {
@@ -107,6 +121,7 @@ def default_calibrations() -> dict[ConfigId, MethodCalibration]:
             quality_delta_points=0.0,
             notes="G1 step 1 native prefix ~2.57× at 6k shared tokens.",
         ),
+        ConfigId.C3_EPIC: G1_EPIC_A100_12K,
         ConfigId.C4_CACHEBLEND: G1_CACHEBLEND_A100_12K,
     }
 
@@ -126,6 +141,7 @@ def plan(
         discarded.setdefault(cfg.value, []).extend(reasons)
 
     if not request.artifacts_valid and request.has_validated_nonprefix_artifacts:
+        discard(ConfigId.C3_EPIC, ReasonCode.ARTIFACT_INVALID.value)
         discard(ConfigId.C4_CACHEBLEND, ReasonCode.ARTIFACT_INVALID.value)
 
     # 1–2: exact prefix wins when present.
@@ -140,7 +156,7 @@ def plan(
 
     # 3–4: score supported non-prefix methods; drop by quality / latency policy.
     candidates: list[tuple[ConfigId, MethodCalibration]] = []
-    for cfg in (ConfigId.C4_CACHEBLEND,):
+    for cfg in (ConfigId.C3_EPIC, ConfigId.C4_CACHEBLEND):
         cal = cals.get(cfg)
         if cal is None or not cal.supported:
             discard(cfg, ReasonCode.METHOD_UNSUPPORTED.value)

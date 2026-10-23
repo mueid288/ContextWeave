@@ -1,8 +1,18 @@
 # Pre-registration: EPIC @ ≥6k/12k (optional GPU)
 
-**Status:** PARKED — do not run until the owner explicitly starts a session.  
-**Date written:** 2026-10-23  
+**Status:** **PASS** (2026-10-23) — banked `artifacts/g1-epic-12k-2026-10-23/`.  
+**Date written:** 2026-10-23 · **Closed:** 2026-10-23  
 **Not a G1 reopen.** CacheBlend G1 stays **CLOSED**. Partner trace not required.
+
+### Result (filled after run)
+
+| Field | Value |
+|---|---|
+| `prompt_tokens` | 12001 |
+| Full / kvlink p50 | 1021 / 266 ms |
+| Speedup | **3.84×** |
+| Quality | gold contains both arms |
+| `pass_heuristic` | **true** |
 
 ## One question
 
@@ -47,15 +57,21 @@ export SMOKE_MODEL=mistralai/Mistral-7B-Instruct-v0.2
 bash scripts/g1_epic_install_fast.sh
 source /content/epic-venv/bin/activate
 
-# Extend bench args if needed for ≥6k/12k (document exact command in log).
-python scripts/g1_epic_bench.py --json | tee g1_epic_12k.json
+# Prefer 12k; on OOM drop to 6000 / max-model-len 8192.
+python scripts/g1_epic_bench.py \
+  --model mistralai/Mistral-7B-Instruct-v0.2 \
+  --max-model-len 16384 \
+  --target-context-tokens 12000 \
+  --runs 5 \
+  --json \
+  --out g1_epic_12k.json
 
 # collect JSON + pip freeze, download, THEN:
 colab stop -s cw-epic-12k
 ```
 
-If `g1_epic_bench.py` lacks a scale flag, **stop and patch offline first** — do not
-improvise a new protocol on the GPU clock.
+Scale flag: `--target-context-tokens` (grows filler until prompt ≥ N tokens).
+Do not improvise a new protocol on the GPU clock.
 
 ## Collect
 

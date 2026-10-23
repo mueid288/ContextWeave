@@ -3,10 +3,10 @@
 Research harness for a **validity-checked planner** over modular KV-cache reuse
 (prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-**Status (2026-10-23): PAUSED** after Phase 0 **PIVOT** — [Docs/pause.md](Docs/pause.md),
-[Docs/phase0-exit-decision.md](Docs/phase0-exit-decision.md).  
-G0 demand held; CacheBlend engaged @12k but **no** quality-preserving ≥15% TTFT win.  
-Phase 1 / G2 / G3 and ResolventKV are **not** opened. Resume only via a path in `pause.md`.
+**Status (2026-10-23): EPIC@12k PASS** after Phase 0 **PIVOT** —
+[Docs/pause.md](Docs/pause.md), [artifacts/g1-epic-12k-2026-10-23/](artifacts/g1-epic-12k-2026-10-23/).  
+G0 demand held; CacheBlend G1 **CLOSED**; LegoLink-8 ~**3.84×** @12k on EPIC fork (gold OK).  
+Phase 1 / G2 / G3 and ResolventKV stay closed.
 
 **Laptop policy:** never download or run models on this machine. See [Docs/local-safety.md](Docs/local-safety.md). Baseline scripts refuse model load unless `CONTEXTWEAVE_ALLOW_MODEL_LOAD=1` on a rented GPU host.
 
@@ -48,10 +48,10 @@ python -c "from contextweave.planner import plan, RequestView; print(plan(Reques
 
 | Doc | Purpose |
 |---|---|
-| [Docs/pause.md](Docs/pause.md) | **Current** project state (paused) + how to resume |
+| [Docs/pause.md](Docs/pause.md) | Current state after EPIC@12k PASS |
 | [Docs/phase0-exit-decision.md](Docs/phase0-exit-decision.md) | Phase 0 go/pivot/stop (pivot; no Phase 1) |
 | [Docs/g1-closeout-thesis.md](Docs/g1-closeout-thesis.md) | Measured G1 thesis restatement |
-| [Docs/pre-reg-epic-12k.md](Docs/pre-reg-epic-12k.md) | Parked optional EPIC@≥6k/12k pre-reg (not started) |
+| [Docs/pre-reg-epic-12k.md](Docs/pre-reg-epic-12k.md) | EPIC@≥6k/12k pre-reg (**PASS**) |
 | [Docs/planner-v0.md](Docs/planner-v0.md) | Rule-based planner v0 |
 | [Docs/project-overview.md](Docs/project-overview.md) | Plain-language + technical overview of the whole project |
 | [Docs/prd/contextweave_prd_v2.md](Docs/prd/contextweave_prd_v2.md) | Research charter + deferred product requirements |
