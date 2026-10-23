@@ -43,6 +43,12 @@ def _scan_vllm_tree(root: Path) -> dict:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true")
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=None,
+        help="Write clean JSON here (avoids import log pollution in tee files).",
+    )
     args = parser.parse_args(argv)
 
     payload: dict = {
@@ -92,8 +98,12 @@ def main(argv: list[str] | None = None) -> int:
         }
     )
 
+    text = json.dumps(payload, indent=2) + "\n"
+    if args.out is not None:
+        args.out.write_text(text)
+        print(f"Wrote {args.out}", flush=True)
     if args.json:
-        print(json.dumps(payload, indent=2))
+        print(text, end="")
     else:
         print(
             f"epic_fork={fork_ok} vllm={version} "

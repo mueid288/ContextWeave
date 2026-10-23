@@ -122,18 +122,18 @@ echo "=== overlaying EPIC *.py onto ${SITE_VLLM} (keeping wheel .so) ==="
 
 echo "=== verify fork markers ==="
 cd "$CW_ROOT"
-"$EPIC_PYTHON" scripts/g1_epic_probe.py --json | tee g1_epic_probe.json
-
-if ! "$EPIC_PYTHON" - <<'PY'
-import json
-p=json.load(open("g1_epic_probe.json"))
-raise SystemExit(0 if p.get("epic_fork_detected") else 1)
-PY
-then
+# Write clean JSON to --out; import INFO/warnings go to stderr and must not pollute the file.
+if ! "$EPIC_PYTHON" scripts/g1_epic_probe.py --out g1_epic_probe.json; then
   echo "FAST PATH FAILED: probe did not see EPIC markers after overlay."
   echo "Next: high-CPU full build (scripts/g1_epic_install.sh) or skip EPIC."
   exit 6
 fi
+"$EPIC_PYTHON" - <<'PY'
+import json
+p = json.load(open("g1_epic_probe.json"))
+print("epic_fork_detected:", p.get("epic_fork_detected"), "path:", p.get("vllm_path"))
+raise SystemExit(0 if p.get("epic_fork_detected") else 6)
+PY
 
 cat <<EOF
 
