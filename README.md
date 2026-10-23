@@ -3,10 +3,10 @@
 Research harness for a **validity-checked planner** over modular KV-cache reuse
 (prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-**Status (2026-10-23): EPIC@12k PASS**; next = multi-fact quality —
-[Docs/pre-reg/pre-reg-epic-quality.md](Docs/pre-reg/pre-reg-epic-quality.md),
-[Docs/status/pause.md](Docs/status/pause.md).  
-G0 held; CacheBlend **CLOSED**; LegoLink-8 ~**3.84×** @12k (single gold). Phase 1 not opened.
+**Status (2026-10-23): EPIC@12k + multi-fact quality PASS** —
+[Docs/status/pause.md](Docs/status/pause.md),
+[artifacts/g1-epic-quality-2026-10-23/](artifacts/g1-epic-quality-2026-10-23/).  
+G0 held; CacheBlend **CLOSED**; LegoLink-8 ~**2–3.9×** @12k across 3 facts. Phase 1 not opened.
 
 **Laptop policy:** never download or run models on this machine. See
 [Docs/runbooks/local-safety.md](Docs/runbooks/local-safety.md). Baseline scripts refuse
@@ -54,7 +54,8 @@ python -c "from contextweave.planner import plan, RequestView; print(plan(Reques
 | [Docs/status/pause.md](Docs/status/pause.md) | Current project state |
 | [Docs/status/experiment-log.md](Docs/status/experiment-log.md) | Dated experiment notes |
 | [Docs/status/phase0-exit-decision.md](Docs/status/phase0-exit-decision.md) | Phase 0 pivot (no Phase 1) |
-| [Docs/pre-reg/pre-reg-epic-quality.md](Docs/pre-reg/pre-reg-epic-quality.md) | **Next** EPIC multi-fact quality |
+| [Docs/pre-reg/pre-reg-epic-quality.md](Docs/pre-reg/pre-reg-epic-quality.md) | EPIC multi-fact quality (**PASS**) |
+| [artifacts/g1-epic-quality-2026-10-23/](artifacts/g1-epic-quality-2026-10-23/) | Quality suite banked JSON |
 | [Docs/prd/](Docs/prd/) | Research charter + amendments |
 | [scripts/README.md](scripts/README.md) | Script folder index |
 | [scripts/workloads/](scripts/workloads/) | G0 CPU CLIs |

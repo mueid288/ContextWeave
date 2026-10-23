@@ -1,9 +1,19 @@
 # Pre-registration: EPIC multi-fact quality @ 12k
 
-**Status:** READY — desk harness ready; start GPU only when owner opens session.  
-**Date written:** 2026-10-23  
+**Status:** **PASS** (2026-10-23) — banked `artifacts/g1-epic-quality-2026-10-23/`.  
+**Date written:** 2026-10-23 · **Closed:** 2026-10-23  
 **Depends on:** EPIC@12k latency PASS (`artifacts/g1-epic-12k-2026-10-23/`)  
 **Not a CacheBlend reopen. Not Phase 1.**
+
+### Result
+
+| Case | Speedup | Contains |
+|---|---|---|
+| city | 3.86× | full+kvlink |
+| year | 2.19× | full+kvlink |
+| code | 1.98× | full+kvlink |
+
+`contains_rate_*` = 1.0; all cases `latency_ok`; `pass_heuristic: true`.
 
 ## One question
 

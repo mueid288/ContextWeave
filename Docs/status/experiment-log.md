@@ -2,13 +2,13 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** EPIC@12k **PASS**; next lane = multi-fact quality pre-reg — `Docs/status/pause.md`
+- **Project state:** EPIC@12k + multi-fact quality **PASS**; default = pause — `Docs/status/pause.md`
 - **Phase 0:** `PIVOT` — `Docs/status/phase0-exit-decision.md` (not reopened)
 - **G1 CacheBlend:** `CLOSED`
-- **G1 EPIC:** **PASS @12k** (3.84×, gold OK) → planner **C3**; multi-fact suite
-  **READY** (`Docs/pre-reg/pre-reg-epic-quality.md`, `--suite quality`)
+- **G1 EPIC:** **PASS** @12k latency (3.84×) **and** multi-fact quality (city/year/code
+  contains 1.0; min speedup **1.98×**) — `artifacts/g1-epic-quality-2026-10-23/`; **C3** kept
 - ResolventKV / Phase 1: **not opened**
-- **Next:** run `cw-epic-quality` when owner starts GPU; else stay desk-idle
+- **Next:** `colab stop -s cw-epic-quality`; stay paused unless explicit Phase 1 go memo
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -535,6 +535,16 @@
 - Added `--suite quality` (city/year/code) to `g1_epic_bench.py`; pre-reg
   `Docs/pre-reg/pre-reg-epic-quality.md`. CPU tests updated. GPU not started.
 - Supersedes: “stay paused” as default next action
+
+## 2026-10-23 — EPIC multi-fact quality PASS (Colab A100)
+
+- **Status:** `VALID`
+- Session `cw-epic-quality`; `--suite quality` @ ~12k tokens; Mistral-7B-Instruct-v0.2.
+- city **3.86×**, year **2.19×**, code **1.98×**; contains_rate full/kvlink **1.0/1.0**;
+  all cases latency_ok; `pass_heuristic: true`.
+- Artifacts: `artifacts/g1-epic-quality-2026-10-23/`.
+- Planner C3 notes + conservative ttft (1/1.98) updated. Phase 1 still not opened.
+- Supersedes: quality pre-reg READY; single-gold-only C3 caveat
 
 ## Template for future entries
 

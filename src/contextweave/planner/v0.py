@@ -93,15 +93,15 @@ G1_CACHEBLEND_A100_12K = MethodCalibration(
     ),
 )
 
-# EPIC@12k pre-reg (2026-10-23) A100, Mistral-7B-Instruct-v0.2, fast-path fork.
-# artifacts/g1-epic-12k-2026-10-23/g1_epic_12k.json — single gold-contains case.
+# EPIC@12k + multi-fact quality (2026-10-23) A100, Mistral-7B-Instruct-v0.2.
+# artifacts/g1-epic-quality-2026-10-23/ — city/year/code contains 1.0; min speedup ~1.98×.
 G1_EPIC_A100_12K = MethodCalibration(
     config=ConfigId.C3_EPIC,
-    ttft_vs_prefill=1.0 / 3.8396841990212693,  # p50 full/kvlink
-    quality_delta_points=0.0,  # gold contains on both arms; not a multi-task suite
+    ttft_vs_prefill=1.0 / 1.9813145219210888,  # conservative: slowest case (code)
+    quality_delta_points=0.0,  # 3/3 gold contains both arms @12k
     supported=True,
     notes=(
-        "EPIC@12k PASS: prompt_tokens=12001; LegoLink-8 p50 266ms vs full 1021ms; "
+        "EPIC quality PASS: city 3.86× / year 2.19× / code 1.98×; contains 1.0; "
         "requires EPIC vLLM fork runtime (not CacheBlend pins)."
     ),
 )

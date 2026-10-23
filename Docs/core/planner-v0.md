@@ -15,7 +15,8 @@ python -c "from contextweave.planner import plan, RequestView; print(plan(Reques
 5. Else pick lowest predicted TTFT; if none remain → **C0** full prefill.
 
 With shipped calibrations, non-prefix + valid artifacts → **C3** (C4 refused on quality).
-C3 assumes an **EPIC fork** runtime — not the CacheBlend pin set.
+C3 assumes an **EPIC fork** runtime — not the CacheBlend pin set. Multi-fact @12k
+PASS (contains 1.0; min ~1.98×) is reflected in C3 notes / conservative TTFT.
 
 Module: `src/contextweave/planner/v0.py`. Tests: `tests/unit/test_planner_v0.py`.
 Thesis: `Docs/status/g1-closeout-thesis.md`.

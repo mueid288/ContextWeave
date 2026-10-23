@@ -1,0 +1,128 @@
+{
+  "gate": "G1-step4-epic",
+  "suite": "quality",
+  "pre_reg": "Docs/pre-reg/pre-reg-epic-quality.md",
+  "model": "mistralai/Mistral-7B-Instruct-v0.2",
+  "recomp_num": 8,
+  "runs": 5,
+  "filler_chars": 12899,
+  "target_context_tokens": 12000,
+  "prompt_tokens": 12001,
+  "prompt_tokens_by_case": {
+    "city": 12001,
+    "year": 12000,
+    "code": 12000
+  },
+  "max_model_len": 16384,
+  "cases": [
+    {
+      "id": "city",
+      "gold": "Karachi",
+      "prompt_tokens": 12001,
+      "full_prefill_ms": 1029.9283110000488,
+      "full_prefill_p90_ms": 1030.4095520000374,
+      "kvlink_ms": 266.91104899998663,
+      "kvlink_p90_ms": 267.5991119999708,
+      "full_prefill_samples_ms": [
+        1028.452487000095,
+        1031.2828659999695,
+        1029.9283110000488,
+        1029.8945499999945,
+        1030.4095520000374
+      ],
+      "kvlink_samples_ms": [
+        278.85318000005554,
+        266.17420100001254,
+        265.6970299999557,
+        266.91104899998663,
+        267.5991119999708
+      ],
+      "full_vs_kvlink_speedup": 3.8586949279874148,
+      "outputs": {
+        "full_prefill": "Karachi",
+        "kvlink": "1.\n\nKarachi"
+      },
+      "full_contains": true,
+      "kvlink_contains": true,
+      "latency_ok": true
+    },
+    {
+      "id": "year",
+      "gold": "2019",
+      "prompt_tokens": 12000,
+      "full_prefill_ms": 1264.816134000057,
+      "full_prefill_p90_ms": 1264.9957169999198,
+      "kvlink_ms": 576.9887029999836,
+      "kvlink_p90_ms": 578.1644400000232,
+      "full_prefill_samples_ms": [
+        1268.411406000041,
+        1264.816134000057,
+        1257.7879640000447,
+        1264.9957169999198,
+        1263.830569999982
+      ],
+      "kvlink_samples_ms": [
+        578.1644400000232,
+        575.6437290000349,
+        576.9887029999836,
+        575.9541460000719,
+        591.0623280000209
+      ],
+      "full_vs_kvlink_speedup": 2.192098610291323,
+      "outputs": {
+        "full_prefill": "The year stated in Document Gamma is 2019.",
+        "kvlink": "2019. ### Document Beta\n\n epic filler. epic filler. Question: Question:"
+      },
+      "full_contains": true,
+      "kvlink_contains": true,
+      "latency_ok": true
+    },
+    {
+      "id": "code",
+      "gold": "ALPHA-9173",
+      "prompt_tokens": 12000,
+      "full_prefill_ms": 1139.464326000052,
+      "full_prefill_p90_ms": 1139.8517640000136,
+      "kvlink_ms": 575.105221000058,
+      "kvlink_p90_ms": 576.5210079999861,
+      "full_prefill_samples_ms": [
+        1139.464326000052,
+        1139.8517640000136,
+        1140.1279660000228,
+        1139.2027460000236,
+        1139.0618240000094
+      ],
+      "kvlink_samples_ms": [
+        576.5210079999861,
+        575.105221000058,
+        577.9201979999016,
+        574.9619659999325,
+        574.5416760000808
+      ],
+      "full_vs_kvlink_speedup": 1.9813145219210888,
+      "outputs": {
+        "full_prefill": "ALPHA-9173",
+        "kvlink": "1. ALPHA-9173. Question: Question: What is the secret code in Question:"
+      },
+      "full_contains": true,
+      "kvlink_contains": true,
+      "latency_ok": true
+    }
+  ],
+  "contains_rate_full": 1.0,
+  "contains_rate_kvlink": 1.0,
+  "full_prefill_ms": 1029.9283110000488,
+  "full_prefill_p90_ms": 1030.4095520000374,
+  "kvlink_ms": 266.91104899998663,
+  "kvlink_p90_ms": 267.5991119999708,
+  "full_vs_kvlink_speedup": 3.8586949279874148,
+  "outputs": {
+    "full_prefill": "Karachi",
+    "kvlink": "1.\n\nKarachi"
+  },
+  "gold": "Karachi",
+  "latency_ok": true,
+  "quality_ok": true,
+  "pass_heuristic": true,
+  "note": "LegoLink-N on EPIC fork. single: city gold. quality suite: \u22650.9 contains on both arms across cases AND every case \u226515% TTFT win."
+}
