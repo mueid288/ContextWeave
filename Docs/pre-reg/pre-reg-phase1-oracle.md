@@ -1,7 +1,7 @@
 # Pre-registration: Phase 1 oracle upside (scoped {C0, C1, C3})
 
-**Status:** READY — CPU harness first; GPU only when owner opens session.  
-**Date written:** 2026-10-23  
+**Status:** READY — collect CLI landed; start `cw-phase1-oracle` when owner runs GPU.  
+**Date written:** 2026-10-23 · **Updated:** 2026-10-23 (collector)  
 **Go memo:** [`Docs/status/phase1-go-memo.md`](../status/phase1-go-memo.md)  
 **Not** CacheBlend reopen. **Not** Phase 2.
 
@@ -37,8 +37,38 @@ points at equal p95 TTFT)?
 | G2 FAIL | Pivot to thin policy around best fixed (likely C3 or C1); no Phase 2 |
 | Cannot run C1 fairly on EPIC fork | Report C0 vs C3 only; mark C1 as calibration-import; do not fake prefix |
 
+## Procedure
+
+```bash
+colab new -s cw-phase1-oracle --gpu A100
+cd /content && git clone --depth 1 https://github.com/mueid288/ContextWeave.git
+cd ContextWeave && git pull
+
+export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
+export CONTEXTWEAVE_ALLOW_EPIC_REINSTALL=1
+export SMOKE_MODEL=mistralai/Mistral-7B-Instruct-v0.2
+bash scripts/g1/epic/g1_epic_install_fast.sh
+source /content/epic-venv/bin/activate
+
+python scripts/phase1/collect_oracle_epic.py \
+  --model mistralai/Mistral-7B-Instruct-v0.2 \
+  --max-model-len 16384 \
+  --target-context-tokens 12000 \
+  --n-requests 20 \
+  --runs 3 \
+  --out oracle_trials.jsonl \
+  --report oracle_report.json \
+  --json
+
+# bank trials + report + pip freeze, then:
+colab stop -s cw-phase1-oracle
+```
+
+C1 rows are emitted with `feasible=false` on this stack (prefix path unavailable).
+Oracle G2 is evaluated over feasible **{C0, C3}**.
+
 ## Collect
 
-- Per-request JSONL (`request_id`, `config`, `quality`, `ttft_ms`, `feasible`, `runtime_id`)
-- Aggregate oracle report JSON
-- `pip freeze`; bank `artifacts/phase1-oracle-YYYY-MM-DD/` before `colab stop`
+- `oracle_trials.jsonl`, `oracle_report.json`
+- `pip freeze` from epic-venv
+- Bank `artifacts/phase1-oracle-YYYY-MM-DD/` **before** `colab stop`

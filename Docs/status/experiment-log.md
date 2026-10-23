@@ -8,7 +8,7 @@
 - **Phase 1:** oracle harness CPU-ready (`contextweave.oracle`); GPU pre-reg
   `Docs/pre-reg/pre-reg-phase1-oracle.md` (not started)
 - Config set: **{C0, C1, C3}**; C4/ResolventKV/Phase 2 still closed
-- **Next:** run `cw-phase1-oracle` when owner starts GPU; else desk-idle on harness
+- **Next:** `cw-phase1-oracle` — `scripts/phase1/collect_oracle_epic.py` (C0+C3; C1 skipped)
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
