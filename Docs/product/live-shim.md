@@ -58,5 +58,7 @@ python scripts/product/eval_order_quality.py \
   --out artifacts/product-order-quality/report.json --json
 ```
 
-Pre-reg: `Docs/pre-reg/pre-reg-product-live-shim.md` Part B. Until PASS, keep
-frequency order **opt-in**.
+Pre-reg: `Docs/pre-reg/pre-reg-product-live-shim.md` Part B — **PASS**
+(2026-10-24, frequency contains 1.0 on needle suite). Default
+`CW_CHUNK_ORDER=by_frequency_desc` is OK for this bar; still not a claim about
+arbitrary RAG relevance tradeoffs.

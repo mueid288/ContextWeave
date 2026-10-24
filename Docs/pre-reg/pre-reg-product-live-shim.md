@@ -1,6 +1,6 @@
 # Pre-registration: Live canonical-order shim (CPU) + quality bar (GPU later)
 
-**Status:** Part A **PASS** · Part B **READY** (GPU, 90 min)  
+**Status:** Part A **PASS** · Part B **PASS** (2026-10-24, Colab A100)  
 **Depends on:** product canonical-order PASS  
 **Not a PIC reopen.**
 
@@ -8,6 +8,12 @@
 
 `FrequencyPrior` + `apply_chat_documents` + `cw-serve-order` (--reorder-json /
 stdlib proxy). Unit tests in `tests/unit/test_live_order.py`. No GPU.
+
+## Part B result
+
+`artifacts/product-order-quality-2026-10-24/` — frequency **1.0**, natural **1.0**,
+`pass_heuristic: true` (freq ≥ 0.80 and ≥ 0.90 × relevance). Shim may default to
+`by_frequency_desc`.
 
 ## Part A — Live shim (CPU, this lane)
 

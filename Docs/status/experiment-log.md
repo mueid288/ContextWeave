@@ -3,7 +3,7 @@
 ## Current verdict (update when it changes)
 
 - **Research:** **ARCHIVED** — `Docs/status/closeout-phase0-1.md`
-- **Product desk:** canonical-order A/B **PASS** + live shim Part A **PASS**; quality Part B **READY** (GPU)
+- **Product desk:** canonical-order A/B **PASS** + live shim **PASS** (Part A+B); default `by_frequency_desc` OK on needle suite
 - G0 provisional PASS · G2/H3 FAIL · H4 MFU consistency only · FP conformance only
 - Planner: **C1 else C0** + prefer frequency chunk order upstream
 - Phase 2 / ResolventKV: **closed**; Colab idle
@@ -773,6 +773,15 @@ a real partner trace. Literature vs harness quality gap remains **unresolved**.
   frequency; `--dry-build` CPU smoke. Pre-reg Part B **READY**.
 - Next: GPU session `cw-order-quality` ≤90 min → bank report → PASS/FAIL.
 - Supersedes: Part B PARKED
+
+## 2026-10-24 — Product order-quality Part B PASS (Colab A100)
+
+- **Status:** `VALID`
+- Session `cw-order-quality`; vLLM 0.32.0; Mistral-7B-Instruct-v0.2.
+- frequency contains **1.0**; natural **1.0**; `pass_heuristic: true`.
+- Artifacts: `artifacts/product-order-quality-2026-10-24/`.
+- Decision: frequency order cleared needle quality bar → default OK for shim.
+- Supersedes: Part B READY / PARKED
 
 ## Template for future entries
 
