@@ -75,20 +75,24 @@ OOM → `--max-model-len 4096`, smaller `-k`, or shorter `--chunk-chars`.
 
 ## Start cw-serve-order (shim)
 
+**Do not use port 8080 on Colab** — a system `node` process already
+binds `*:8080`. Killing it drops the SSH/session tunnel. Use **18080**.
+
 ```bash
 source /content/cw-venv/bin/activate
 pkill -f 'cw-serve-order|serve_order' || true
 sleep 1
 
 # Prefer CLI flags (env alone can race with import-time config)
+# Port 18080 — never 8080 on Colab (node pid holds 8080)
 nohup cw-serve-order \
-  --host 127.0.0.1 --port 8080 \
+  --host 127.0.0.1 --port 18080 \
   --upstream http://127.0.0.1:8000 \
   --cold-start-n 0 \
   > /tmp/cw-serve-order.log 2>&1 &
 sleep 2
 cat /tmp/cw-serve-order.log
-curl -sf http://127.0.0.1:8080/health || (echo FAIL; tail -n 40 /tmp/cw-serve-order.log; exit 1)
+curl -sf http://127.0.0.1:18080/health || (echo FAIL; tail -n 40 /tmp/cw-serve-order.log; exit 1)
 ```
 
 ## Index + bench
@@ -100,7 +104,7 @@ mkdir -p artifacts/own-rag-demo-2026-10-24
 
 cw-rag-demo index --corpus benchmarks/corpora/sample_docs
 cw-rag-demo bench \
-  --base-url http://127.0.0.1:8080 \
+  --base-url http://127.0.0.1:18080 \
   --model mistralai/Mistral-7B-Instruct-v0.2 \
   --warm-trials 8 \
   --out artifacts/own-rag-demo-2026-10-24/report.json --json \
