@@ -19,7 +19,9 @@ New PIC/H3/EPIC/ResolventKV lanes. Product hardening only with a real integratee
 
 ## Resume
 
-1. **Default:** leave the repo; use the shim when you have an upstream  
-2. New research only with a different pre-registered thesis  
+1. **Default:** leave research archived; use `cw-serve-order` when you have an upstream  
+2. **Optional demo:** own-corpus RAG — `cw-rag-demo` + Colab
+   `Docs/product/colab-own-rag-demo.md` (pre-reg READY until GPU banked)  
+3. New research only with a different pre-registered thesis  
 
-Live: `Docs/product/live-shim.md` · Demo: `cw-plan-demo --json`
+Live: `Docs/product/live-shim.md` · Demo: `cw-plan-demo --json` · RAG: `cw-rag-demo --help`

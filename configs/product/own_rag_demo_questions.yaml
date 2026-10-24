@@ -1,0 +1,33 @@
+# Fixed question suite for own-rag-demo bench (N>=8).
+# gold: substring that should appear in a grounded answer (case-insensitive).
+questions:
+  - id: sla_uptime
+    question: "What monthly uptime does Acme target for the Inference API?"
+    gold: "99.9%"
+  - id: refund_window
+    question: "Within how many days may customers request a refund for software subscriptions?"
+    gold: "30 days"
+  - id: api_key_prefix
+    question: "What prefix denotes a live API key?"
+    gold: "ack_"
+  - id: encryption_rest
+    question: "What encryption is used for data at rest?"
+    gold: "AES-256"
+  - id: prompt_retention
+    question: "How long are prompt logs retained by default?"
+    gold: "30 days"
+  - id: rag_topk
+    question: "For latency-sensitive apps, what top-k cap is recommended for retrieval?"
+    gold: "8"
+  - id: sev1_def
+    question: "What is a SEV-1 incident?"
+    gold: "customer-wide outage"
+  - id: rate_limit
+    question: "What is the default requests-per-minute limit per API key?"
+    gold: "600"
+  - id: sla_credit
+    question: "What service credit percentage applies when monthly uptime falls below 99.9%?"
+    gold: "10%"
+  - id: shadow_traffic
+    question: "What do shadow routes do with candidate model traffic?"
+    gold: "clone"

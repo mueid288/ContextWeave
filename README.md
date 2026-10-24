@@ -55,6 +55,11 @@ cw-analyze-trace --trace benchmarks/workloads/synthetic_rag_default/trace.jsonl 
 cw-serve-order --reorder-json /path/to/req.json --cold-start-n 0
 # cw-serve-order --port 8080   # or CW_UPSTREAM_URL=http://gpu:8000
 
+# Own-corpus RAG demo (CPU index/retrieve; GPU via Colab runbook)
+cw-rag-demo index
+cw-rag-demo retrieve "What monthly uptime does Acme target?"
+# Docs/product/colab-own-rag-demo.md
+
 # Planner v0 (CPU)
 python -c "from contextweave.planner import plan, RequestView; print(plan(RequestView(has_validated_nonprefix_artifacts=True)).to_dict())"
 ```

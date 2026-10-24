@@ -4,6 +4,7 @@
 
 - **Research:** **ARCHIVED** — `Docs/status/closeout-phase0-1.md`
 - **Product v0:** **COMPLETE (scoped)** — `Docs/status/closeout-product-v0.md` (sim + quality + live 1.79×)
+- **Own-RAG demo:** CPU shipped (`cw-rag-demo`); GPU bench pre-reg **READY** — `Docs/product/colab-own-rag-demo.md`
 - G0 provisional PASS · G2/H3 FAIL · H4 MFU consistency only · FP conformance only
 - Planner: **C1 else C0** + prefer frequency chunk order upstream
 - Phase 2 / ResolventKV: **closed**; Colab idle
