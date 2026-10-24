@@ -32,6 +32,7 @@ cw-fingerprint-example = "contextweave.cli.fingerprint_example:main"
 cw-plan-demo = "contextweave.cli.plan_demo:main"
 cw-serve-order = "contextweave.cli.serve_order:main"
 cw-rag-demo = "contextweave.cli.rag_demo:main"
+cw-field-g0 = "contextweave.cli.cw_field_g0:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

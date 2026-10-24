@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "base_url": "http://127.0.0.1:8787",
+  "n_traces": 3,
+  "health": {
+    "ok": true,
+    "db_ok": true,
+    "db": "postgres",
+    "data_dir": "/data",
+    "users": 1,
+    "traces": 3,
+    "invite_codes_configured": true
+  },
+  "g0": {
+    "gate": "FAIL",
+    "requests": 3,
+    "rationale": "G0 FAIL: unconstrained share 11.0% < 30%; median chunk 250 < 512; working-set hit share 11.0% < 30% (budget=128 GB). Marked provisional.",
+    "recurring_line": "250 (11.0% of post-prefix)"
+  },
+  "paths": {
+    "raw": "artifacts/cw-field-g0-2026-10-24-auto/partner_v1.jsonl",
+    "imported": "artifacts/cw-field-g0-2026-10-24-auto/trace.jsonl",
+    "report": "artifacts/cw-field-g0-2026-10-24-auto/g0_report.md"
+  },
+  "note": "Provisional until N is large and median chunk / recurrence clear bars."
+}

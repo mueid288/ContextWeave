@@ -35,6 +35,11 @@ python scripts/workloads/import_trace.py \
   --out benchmarks/workloads/imported_sample/trace.jsonl \
   --analyze --report benchmarks/reports/g0_imported_sample.md
 
+# cw-field live pull → import → G0 (needs cw-field up + ADMIN_TOKEN)
+# export CW_FIELD_URL=http://127.0.0.1:8787 CW_FIELD_ADMIN_TOKEN=...
+python scripts/workloads/cw_field_pipeline.py
+
+
 # PRD §7.5 cost / break-even table (no GPU)
 python scripts/workloads/cost_model.py
 
