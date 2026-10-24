@@ -112,3 +112,19 @@ def test_slice_cal_also_requires_provenance():
         )
     )
     assert d.chosen == ConfigId.C0_FULL_PREFILL
+
+
+def test_build_context_hash_mismatch_refuses_c3():
+    rec = _available()
+    d = plan(
+        RequestView(
+            has_validated_nonprefix_artifacts=True,
+            keydev_score=0.05,
+            keydev_threshold=0.5,
+            provenance=rec,
+            request_trust=_ops(),
+            request_build_context_hash="sha256:victim-other-prefix",
+        )
+    )
+    assert d.chosen == ConfigId.C0_FULL_PREFILL
+    assert ReasonCode.ARTIFACT_INVALID.value in d.discarded[ConfigId.C3_EPIC.value]

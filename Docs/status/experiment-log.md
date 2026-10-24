@@ -2,10 +2,10 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** **PAUSED** — FP planner gate **PASS**; G2/H3/H4 FAIL stand —
-  `Docs/status/pause.md`, `Docs/pre-reg/pre-reg-fp-planner-gate.md`
-- **Phase 0 / 1:** G2/H3/H4 FAIL; validity gate wired for non-prefix
-- Planner: **C1 else C0**; C3 needs provenance + quality clear; C4 quality-refused
+- **Project state:** **PAUSED** — FP poison suite **PASS**; G2/H3/H4 FAIL stand —
+  `Docs/status/pause.md`, `artifacts/fp-poison-2026-10-24/`
+- **Phase 0 / 1:** G2/H3/H4 FAIL; validity + build-context poison coverage desk PASS
+- Planner: **C1 else C0**; non-prefix needs provenance + build-hash match + quality clear
 - Phase 2 / ResolventKV: **not opened**; Colab idle
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
@@ -662,6 +662,14 @@
   FR-13 `assert_reuse_allowed` before quality clears. Tests:
   `tests/unit/test_planner_provenance_gate.py`. **PAUSED.**
 - Supersedes: planner without provenance on non-prefix path
+
+## 2026-10-24 — FP build-context poison suite PASS (CPU)
+
+- **Status:** `VALID`
+- Pre-reg `Docs/pre-reg/pre-reg-fp-poison-suite.md`. 8/8 attacker-prefix cases
+  refused (fingerprint + planner). `request_build_context_hash` wired.
+- Artifacts: `artifacts/fp-poison-2026-10-24/`. **PAUSED.**
+- Supersedes: planner ignoring build-hash vs provenance
 
 ## Template for future entries
 

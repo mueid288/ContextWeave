@@ -1,14 +1,13 @@
-# Project pause (FP planner gate PASS)
+# Project pause (FP poison suite PASS)
 
 **Effective:** 2026-10-24  
 **State:** **PAUSED**  
-**G2/H3/H4:** FAIL · **FP→planner gate:** **PASS** (desk)
+**G2/H3/H4:** FAIL · FP planner gate: PASS · **FP poison suite:** **PASS**
 
 ## Policy (shipped)
 
 **C1** if exact prefix, else **C0** by default.  
-Non-prefix only if FR-13 provenance passes **and** a quality clear exists
-(keydev / exact-distro slice-cal). C4 still quality-refused.
+Non-prefix: FR-13 provenance + matching `request_build_context_hash` + quality clear.
 
 ## Frozen
 

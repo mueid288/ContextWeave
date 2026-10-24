@@ -88,6 +88,8 @@ class RequestView:
     provenance: ProvenanceRecord | None = None
     request_trust: TrustNamespace | None = None
     artifact_from_untrusted_content: bool = False
+    # HijackKV-style: refuse if request build policy ≠ artifact build policy.
+    request_build_context_hash: str | None = None
 
 
 @dataclass
@@ -203,6 +205,13 @@ def plan(
                     record=request.provenance,
                 )
             except (CrossTrustReuseError, IllegalBuildModeError):
+                discard(cfg, ReasonCode.ARTIFACT_INVALID.value)
+                continue
+            if (
+                request.request_build_context_hash is not None
+                and request.request_build_context_hash
+                != request.provenance.build_context_hash
+            ):
                 discard(cfg, ReasonCode.ARTIFACT_INVALID.value)
                 continue
         # C3 quality clear: runtime keydev (preferred) or exact-distro slice table.

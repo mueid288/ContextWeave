@@ -1,0 +1,97 @@
+{
+  "pre_reg": "Docs/pre-reg/pre-reg-fp-poison-suite.md",
+  "n_cases": 8,
+  "refuse_rate": 1.0,
+  "pass_heuristic": true,
+  "cases": [
+    {
+      "case_id": "poison_00",
+      "same_chunk_tokens": true,
+      "fingerprint_refused": true,
+      "fingerprint_reasons": [
+        "build_context_hash_mismatch"
+      ],
+      "planner_chosen": "C0",
+      "planner_refused": true,
+      "pass": true
+    },
+    {
+      "case_id": "poison_01",
+      "same_chunk_tokens": true,
+      "fingerprint_refused": true,
+      "fingerprint_reasons": [
+        "build_context_hash_mismatch"
+      ],
+      "planner_chosen": "C0",
+      "planner_refused": true,
+      "pass": true
+    },
+    {
+      "case_id": "poison_02",
+      "same_chunk_tokens": true,
+      "fingerprint_refused": true,
+      "fingerprint_reasons": [
+        "build_context_hash_mismatch"
+      ],
+      "planner_chosen": "C0",
+      "planner_refused": true,
+      "pass": true
+    },
+    {
+      "case_id": "poison_03",
+      "same_chunk_tokens": true,
+      "fingerprint_refused": true,
+      "fingerprint_reasons": [
+        "build_context_hash_mismatch"
+      ],
+      "planner_chosen": "C0",
+      "planner_refused": true,
+      "pass": true
+    },
+    {
+      "case_id": "poison_04",
+      "same_chunk_tokens": true,
+      "fingerprint_refused": true,
+      "fingerprint_reasons": [
+        "build_context_hash_mismatch"
+      ],
+      "planner_chosen": "C0",
+      "planner_refused": true,
+      "pass": true
+    },
+    {
+      "case_id": "poison_05",
+      "same_chunk_tokens": true,
+      "fingerprint_refused": true,
+      "fingerprint_reasons": [
+        "build_context_hash_mismatch"
+      ],
+      "planner_chosen": "C0",
+      "planner_refused": true,
+      "pass": true
+    },
+    {
+      "case_id": "poison_06",
+      "same_chunk_tokens": true,
+      "fingerprint_refused": true,
+      "fingerprint_reasons": [
+        "build_context_hash_mismatch"
+      ],
+      "planner_chosen": "C0",
+      "planner_refused": true,
+      "pass": true
+    },
+    {
+      "case_id": "poison_07",
+      "same_chunk_tokens": true,
+      "fingerprint_refused": true,
+      "fingerprint_reasons": [
+        "build_context_hash_mismatch"
+      ],
+      "planner_chosen": "C0",
+      "planner_refused": true,
+      "pass": true
+    }
+  ],
+  "note": "Refuse if fingerprints_compatible reports build_context_hash_mismatch and planner stays on C0 when request_build_context_hash \u2260 provenance."
+}

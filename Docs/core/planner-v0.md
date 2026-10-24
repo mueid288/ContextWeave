@@ -26,9 +26,10 @@ print(plan(RequestView(
 
 1. Invalid artifacts → no non-prefix reuse.
 2. Exact prefix → **C1**.
-3. Non-prefix (**C3/C4**): require FR-13 provenance (`assert_reuse_allowed`).
+3. Non-prefix (**C3/C4**): FR-13 provenance + matching `request_build_context_hash`.
 4. **C3:** also need keydev &lt; T **or** exact-distro slice-cal safe cell.
 5. **C4:** refused on quality calibration (G1).
 6. Else → **C0**.
 
-Evidence: `Docs/pre-reg/pre-reg-fp-planner-gate.md`.
+Evidence: `Docs/pre-reg/pre-reg-fp-planner-gate.md`,
+`Docs/pre-reg/pre-reg-fp-poison-suite.md`.
