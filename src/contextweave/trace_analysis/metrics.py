@@ -178,25 +178,15 @@ def _canonical_segments(
 _DEFAULT_WORKING_SET = object()
 
 
-def analyze_trace(
-    path: Path,
+def analyze_rows(
+    rows: Iterable[dict[str, Any]],
     *,
     working_set_cfg: WorkingSetConfig | None | object = _DEFAULT_WORKING_SET,
     prefix_cache_budget_gb: float | None = DEFAULT_PREFIX_CACHE_BUDGET_GB,
     bytes_per_token: float = DEFAULT_BYTES_PER_TOKEN,
     chunking: ChunkingConfig | None = None,
 ) -> DemandMetrics:
-    """
-    Analyze a JSONL trace.
-
-    Expected fields per request (synthetic generator output):
-      - token_ids: full prompt
-      - prefix_token_ids: system/instruction prefix
-      - chunk_token_ids: list of document chunks
-      - chunk_lengths / document_ids
-      - query_token_ids
-      - query_type: lookup | synthesis
-    """
+    """Analyze an in-memory iterable of canonical request rows."""
     metrics = DemandMetrics()
     budget_tokens: int | None = None
     if prefix_cache_budget_gb is not None and prefix_cache_budget_gb > 0:
@@ -213,7 +203,7 @@ def analyze_trace(
     if working_set_cfg is _DEFAULT_WORKING_SET:
         working_set_cfg = WorkingSetConfig.from_gb(128.0, bytes_per_token)
 
-    for idx, row in enumerate(iter_trace(path)):
+    for idx, row in enumerate(rows):
         metrics.num_requests += 1
         query_type = row.get("query_type", "lookup")
         doc_ids = row.get("document_ids") or []
@@ -283,6 +273,161 @@ def analyze_trace(
         )
 
     return metrics
+
+
+def analyze_trace(
+    path: Path,
+    *,
+    working_set_cfg: WorkingSetConfig | None | object = _DEFAULT_WORKING_SET,
+    prefix_cache_budget_gb: float | None = DEFAULT_PREFIX_CACHE_BUDGET_GB,
+    bytes_per_token: float = DEFAULT_BYTES_PER_TOKEN,
+    chunking: ChunkingConfig | None = None,
+    chunk_order: str = "natural",
+) -> DemandMetrics:
+    """
+    Analyze a JSONL trace.
+
+    Expected fields per request (synthetic generator output):
+      - token_ids: full prompt
+      - prefix_token_ids: system/instruction prefix
+      - chunk_token_ids: list of document chunks
+      - chunk_lengths / document_ids
+      - query_token_ids
+      - query_type: lookup | synthesis
+
+    ``chunk_order``: natural | by_doc_id | by_sha256_doc_id | by_frequency_desc
+    """
+    from contextweave.trace_analysis.chunk_order import (
+        build_doc_frequency,
+        reorder_chunks,
+    )
+
+    rows = list(iter_trace(path))
+    freq = build_doc_frequency(rows) if chunk_order == "by_frequency_desc" else None
+    ordered = [
+        reorder_chunks(r, chunk_order, freq=freq)  # type: ignore[arg-type]
+        for r in rows
+    ]
+    return analyze_rows(
+        ordered,
+        working_set_cfg=working_set_cfg,
+        prefix_cache_budget_gb=prefix_cache_budget_gb,
+        bytes_per_token=bytes_per_token,
+        chunking=chunking,
+    )
+
+
+def _kpi_payload(metrics: DemandMetrics) -> dict[str, Any]:
+    ws = metrics.working_set
+    return {
+        "num_requests": metrics.num_requests,
+        "share_prefix_cached": metrics.share_prefix_cached,
+        "prefix_cached_tokens": metrics.prefix_cached_tokens,
+        "total_prefill_tokens": metrics.total_prefill_tokens,
+        "post_prefix_prefill_tokens": metrics.post_prefix_prefill_tokens,
+        "share_recurring_non_prefix": metrics.share_recurring_non_prefix,
+        "working_set_hit_share": (
+            None if ws is None else ws.hit_share_of_post_prefix
+        ),
+    }
+
+
+def compare_chunk_orders(
+    path: Path,
+    *,
+    modes: tuple[str, ...] | None = None,
+    working_set_cfg: WorkingSetConfig | None | object = _DEFAULT_WORKING_SET,
+    prefix_cache_budget_gb: float | None = DEFAULT_PREFIX_CACHE_BUDGET_GB,
+    bytes_per_token: float = DEFAULT_BYTES_PER_TOKEN,
+) -> dict[str, Any]:
+    """A/B chunk-order modes; primary KPI is share_prefix_cached (not G0 PASS)."""
+    from contextweave.trace_analysis.chunk_order import (
+        CHUNK_ORDER_MODES,
+        build_doc_frequency,
+        reorder_chunks,
+    )
+
+    modes = modes or CHUNK_ORDER_MODES
+    rows = list(iter_trace(path))
+    freq = build_doc_frequency(rows)
+    multi = [r for r in rows if len(r.get("chunk_token_ids") or []) >= 2]
+
+    def _run(subset: list[dict[str, Any]], mode: str) -> dict[str, Any]:
+        ordered = [
+            reorder_chunks(r, mode, freq=freq)  # type: ignore[arg-type]
+            for r in subset
+        ]
+        m = analyze_rows(
+            ordered,
+            working_set_cfg=working_set_cfg,
+            prefix_cache_budget_gb=prefix_cache_budget_gb,
+            bytes_per_token=bytes_per_token,
+        )
+        return _kpi_payload(m)
+
+    overall: dict[str, Any] = {}
+    multi_doc: dict[str, Any] = {}
+    for mode in modes:
+        overall[mode] = _run(rows, mode)
+        multi_doc[mode] = _run(multi, mode) if multi else _kpi_payload(DemandMetrics())
+
+    natural_pp = overall["natural"]["post_prefix_prefill_tokens"]
+    natural_share = overall["natural"]["share_prefix_cached"]
+    natural_multi_pp = multi_doc["natural"]["post_prefix_prefill_tokens"]
+    natural_multi_share = multi_doc["natural"]["share_prefix_cached"]
+
+    deltas: dict[str, Any] = {}
+    for mode in modes:
+        if mode == "natural":
+            continue
+        o = overall[mode]
+        md = multi_doc[mode]
+        deltas[mode] = {
+            "overall_share_prefix_cached_pp": (o["share_prefix_cached"] - natural_share)
+            * 100.0,
+            "overall_post_prefix_reduction_pct": (
+                0.0
+                if natural_pp == 0
+                else (1.0 - o["post_prefix_prefill_tokens"] / natural_pp) * 100.0
+            ),
+            "multi_doc_share_prefix_cached_pp": (
+                md["share_prefix_cached"] - natural_multi_share
+            )
+            * 100.0,
+            "multi_doc_post_prefix_reduction_pct": (
+                0.0
+                if natural_multi_pp == 0
+                else (1.0 - md["post_prefix_prefill_tokens"] / natural_multi_pp) * 100.0
+            ),
+            "note_recurrence": (
+                "Recurrence absorbed into native prefix cache (C1)"
+                if o["share_recurring_non_prefix"]
+                < overall["natural"]["share_recurring_non_prefix"]
+                else None
+            ),
+        }
+
+    # Pre-reg bar on by_frequency_desc
+    freq_d = deltas.get("by_frequency_desc", {})
+    pass_heuristic = bool(
+        freq_d.get("overall_share_prefix_cached_pp", 0) >= 10.0
+        or freq_d.get("multi_doc_share_prefix_cached_pp", 0) >= 10.0
+        or freq_d.get("multi_doc_post_prefix_reduction_pct", 0) >= 20.0
+    )
+
+    return {
+        "trace": str(path),
+        "n_requests": len(rows),
+        "n_multi_doc": len(multi),
+        "overall": overall,
+        "multi_doc": multi_doc,
+        "deltas_vs_natural": deltas,
+        "pass_heuristic_frequency": pass_heuristic,
+        "pass_bar": (
+            "by_frequency_desc: ≥+10pp share_prefix_cached (overall or multi-doc) "
+            "OR ≥20% multi-doc post_prefix reduction"
+        ),
+    }
 
 
 def evaluate_g0(

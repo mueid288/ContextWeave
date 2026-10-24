@@ -75,6 +75,16 @@ def _scenarios() -> list[tuple[str, RequestView]]:
                 request_build_context_hash=rec.build_context_hash,
             ),
         ),
+        # Product path: canonicalize chunk order upstream → more exact-prefix C1;
+        # without that, shuffled multi-doc looks like no reuse → C0.
+        (
+            "canonical_order_enables_prefix_c1",
+            RequestView(has_exact_prefix=True),
+        ),
+        (
+            "shuffled_order_falls_back_c0",
+            RequestView(has_exact_prefix=False, has_validated_nonprefix_artifacts=False),
+        ),
     ]
 
 
@@ -97,7 +107,11 @@ def main(argv: list[str] | None = None) -> int:
 
     payload = {
         "closeout": "Docs/status/closeout-phase0-1.md",
-        "policy": "C1 if prefix else C0; C3 only with provenance+build-hash+quality clear",
+        "product": "Docs/product/canonical-order.md",
+        "policy": (
+            "C1 if prefix else C0; C3 only with provenance+build-hash+quality clear; "
+            "prefer by_frequency_desc chunk order upstream to amplify C1"
+        ),
         "scenarios": rows,
     }
     if args.json:

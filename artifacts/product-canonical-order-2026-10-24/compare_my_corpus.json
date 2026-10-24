@@ -1,0 +1,106 @@
+{
+  "trace": "benchmarks/workloads/my_corpus/trace.jsonl",
+  "n_requests": 300,
+  "n_multi_doc": 153,
+  "overall": {
+    "natural": {
+      "num_requests": 300,
+      "share_prefix_cached": 0.44876497687025313,
+      "prefix_cached_tokens": 281136,
+      "total_prefill_tokens": 626466,
+      "post_prefix_prefill_tokens": 345330,
+      "share_recurring_non_prefix": 0.7526713578316393,
+      "working_set_hit_share": 0.7526713578316393
+    },
+    "by_doc_id": {
+      "num_requests": 300,
+      "share_prefix_cached": 0.5247978342001003,
+      "prefix_cached_tokens": 328768,
+      "total_prefill_tokens": 626466,
+      "post_prefix_prefill_tokens": 297698,
+      "share_recurring_non_prefix": 0.7130985092274721,
+      "working_set_hit_share": 0.7130985092274721
+    },
+    "by_sha256_doc_id": {
+      "num_requests": 300,
+      "share_prefix_cached": 0.48426570635916394,
+      "prefix_cached_tokens": 303376,
+      "total_prefill_tokens": 626466,
+      "post_prefix_prefill_tokens": 323090,
+      "share_recurring_non_prefix": 0.7356464143118017,
+      "working_set_hit_share": 0.7356464143118017
+    },
+    "by_frequency_desc": {
+      "num_requests": 300,
+      "share_prefix_cached": 0.5388704255298771,
+      "prefix_cached_tokens": 337584,
+      "total_prefill_tokens": 626466,
+      "post_prefix_prefill_tokens": 288882,
+      "share_recurring_non_prefix": 0.7043429497164932,
+      "working_set_hit_share": 0.7043429497164932
+    }
+  },
+  "multi_doc": {
+    "natural": {
+      "num_requests": 153,
+      "share_prefix_cached": 0.3075218651171105,
+      "prefix_cached_tokens": 139344,
+      "total_prefill_tokens": 453119,
+      "post_prefix_prefill_tokens": 313775,
+      "share_recurring_non_prefix": 0.7667659947414549,
+      "working_set_hit_share": 0.7667659947414549
+    },
+    "by_doc_id": {
+      "num_requests": 153,
+      "share_prefix_cached": 0.44745861462441433,
+      "prefix_cached_tokens": 202752,
+      "total_prefill_tokens": 453119,
+      "post_prefix_prefill_tokens": 250367,
+      "share_recurring_non_prefix": 0.7076971006562367,
+      "working_set_hit_share": 0.7076971006562367
+    },
+    "by_sha256_doc_id": {
+      "num_requests": 153,
+      "share_prefix_cached": 0.3708341517349747,
+      "prefix_cached_tokens": 168032,
+      "total_prefill_tokens": 453119,
+      "post_prefix_prefill_tokens": 285087,
+      "share_recurring_non_prefix": 0.7432959061619786,
+      "working_set_hit_share": 0.7432959061619786
+    },
+    "by_frequency_desc": {
+      "num_requests": 153,
+      "share_prefix_cached": 0.4627128855775194,
+      "prefix_cached_tokens": 209664,
+      "total_prefill_tokens": 453119,
+      "post_prefix_prefill_tokens": 243455,
+      "share_recurring_non_prefix": 0.6993982460824383,
+      "working_set_hit_share": 0.6993982460824383
+    }
+  },
+  "deltas_vs_natural": {
+    "by_doc_id": {
+      "overall_share_prefix_cached_pp": 7.603285732984716,
+      "overall_post_prefix_reduction_pct": 13.793183331885439,
+      "multi_doc_share_prefix_cached_pp": 13.993674950730384,
+      "multi_doc_post_prefix_reduction_pct": 20.208110907497414,
+      "note_recurrence": "Recurrence absorbed into native prefix cache (C1)"
+    },
+    "by_sha256_doc_id": {
+      "overall_share_prefix_cached_pp": 3.550072948891081,
+      "overall_post_prefix_reduction_pct": 6.440216604407379,
+      "multi_doc_share_prefix_cached_pp": 6.33122866178642,
+      "multi_doc_post_prefix_reduction_pct": 9.142857142857142,
+      "note_recurrence": "Recurrence absorbed into native prefix cache (C1)"
+    },
+    "by_frequency_desc": {
+      "overall_share_prefix_cached_pp": 9.010544865962395,
+      "overall_post_prefix_reduction_pct": 16.346103726869956,
+      "multi_doc_share_prefix_cached_pp": 15.519102046040889,
+      "multi_doc_post_prefix_reduction_pct": 22.410963269858975,
+      "note_recurrence": "Recurrence absorbed into native prefix cache (C1)"
+    }
+  },
+  "pass_heuristic_frequency": true,
+  "pass_bar": "by_frequency_desc: \u2265+10pp share_prefix_cached (overall or multi-doc) OR \u226520% multi-doc post_prefix reduction"
+}

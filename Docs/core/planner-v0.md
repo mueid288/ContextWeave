@@ -31,5 +31,12 @@ print(plan(RequestView(
 5. **C4:** refused on quality calibration (G1).
 6. Else → **C0**.
 
+## Product tip (upstream of planner)
+
+Reorder retrieved chunks with `by_frequency_desc` (see
+`Docs/product/canonical-order.md`) so more requests become exact-prefix **C1**
+without PIC. Quality vs relevance order is unverified.
+
 Evidence: `Docs/pre-reg/pre-reg-fp-planner-gate.md`,
-`Docs/pre-reg/pre-reg-fp-poison-suite.md`.
+`Docs/pre-reg/pre-reg-fp-poison-suite.md`,
+`Docs/pre-reg/pre-reg-product-canonical-order.md`.

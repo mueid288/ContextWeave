@@ -7,14 +7,73 @@ from pathlib import Path
 import json
 import sys
 
+from contextweave.trace_analysis.chunk_order import CHUNK_ORDER_MODES
 from contextweave.trace_analysis.metrics import (
     DEFAULT_BYTES_PER_TOKEN,
     DEFAULT_PREFIX_CACHE_BUDGET_GB,
     analyze_trace,
+    compare_chunk_orders,
     evaluate_g0,
     render_report,
 )
 from contextweave.trace_analysis.working_set import WorkingSetConfig
+
+
+def _render_compare(payload: dict) -> str:
+    lines = [
+        f"# Chunk-order compare — `{payload['trace']}`",
+        "",
+        f"Requests: **{payload['n_requests']}** "
+        f"(multi-doc ≥2 chunks: **{payload['n_multi_doc']}**)",
+        "",
+        "## Overall `share_prefix_cached`",
+        "",
+        "| Mode | share_prefix_cached | post_prefix_tokens | recurring_non_prefix |",
+        "|---|---:|---:|---:|",
+    ]
+    for mode, row in payload["overall"].items():
+        lines.append(
+            f"| `{mode}` | {row['share_prefix_cached']:.1%} | "
+            f"{row['post_prefix_prefill_tokens']:,} | "
+            f"{row['share_recurring_non_prefix']:.1%} |"
+        )
+    lines += [
+        "",
+        "## Multi-doc (`len(chunks)≥2`) `share_prefix_cached`",
+        "",
+        "| Mode | share_prefix_cached | post_prefix_tokens |",
+        "|---|---:|---:|",
+    ]
+    for mode, row in payload["multi_doc"].items():
+        lines.append(
+            f"| `{mode}` | {row['share_prefix_cached']:.1%} | "
+            f"{row['post_prefix_prefill_tokens']:,} |"
+        )
+    lines += [
+        "",
+        "## Deltas vs `natural` (product KPIs)",
+        "",
+        "| Mode | overall Δpp | overall post_prefix ↓% | multi-doc Δpp | multi-doc post_prefix ↓% |",
+        "|---|---:|---:|---:|---:|",
+    ]
+    for mode, d in payload["deltas_vs_natural"].items():
+        lines.append(
+            f"| `{mode}` | {d['overall_share_prefix_cached_pp']:+.2f} | "
+            f"{d['overall_post_prefix_reduction_pct']:+.1f}% | "
+            f"{d['multi_doc_share_prefix_cached_pp']:+.2f} | "
+            f"{d['multi_doc_post_prefix_reduction_pct']:+.1f}% |"
+        )
+    lines += [
+        "",
+        f"**Pre-reg (`by_frequency_desc`):** "
+        f"`pass_heuristic={payload['pass_heuristic_frequency']}`",
+        f"Bar: {payload['pass_bar']}",
+        "",
+        "Drops in `share_recurring_non_prefix` mean recurrence was absorbed into "
+        "native prefix cache (C1) — not a G0 product failure.",
+        "",
+    ]
+    return "\n".join(lines)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -63,6 +122,17 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Mark G0 as final (real trace). Default is provisional.",
     )
+    parser.add_argument(
+        "--chunk-order",
+        choices=list(CHUNK_ORDER_MODES),
+        default="natural",
+        help="Reorder chunks before prefix-cache simulation (product C1 amplification).",
+    )
+    parser.add_argument(
+        "--compare-chunk-order",
+        action="store_true",
+        help="A/B all chunk-order modes; primary KPI share_prefix_cached (not G0 PASS).",
+    )
     args = parser.parse_args(argv)
 
     if args.cache_budget_gb and args.cache_budget_gb > 0:
@@ -74,11 +144,30 @@ def main(argv: list[str] | None = None) -> int:
 
     prefix_budget = args.prefix_cache_budget_gb if args.prefix_cache_budget_gb > 0 else None
 
+    if args.compare_chunk_order:
+        payload = compare_chunk_orders(
+            args.trace,
+            working_set_cfg=ws_cfg,
+            prefix_cache_budget_gb=prefix_budget,
+            bytes_per_token=args.bytes_per_token,
+        )
+        report = _render_compare(payload)
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        args.report.write_text(report, encoding="utf-8")
+        print(report)
+        print(f"\nWrote report: {args.report}")
+        if args.metrics_json:
+            args.metrics_json.parent.mkdir(parents=True, exist_ok=True)
+            args.metrics_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+            print(f"Wrote metrics: {args.metrics_json}")
+        return 0 if payload["pass_heuristic_frequency"] else 3
+
     metrics = analyze_trace(
         args.trace,
         working_set_cfg=ws_cfg,
         prefix_cache_budget_gb=prefix_budget,
         bytes_per_token=args.bytes_per_token,
+        chunk_order=args.chunk_order,
     )
     g0 = evaluate_g0(
         metrics,
@@ -89,6 +178,8 @@ def main(argv: list[str] | None = None) -> int:
         threshold_working_set_share=args.threshold_share,
     )
     report = render_report(metrics, g0, trace_path=args.trace)
+    if args.chunk_order != "natural":
+        report = f"_chunk_order=`{args.chunk_order}`_\n\n" + report
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(report, encoding="utf-8")
     print(report)
@@ -98,6 +189,7 @@ def main(argv: list[str] | None = None) -> int:
         payload = {
             "metrics": metrics.to_dict(),
             "g0": g0.to_dict(),
+            "chunk_order": args.chunk_order,
         }
         for key in ("chunk_lengths", "context_lengths", "reuse_distances"):
             payload["metrics"].pop(key, None)

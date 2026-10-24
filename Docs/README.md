@@ -11,6 +11,7 @@
 | [`runbooks/`](runbooks/) | GPU rental, pins, safety, partner ask |
 | [`results/`](results/) | Provisional G0 write-ups |
 | [`Reports/`](Reports/) | Scoped Phase 0/1 negative-results writeup |
+| [`product/`](product/) | Canonical-order C1 amplification (CPU product desk) |
 | [`Reviews/`](Reviews/) | External review notes + dispositions |
 | [`Research/`](Research/) | ResolventKV brief + adoption map |
 | [`plans/`](plans/) | Implementation plans |

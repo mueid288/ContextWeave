@@ -2,9 +2,10 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** **PAUSED / ARCHIVED** — see `Docs/status/closeout-phase0-1.md`
-- G0 provisional PASS · G1 EPIC latency PASS · G2/H3 FAIL · H4 **MISSPECIFIED→MFU consistency (not validation)** · FP = **implementation conformance (self-authored)**
-- Planner: **C1 else C0** (≈ default prefix-or-prefill; refusal hooks for disabled C3)
+- **Research:** **ARCHIVED** — `Docs/status/closeout-phase0-1.md`
+- **Product desk:** canonical chunk-order **PASS** (`by_frequency_desc` C1 amplification) — `Docs/product/canonical-order.md`
+- G0 provisional PASS · G2/H3 FAIL · H4 MFU consistency only · FP conformance only
+- Planner: **C1 else C0** + prefer frequency chunk order upstream
 - Phase 2 / ResolventKV: **closed**; Colab idle
 - Scoped writeup: `Docs/Reports/phase01-negative-results.md`
 
@@ -741,8 +742,20 @@ a real partner trace. Literature vs harness quality gap remains **unresolved**.
   log template expanded; `Docs/Reports/phase01-negative-results.md`.
 - Report revision: Gate D N=12; per-order TTFT; Gate R 7705/8063; oracle wording;
   pin-split native gaps; standalone can-claim; drop MFU “PASS”.
-- Optional EPIC fidelity GPU and canonical-order CPU study **not** run.
 - Supersedes: overstated PASS/FAIL wording in Current verdict
+
+## 2026-10-24 — Product: canonical chunk-order PASS (CPU)
+
+- **Status:** `VALID`
+- Pre-reg `Docs/pre-reg/pre-reg-product-canonical-order.md` (Gemini_4 fixes:
+  frequency + sha256 baselines; KPI = prefix share / post_prefix; natural sort;
+  multi-doc slice; lift bar ≥+10pp or ≥20% multi-doc post_prefix↓).
+- `by_frequency_desc` vs natural: synthetic multi-doc **+14.4 pp** / **21%**↓;
+  my_corpus **+15.5 pp** / **22.4%**↓ → `pass_heuristic: true` both.
+- `by_doc_id` ≈ frequency (Zipf↔alpha coincidence); `by_sha256` multi-doc ~+5–6 pp.
+- Module: `contextweave.trace_analysis.chunk_order`; CLI `--compare-chunk-order`.
+- Artifacts: `artifacts/product-canonical-order-2026-10-24/`. Quality **unverified**.
+- Supersedes: “R7 not run”; product desk idle
 
 ## Template for future entries
 

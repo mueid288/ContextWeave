@@ -3,12 +3,11 @@
 Research harness for a **validity-checked planner** over modular KV-cache reuse
 (prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-**Status (2026-10-24): PAUSED / ARCHIVED** —
-[Docs/status/closeout-phase0-1.md](Docs/status/closeout-phase0-1.md),
-[Docs/status/pause.md](Docs/status/pause.md),
-[Docs/Reports/phase01-negative-results.md](Docs/Reports/phase01-negative-results.md).  
-G0 provisional PASS · G2/H3 FAIL · H4 misspecified→MFU consistency only · FP = conformance only.
-Planner: **C1 else C0**.
+**Status (2026-10-24):** research **ARCHIVED**; product desk =
+[canonical chunk order](Docs/product/canonical-order.md) (C1 amplification, CPU).  
+Closeout: [Docs/status/closeout-phase0-1.md](Docs/status/closeout-phase0-1.md) ·
+[pause](Docs/status/pause.md) · [negative results](Docs/Reports/phase01-negative-results.md).  
+Planner: **C1 else C0**; prefer `by_frequency_desc` before assemble.
 
 **Laptop policy:** never download or run models on this machine. See
 [Docs/runbooks/local-safety.md](Docs/runbooks/local-safety.md). Baseline scripts refuse
@@ -46,6 +45,10 @@ python scripts/workloads/fingerprint_example.py --model-config configs/models/qw
 
 # Shipped policy demo (CPU)
 cw-plan-demo --json
+
+# Product: chunk-order A/B (prefix-cache amplification, CPU)
+cw-analyze-trace --trace benchmarks/workloads/synthetic_rag_default/trace.jsonl \
+  --compare-chunk-order --report /tmp/compare_chunk_order.md
 
 # Planner v0 (CPU)
 python -c "from contextweave.planner import plan, RequestView; print(plan(RequestView(has_validated_nonprefix_artifacts=True)).to_dict())"
