@@ -1,13 +1,16 @@
 # Pre-registration: H4 MFU-prior check (supersedes misspecified H4)
 
-**Status:** **PASS** (2026-10-24) — `artifacts/h4-mfu-2026-10-24/`  
+**Status:** **Consistent with MFU prior — not a validation** (2026-10-24) —
+`artifacts/h4-mfu-2026-10-24/`  
 **Supersedes:** `Docs/pre-reg/pre-reg-h4-cost-model.md` (**MISSPECIFIED** — used 450 TFLOP/s > A100 bf16 peak)  
-**Not a G2 redo. No new GPU.**
+**Not a G2 redo. No new GPU. Do not label PASS.**
 
 ## Result
 
 Implied effective TFLOP/s from banked C0 ≈ **177–182** on all four suites; MFU ≈
-**57–58%** of peak 312 → inside prior **[124.8, 202.8]**; `pass_heuristic: true`.
+**57–58%** of peak 312 → inside band **[124.8, 202.8]**. Caveats: MFU range was
+fixed after measured ~58% was known (post hoc); band is wide; check is C0
+prefill FLOP/TTFT only (not load costs or C3 break-even).
 
 ## One question
 

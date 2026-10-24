@@ -3,7 +3,7 @@
 ## Current verdict (update when it changes)
 
 - **Project state:** **PAUSED / ARCHIVED** — see `Docs/status/closeout-phase0-1.md`
-- G0 provisional PASS · G1 EPIC latency PASS · G2/H3 FAIL · H4 **MISSPECIFIED→MFU PASS** · FP suites = **implementation conformance (self-authored)**
+- G0 provisional PASS · G1 EPIC latency PASS · G2/H3 FAIL · H4 **MISSPECIFIED→MFU consistency (not validation)** · FP = **implementation conformance (self-authored)**
 - Planner: **C1 else C0** (≈ default prefix-or-prefill; refusal hooks for disabled C3)
 - Phase 2 / ResolventKV: **closed**; Colab idle
 - Scoped writeup: `Docs/Reports/phase01-negative-results.md`
@@ -11,22 +11,21 @@
 ## Final verdict (scoped claims)
 
 On A100-40GB, **Qwen3-8B**, vLLM 0.18 + lmcache 0.4.2 in-process blend (~12k,
-chunk_sep, **4 shims**): reorder reuse engaged partially (BAC **7705**/11520
-cached tokens, CBA ~0); mean TTFT ~**1.10×** vs native miss; quality **0.67** on
-the needle suite (Gate D bac). Report negative **for this config only** — not
-“CacheBlend fails.”
+chunk_sep, **4 shims**): BAC cached **7705**/11520 (Gate R bar **8063**, formal
+miss ~66.9%); CBA ~0; blend BAC TTFT ~**622 ms** vs native reorder **924** /
+CBA ~**1065**; mean ~**1.10×** hides quality loss on the fast order. Gate D bac
+quality **0.67** (**N=12**). Report negative **for this config only**.
 
 On **Mistral-7B** with EPIC LegoLink-8 **Python overlay** on vLLM 0.7.0 @~12k:
-TTFT **2–3.9×** vs full prefill; C3 mean quality **0.70** (N=20) and **0.50**
-(N=12) on synthetic needles **under reorder**. Order-blind multi-fact quality
-PASS is **superseded** by the oracle for non-prefix quality claims.
+C3 is **faster** (~2–4× TTFT) but mean quality **0.70** (N=20) / **0.50** (N=12)
+under reorder; oracle fallback to C0 → **no p95 upside** (G2 FAIL). Order-blind
+multi-fact quality PASS is **superseded** for non-prefix quality claims.
 
 Neither order nor (order, fact-type) predictors transferred across filler seeds.
-H4 at 450 TFLOP/s was **misspecified**; measured C0 (~177–182 TFLOP/s) lands in
-peak **312 × MFU 40–65%**. FP poison/fault/planner gates show coded refusal
-behavior only — **not** security validation. G0 never saw a real partner trace.
-Harness discrepancy vs published PIC quality framing remains **unresolved**
-(optional R4 only).
+H4 at 450 TFLOP/s was **misspecified**; measured C0 (~177–182 TFLOP/s) is
+**consistent with** peak **312 × MFU 40–65%** — not a cost-model validation
+(prior post hoc / wide; C0-only). FP suites = coded refusal only. G0 never saw
+a real partner trace. Literature vs harness quality gap remains **unresolved**.
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -685,13 +684,14 @@ Harness discrepancy vs published PIC quality framing remains **unresolved**
 - Supersedes: “H4 untested” in cost_model_8b.md
 - Superseded by: H4 MFU-prior entry below
 
-## 2026-10-24 — H4 MFU-prior PASS (CPU vs banked)
+## 2026-10-24 — H4 MFU-prior check (CPU vs banked)
 
-- **Status:** `VALID`
-- Pre-reg `Docs/pre-reg/pre-reg-h4-mfu.md`. Peak **312** TFLOP/s; MFU prior
-  **40–65%** → band **[124.8, 202.8]**. Implied effective TFLOP/s ≈ **177–182**
-  (MFU ~57–58%) on oracle + confirm99 + keydev99/100; all in-band;
-  `pass_heuristic: true`.
+- **Status:** `VALID` — **consistent with MFU prior, not a validation** (do not label PASS)
+- Pre-reg `Docs/pre-reg/pre-reg-h4-mfu.md`. Peak **312** TFLOP/s; MFU band
+  **40–65%** → **[124.8, 202.8]**. Implied ≈ **177–182** TFLOP/s (MFU ~57–58%)
+  on four banked C0 suites; in-band. Caveats: band chosen after ~58% seen;
+  wide enough that most prefills fit; checks C0 FLOP/TTFT only (not load/C3
+  break-even).
 - N: 4 suites × banked C0 means (n_c0 12–20). No new GPU.
 - Artifacts: `artifacts/h4-mfu-2026-10-24/`.
 - Supersedes: misspecified H4 @450
@@ -737,9 +737,11 @@ Harness discrepancy vs published PIC quality framing remains **unresolved**
 ## 2026-10-24 — Post-archive review gap fixes (CPU)
 
 - **Status:** `VALID` (desk hygiene; not a gate reopen)
-- Applied review R1–R3 + R5: relabeled H4/FP/EPIC quality/CacheBlend; H4 MFU
-  redo PASS; log template expanded; `Docs/Reports/phase01-negative-results.md`.
-- Stopping rule (R6) unchanged. R4 GPU fidelity and R7 canonical-order **not** run.
+- Relabeled H4/FP/EPIC quality/CacheBlend; H4 MFU consistency check (not PASS);
+  log template expanded; `Docs/Reports/phase01-negative-results.md`.
+- Report revision: Gate D N=12; per-order TTFT; Gate R 7705/8063; oracle wording;
+  pin-split native gaps; standalone can-claim; drop MFU “PASS”.
+- Optional EPIC fidelity GPU and canonical-order CPU study **not** run.
 - Supersedes: overstated PASS/FAIL wording in Current verdict
 
 ## Template for future entries

@@ -93,9 +93,12 @@ def main(argv: list[str] | None = None) -> int:
         "mfu_prior": [MFU_LOW, MFU_HIGH],
         "effective_tflops_band": [band_lo, band_hi],
         "suites": rows,
-        "pass_heuristic": all_pass,
+        "in_band": all_pass,
+        "pass_heuristic": all_pass,  # exit code only; report as consistency, not PASS
+        "label": "consistent_with_mfu_prior_not_validation",
         "note": (
-            "Pass = implied effective TFLOP/s from banked C0 lies in peak×MFU prior. "
+            "In-band = implied effective TFLOP/s from banked C0 lies in peak×MFU band. "
+            "Not a cost-model validation (band post-hoc/wide; C0-only). "
             "Old H4 at 450 TFLOP/s was MISSPECIFIED (above peak)."
         ),
     }
