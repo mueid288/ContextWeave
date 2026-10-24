@@ -1,19 +1,20 @@
-# Project pause (H4 FAIL)
+# Project pause (FP planner gate PASS)
 
 **Effective:** 2026-10-24  
 **State:** **PAUSED**  
-**G2:** FAIL · H3 (order/slice/keydev): FAIL · **H4 (default cost model):** **FAIL**
+**G2/H3/H4:** FAIL · **FP→planner gate:** **PASS** (desk)
 
 ## Policy (shipped)
 
-**C1** if exact prefix, else **C0**. C3/C4 refused by default.
+**C1** if exact prefix, else **C0** by default.  
+Non-prefix only if FR-13 provenance passes **and** a quality clear exists
+(keydev / exact-distro slice-cal). C4 still quality-refused.
 
 ## Frozen
 
-Phase 2, ResolventKV, G2 re-attack, EPIC H3 rematches, treating §7.5 450-TFLOP
-tables as measured TTFT.
+Phase 2, ResolventKV, G2 re-attack, H3 rematches, default-H4 redo.
 
 ## Resume
 
 1. Stay paused / archive — **default**  
-2. New pre-reg only for a **different** thesis (not H3 rematch, not default-H4 redo)  
+2. New pre-reg only for a **different** thesis  

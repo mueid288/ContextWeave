@@ -2,10 +2,10 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** **PAUSED** — H4 default cost model **FAIL**; G2 FAIL stands —
-  `Docs/status/pause.md`, `artifacts/h4-cost-model-2026-10-24/`
-- **Phase 0 / 1:** G2 FAIL; H3 FAIL; H4 FAIL at 450 TFLOP/s (~60% vs C0)
-- Planner: **C1 else C0**; C3/C4 refused; §7.5 tables not measured TTFT
+- **Project state:** **PAUSED** — FP planner gate **PASS**; G2/H3/H4 FAIL stand —
+  `Docs/status/pause.md`, `Docs/pre-reg/pre-reg-fp-planner-gate.md`
+- **Phase 0 / 1:** G2/H3/H4 FAIL; validity gate wired for non-prefix
+- Planner: **C1 else C0**; C3 needs provenance + quality clear; C4 quality-refused
 - Phase 2 / ResolventKV: **not opened**; Colab idle
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
@@ -654,6 +654,14 @@
   false`. Calibrated ~182 TFLOP/s → seed100 ~2.9% (secondary only).
 - Artifacts: `artifacts/h4-cost-model-2026-10-24/`. **PAUSED.** No partner track.
 - Supersedes: “H4 untested” in cost_model_8b.md
+
+## 2026-10-24 — FP planner provenance gate PASS (CPU)
+
+- **Status:** `VALID`
+- Pre-reg `Docs/pre-reg/pre-reg-fp-planner-gate.md`. Non-prefix C3/C4 require
+  FR-13 `assert_reuse_allowed` before quality clears. Tests:
+  `tests/unit/test_planner_provenance_gate.py`. **PAUSED.**
+- Supersedes: planner without provenance on non-prefix path
 
 ## Template for future entries
 

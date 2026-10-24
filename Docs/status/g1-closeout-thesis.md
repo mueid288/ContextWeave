@@ -49,6 +49,6 @@ when non-prefix artifacts are valid; **C4** (CacheBlend) refused; else **C0**.
 
 ## Next
 
-1. Policy: **C1** / **C3 iff workload-local slice-cal safe** / else **C0** (C4 refused).
-2. H3 order-only: **FAIL** on confirm. H3 slice-cal LOO: **PASS** (local only).
-3. Phase 2 / ResolventKV still closed.
+1. Policy: **C1 else C0**; C3 only with FR-13 provenance **and** quality clear.
+2. H3/H4: **FAIL**. FP planner gate: **PASS** (desk).
+3. Phase 2 / ResolventKV still closed. **PAUSED.**

@@ -8,11 +8,30 @@ import sys
 from pathlib import Path
 
 from contextweave.planner.v0 import ConfigId, ReasonCode, RequestView, plan
+from contextweave.provenance.trust import (
+    ArtifactLifecycle,
+    ProvenanceRecord,
+    TrustNamespace,
+    TrustNamespaceKind,
+)
 from contextweave.risk.keydev import (
     fit_threshold,
     mean_one_minus_cosine,
     predict_c3_quality_fail,
 )
+
+
+def _prov() -> tuple[ProvenanceRecord, TrustNamespace]:
+    ns = TrustNamespace("ops", TrustNamespaceKind.OPERATOR)
+    rec = ProvenanceRecord(
+        artifact_id="a1",
+        trust_namespace=ns,
+        fingerprint_digest="deadbeef",
+        build_context_hash="sha256:x",
+        built_in_canonical_context=True,
+        lifecycle=ArtifactLifecycle.AVAILABLE,
+    )
+    return rec, ns
 
 REPO = Path(__file__).resolve().parents[2]
 EVAL = REPO / "scripts" / "phase1" / "eval_h3_keydev.py"
@@ -41,11 +60,14 @@ def test_fit_threshold_separates_scores():
 
 
 def test_planner_keydev_allows_and_refuses():
+    rec, ns = _prov()
     d_ok = plan(
         RequestView(
             has_validated_nonprefix_artifacts=True,
             keydev_score=0.05,
             keydev_threshold=0.5,
+            provenance=rec,
+            request_trust=ns,
         )
     )
     assert d_ok.chosen == ConfigId.C3_EPIC
@@ -55,6 +77,8 @@ def test_planner_keydev_allows_and_refuses():
             has_validated_nonprefix_artifacts=True,
             keydev_score=0.9,
             keydev_threshold=0.5,
+            provenance=rec,
+            request_trust=ns,
         )
     )
     assert d_bad.chosen == ConfigId.C0_FULL_PREFILL

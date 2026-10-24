@@ -11,6 +11,25 @@ from contextweave.planner.v0 import (
     default_calibrations,
     plan,
 )
+from contextweave.provenance.trust import (
+    ArtifactLifecycle,
+    ProvenanceRecord,
+    TrustNamespace,
+    TrustNamespaceKind,
+)
+
+
+def _prov() -> tuple[ProvenanceRecord, TrustNamespace]:
+    ns = TrustNamespace("ops", TrustNamespaceKind.OPERATOR)
+    rec = ProvenanceRecord(
+        artifact_id="a1",
+        trust_namespace=ns,
+        fingerprint_digest="deadbeef",
+        build_context_hash="sha256:x",
+        built_in_canonical_context=True,
+        lifecycle=ArtifactLifecycle.AVAILABLE,
+    )
+    return rec, ns
 
 
 def test_prefix_hit_wins():
@@ -20,7 +39,7 @@ def test_prefix_hit_wins():
 
 
 def test_h3_confirm_fail_blanket_refuses_c3_even_on_safe_order():
-    """After GPU confirm FAIL, C3 calibration refuses regardless of order."""
+    """Without provenance + quality clear, C3 is refused (order alone insufficient)."""
     d = plan(
         RequestView(
             has_validated_nonprefix_artifacts=True,
@@ -29,9 +48,10 @@ def test_h3_confirm_fail_blanket_refuses_c3_even_on_safe_order():
     )
     assert d.chosen == ConfigId.C0_FULL_PREFILL
     assert ConfigId.C3_EPIC.value in d.discarded
+    reasons = d.discarded[ConfigId.C3_EPIC.value]
     assert (
-        ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value
-        in d.discarded[ConfigId.C3_EPIC.value]
+        ReasonCode.ARTIFACT_INVALID.value in reasons
+        or ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value in reasons
     )
     assert ConfigId.C4_CACHEBLEND.value in d.discarded
 
@@ -62,8 +82,14 @@ def test_safe_fast_blend_would_be_chosen():
         quality_delta_points=-1.0,
         supported=True,
     )
+    rec, ns = _prov()
     d = plan(
-        RequestView(has_validated_nonprefix_artifacts=True, chunk_order="BCA"),
+        RequestView(
+            has_validated_nonprefix_artifacts=True,
+            chunk_order="BCA",
+            provenance=rec,
+            request_trust=ns,
+        ),
         calibrations=cals,
         policy=PlannerPolicy(),
     )
@@ -84,8 +110,14 @@ def test_latency_bar_alone_discards_modest_win():
         quality_delta_points=-0.5,
         supported=True,
     )
+    rec, ns = _prov()
     d = plan(
-        RequestView(has_validated_nonprefix_artifacts=True, chunk_order="BCA"),
+        RequestView(
+            has_validated_nonprefix_artifacts=True,
+            chunk_order="BCA",
+            provenance=rec,
+            request_trust=ns,
+        ),
         calibrations=cals,
     )
     assert d.chosen == ConfigId.C0_FULL_PREFILL

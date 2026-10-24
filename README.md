@@ -3,10 +3,10 @@
 Research harness for a **validity-checked planner** over modular KV-cache reuse
 (prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-**Status (2026-10-24): PAUSED** — H4 cost model **FAIL**; G2/H3 FAIL stand —
+**Status (2026-10-24): PAUSED** — FP planner gate **PASS**; G2/H3/H4 FAIL stand —
 [Docs/status/pause.md](Docs/status/pause.md),
-[artifacts/h4-cost-model-2026-10-24/](artifacts/h4-cost-model-2026-10-24/).  
-Planner: **C1 else C0** (C3/C4 refused).
+[Docs/pre-reg/pre-reg-fp-planner-gate.md](Docs/pre-reg/pre-reg-fp-planner-gate.md).  
+Planner: **C1 else C0**; non-prefix needs provenance + quality clear.
 
 **Laptop policy:** never download or run models on this machine. See
 [Docs/runbooks/local-safety.md](Docs/runbooks/local-safety.md). Baseline scripts refuse

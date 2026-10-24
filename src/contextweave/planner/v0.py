@@ -11,6 +11,15 @@ from dataclasses import dataclass, field, replace
 from enum import Enum
 from typing import Any
 
+from contextweave.provenance.trust import (
+    ArtifactBuildMode,
+    CrossTrustReuseError,
+    IllegalBuildModeError,
+    ProvenanceRecord,
+    TrustNamespace,
+    TrustNamespaceKind,
+    assert_reuse_allowed,
+)
 from contextweave.risk.keydev import predict_c3_quality_fail as keydev_refuse
 from contextweave.risk.slice_calibration import SliceCalibration
 
@@ -55,6 +64,8 @@ class PlannerPolicy:
     min_ttft_speedup: float = 0.85  # ≥15% faster
     # If quality unknown for a method, refuse it.
     refuse_unknown_quality: bool = True
+    # Non-prefix configs require a passing ProvenanceRecord (FR-13).
+    require_provenance_for_nonprefix: bool = True
 
 
 @dataclass
@@ -73,6 +84,10 @@ class RequestView:
     slice_calibration: SliceCalibration | None = None
     keydev_score: float | None = None
     keydev_threshold: float | None = None
+    # FR-13: required for C3/C4 when policy.require_provenance_for_nonprefix.
+    provenance: ProvenanceRecord | None = None
+    request_trust: TrustNamespace | None = None
+    artifact_from_untrusted_content: bool = False
 
 
 @dataclass
@@ -175,6 +190,21 @@ def plan(
         if not request.has_validated_nonprefix_artifacts:
             discard(cfg, ReasonCode.ARTIFACT_INVALID.value)
             continue
+        if policy.require_provenance_for_nonprefix:
+            if request.provenance is None or request.request_trust is None:
+                discard(cfg, ReasonCode.ARTIFACT_INVALID.value)
+                continue
+            try:
+                assert_reuse_allowed(
+                    request.provenance.trust_namespace,
+                    request.request_trust,
+                    artifact_from_untrusted_content=request.artifact_from_untrusted_content,
+                    build_mode=request.provenance.build_mode,
+                    record=request.provenance,
+                )
+            except (CrossTrustReuseError, IllegalBuildModeError):
+                discard(cfg, ReasonCode.ARTIFACT_INVALID.value)
+                continue
         # C3 quality clear: runtime keydev (preferred) or exact-distro slice table.
         if cfg == ConfigId.C3_EPIC:
             cleared = False
