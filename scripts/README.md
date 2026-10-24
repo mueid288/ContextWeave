@@ -8,7 +8,8 @@
 | [`g1/matched/`](g1/matched/) | Matched-pin CacheBlend Gates B–E (Colab) |
 | [`g1/common/`](g1/common/) | Shared scoring, engagement, blend hooks |
 | [`smoke/`](smoke/) | Remote GPU smoke (`CONTEXTWEAVE_ALLOW_MODEL_LOAD=1`) |
-| [`phase1/`](phase1/) | Oracle collect (GPU) + upside CLI (CPU) |
+| [`phase1/`](phase1/) | Oracle/H3/H4/FP evals (CPU) + GPU collectors |
+| [`ci/`](ci/) | `cpu_gate.sh` — unit tests + plan-demo lock |
 | [`_paths.py`](_paths.py) | Optional `repo_root()` helper |
 
 Run from the **repo root** (scripts locate `pyproject.toml` themselves).

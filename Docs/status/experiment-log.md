@@ -685,6 +685,13 @@
   for the archived policy. Not a gate reopen.
 - Supersedes: none
 
+## 2026-10-24 — CPU archive lock + tag
+
+- **Status:** `VALID`
+- `scripts/ci/cpu_gate.sh`: 142 unit tests + plan-demo. Tag
+  `v0.1.0-phase01-archive` points at Phase 0/1 closeout. Not a gate reopen.
+- Supersedes: none
+
 ## Template for future entries
 
 ```
