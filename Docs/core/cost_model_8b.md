@@ -56,5 +56,8 @@ for CacheBlend even where latency looks soft-positive.
 | Full vs prefix @6k (earlier G1 step 1) | **~2.57×** | Prefix gap is real |
 
 **Planner implication:** do not treat §7.5 “reuse wins on PCIe” as permission to pick
-C4. Use measured quality + ≥15% bar (`contextweave.planner.v0`). H4 (cost-model
-±20% vs measured) remains **untested** — needs a dedicated Phase 2 comparison.
+C4. Use measured quality + ≥15% bar (`contextweave.planner.v0`).
+
+**H4 (2026-10-24):** default 450 TFLOP/s vs EPIC A100 C0 @12k → **FAIL** (~60%
+rel err). Calibrated ~182 TFLOP/s transfers seed99→100 (~3% err) but is **not**
+the PRD default. See `artifacts/h4-cost-model-2026-10-24/`.

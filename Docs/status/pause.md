@@ -1,8 +1,8 @@
-# Project pause (H3 keydev FAIL)
+# Project pause (H4 FAIL)
 
-**Effective:** 2026-10-23  
+**Effective:** 2026-10-24  
 **State:** **PAUSED**  
-**G2:** FAIL · Static H3: FAIL · Slice-cal LOO: local-only · **Keydev:** **FAIL**
+**G2:** FAIL · H3 (order/slice/keydev): FAIL · **H4 (default cost model):** **FAIL**
 
 ## Policy (shipped)
 
@@ -10,11 +10,10 @@
 
 ## Frozen
 
-Phase 2, ResolventKV, G2 re-attack, order/slice/keydev EPIC quality-rule fishing
-without a **new** signal class + pre-reg.
+Phase 2, ResolventKV, G2 re-attack, EPIC H3 rematches, treating §7.5 450-TFLOP
+tables as measured TTFT.
 
 ## Resume
 
 1. Stay paused / archive — **default**  
-2. New pre-reg only for a different thesis (not another EPIC seam/order variant)  
-3. Partner trace — optional  
+2. New pre-reg only for a **different** thesis (not H3 rematch, not default-H4 redo)  

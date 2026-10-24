@@ -2,11 +2,10 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** **PAUSED** — H3 keydev **FAIL**; G2 FAIL stands —
-  `Docs/status/pause.md`, `artifacts/h3-keydev-2026-10-23/`
-- **Phase 0 / 1:** G2 FAIL; best fixed C0; **do not re-attack G2**
-- **H3:** static + isolated-seam keydev all FAIL transfer / separability
-- Planner: **C1 else C0** by default; C3/C4 refused
+- **Project state:** **PAUSED** — H4 default cost model **FAIL**; G2 FAIL stands —
+  `Docs/status/pause.md`, `artifacts/h4-cost-model-2026-10-24/`
+- **Phase 0 / 1:** G2 FAIL; H3 FAIL; H4 FAIL at 450 TFLOP/s (~60% vs C0)
+- Planner: **C1 else C0**; C3/C4 refused; §7.5 tables not measured TTFT
 - Phase 2 / ResolventKV: **not opened**; Colab idle
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
@@ -646,6 +645,15 @@
 - Joint probe path previously CUDA-IMA’d (fixed to isolated-only). Stopped Colab.
 - Artifacts: `artifacts/h3-keydev-2026-10-23/`. **PAUSED.**
 - Supersedes: keydev as production C3 gate
+
+## 2026-10-24 — H4 cost model FAIL (CPU vs banked)
+
+- **Status:** `VALID`
+- Pre-reg `Docs/pre-reg/pre-reg-h4-cost-model.md`. Default 450 TFLOP/s pred
+  ~457 ms vs C0 ~1.13–1.16 s → rel err **~0.60** on 4 suites; `pass_heuristic:
+  false`. Calibrated ~182 TFLOP/s → seed100 ~2.9% (secondary only).
+- Artifacts: `artifacts/h4-cost-model-2026-10-24/`. **PAUSED.** No partner track.
+- Supersedes: “H4 untested” in cost_model_8b.md
 
 ## Template for future entries
 

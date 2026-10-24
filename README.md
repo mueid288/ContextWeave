@@ -3,9 +3,9 @@
 Research harness for a **validity-checked planner** over modular KV-cache reuse
 (prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-**Status (2026-10-23): PAUSED** — H3 keydev **FAIL**; G2 FAIL stands —
+**Status (2026-10-24): PAUSED** — H4 cost model **FAIL**; G2/H3 FAIL stand —
 [Docs/status/pause.md](Docs/status/pause.md),
-[artifacts/h3-keydev-2026-10-23/](artifacts/h3-keydev-2026-10-23/).  
+[artifacts/h4-cost-model-2026-10-24/](artifacts/h4-cost-model-2026-10-24/).  
 Planner: **C1 else C0** (C3/C4 refused).
 
 **Laptop policy:** never download or run models on this machine. See
