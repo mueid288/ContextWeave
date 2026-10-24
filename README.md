@@ -3,10 +3,10 @@
 Research harness for a **validity-checked planner** over modular KV-cache reuse
 (prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-**Status (2026-10-24): PAUSED** — FP poison suite **PASS**; G2/H3/H4 FAIL stand —
-[Docs/status/pause.md](Docs/status/pause.md),
-[artifacts/fp-poison-2026-10-24/](artifacts/fp-poison-2026-10-24/).  
-Planner: **C1 else C0**; non-prefix needs provenance + build-hash match + quality clear.
+**Status (2026-10-24): PAUSED / ARCHIVED** —
+[Docs/status/closeout-phase0-1.md](Docs/status/closeout-phase0-1.md),
+[Docs/status/pause.md](Docs/status/pause.md).  
+G0 PASS · G2/H3/H4 FAIL · FP validity suites PASS. Planner: **C1 else C0**.
 
 **Laptop policy:** never download or run models on this machine. See
 [Docs/runbooks/local-safety.md](Docs/runbooks/local-safety.md). Baseline scripts refuse

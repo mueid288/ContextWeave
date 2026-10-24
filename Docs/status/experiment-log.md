@@ -2,11 +2,10 @@
 
 ## Current verdict (update when it changes)
 
-- **Project state:** **PAUSED** — FP poison suite **PASS**; G2/H3/H4 FAIL stand —
-  `Docs/status/pause.md`, `artifacts/fp-poison-2026-10-24/`
-- **Phase 0 / 1:** G2/H3/H4 FAIL; validity + build-context poison coverage desk PASS
-- Planner: **C1 else C0**; non-prefix needs provenance + build-hash match + quality clear
-- Phase 2 / ResolventKV: **not opened**; Colab idle
+- **Project state:** **PAUSED / ARCHIVED** — see `Docs/status/closeout-phase0-1.md`
+- G0 PASS · G1 EPIC latency PASS · G2/H3/H4 FAIL · FP gate/poison/fault PASS
+- Planner: **C1 else C0**; non-prefix needs provenance + build-hash + quality clear
+- Phase 2 / ResolventKV: **closed**; Colab idle
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -670,6 +669,14 @@
   refused (fingerprint + planner). `request_build_context_hash` wired.
 - Artifacts: `artifacts/fp-poison-2026-10-24/`. **PAUSED.**
 - Supersedes: planner ignoring build-hash vs provenance
+
+## 2026-10-24 — FR fault-injection suite PASS + Phase0/1 closeout
+
+- **Status:** `VALID`
+- Pre-reg `Docs/pre-reg/pre-reg-fp-fault-suite.md`: 7/7 faults refused; control C3 ok.
+- Artifacts: `artifacts/fp-fault-2026-10-24/`. Closeout:
+  `Docs/status/closeout-phase0-1.md`. **PAUSED / ARCHIVED.**
+- Supersedes: open-ended FP micro-suite treadmill as default next
 
 ## Template for future entries
 
