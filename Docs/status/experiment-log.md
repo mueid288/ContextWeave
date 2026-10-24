@@ -3,7 +3,7 @@
 ## Current verdict (update when it changes)
 
 - **Research:** **ARCHIVED** — `Docs/status/closeout-phase0-1.md`
-- **Product desk:** shim+quality PASS; **live TTFT C1 proof READY** (must run to claim real latency win)
+- **Product desk:** shim + quality + **live C1 TTFT PASS (1.79×)** — intended effect measured
 - G0 provisional PASS · G2/H3 FAIL · H4 MFU consistency only · FP conformance only
 - Planner: **C1 else C0** + prefer frequency chunk order upstream
 - Phase 2 / ResolventKV: **closed**; Colab idle
@@ -792,6 +792,15 @@ a real partner trace. Literature vs harness quality gap remains **unresolved**.
 - E2E mock-upstream unit test for shim forward path.
 - Next: `cw-order-ttft` ≤90 min → bank → PASS/FAIL.
 - Supersedes: “product complete” without live C1 latency evidence
+
+## 2026-10-24 — Product live TTFT C1 PASS (Colab A100)
+
+- **Status:** `VALID`
+- Session `cw-order-ttft`; vLLM + `--enable-prefix-caching`; Mistral-7B.
+- Warm p50: shuffled **95.6 ms** vs frequency **53.6 ms** → **1.79×**; contains 1.0/1.0.
+- Artifacts: `artifacts/product-order-ttft-2026-10-24/`.
+- Decision: intended product effect (stable order → native C1) **measured live**.
+- Supersedes: TTFT READY / “sim only”
 
 ## Template for future entries
 

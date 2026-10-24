@@ -3,8 +3,9 @@
 Research harness for a **validity-checked planner** over modular KV-cache reuse
 (prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-**Status (2026-10-24):** research **ARCHIVED**; product desk =
-[canonical chunk order](Docs/product/canonical-order.md) (C1 amplification, CPU).  
+**Status (2026-10-24):** research **ARCHIVED**; product =
+[canonical chunk order](Docs/product/canonical-order.md) +
+[live shim](Docs/product/live-shim.md) — sim lift, quality PASS, **live TTFT 1.79×**.  
 Closeout: [Docs/status/closeout-phase0-1.md](Docs/status/closeout-phase0-1.md) ·
 [pause](Docs/status/pause.md) · [negative results](Docs/Reports/phase01-negative-results.md).  
 Planner: **C1 else C0**; prefer `by_frequency_desc` before assemble.

@@ -71,4 +71,6 @@ Sim lift + needle quality are not enough. Measure warm TTFT with prefix caching:
 - Colab: `Docs/product/colab-order-ttft.md`
 - Harness: `scripts/product/eval_order_ttft.py`
 
-Until that PASSes, do **not** claim live C1 amplification — only sim + quality.
+**PASS (2026-10-24):** warm p50 **1.79×** (shuffled 95.6 ms → frequency 53.6 ms) with
+prefix caching on — `artifacts/product-order-ttft-2026-10-24/`. Live C1 amplification
+is measured; still scoped to this stack/suite.

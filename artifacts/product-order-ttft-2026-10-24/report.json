@@ -1,0 +1,89 @@
+{
+  "pre_reg": "Docs/pre-reg/pre-reg-product-live-ttft.md",
+  "model": "mistralai/Mistral-7B-Instruct-v0.2",
+  "base_url": "http://127.0.0.1:8000",
+  "filler_chars": 2500,
+  "warm_trials": 8,
+  "modes": {
+    "shuffled": {
+      "warm_ms": [
+        53.91298399990774,
+        185.84146100010912,
+        53.675271999964025,
+        136.8146689999321,
+        53.73306899991803,
+        186.61170199993649,
+        54.42534500002694,
+        137.6424949999091
+      ],
+      "warm_p50_ms": 95.62000699997952,
+      "warm_mean_ms": 107.83212462496294,
+      "contains_rate": 1.0,
+      "usage_samples": [
+        {
+          "prompt_tokens": 2156,
+          "total_tokens": 2159,
+          "completion_tokens": 3,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": null
+        },
+        {
+          "prompt_tokens": 2156,
+          "total_tokens": 2159,
+          "completion_tokens": 3,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": null
+        },
+        {
+          "prompt_tokens": 2156,
+          "total_tokens": 2159,
+          "completion_tokens": 3,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": null
+        }
+      ]
+    },
+    "frequency": {
+      "warm_ms": [
+        53.461641000012605,
+        53.77102800002831,
+        53.40671099997962,
+        53.61015599987695,
+        54.11950600000637,
+        53.8303180001094,
+        53.40885300006448,
+        53.506527000081405
+      ],
+      "warm_p50_ms": 53.55834149997918,
+      "warm_mean_ms": 53.63934250001989,
+      "contains_rate": 1.0,
+      "usage_samples": [
+        {
+          "prompt_tokens": 2173,
+          "total_tokens": 2176,
+          "completion_tokens": 3,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": null
+        },
+        {
+          "prompt_tokens": 2173,
+          "total_tokens": 2176,
+          "completion_tokens": 3,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": null
+        },
+        {
+          "prompt_tokens": 2173,
+          "total_tokens": 2176,
+          "completion_tokens": 3,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": null
+        }
+      ]
+    }
+  },
+  "speedup_shuffled_over_frequency": 1.785342942331713,
+  "pass_heuristic": true,
+  "pass_bar": "warm p50 speedup >= 1.15 and frequency contains >= 0.8",
+  "note": "Requires --enable-prefix-caching on the server. Frequency keeps a stable doc order; shuffled breaks the prefix each trial."
+}

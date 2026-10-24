@@ -1,8 +1,18 @@
 # Pre-registration: Live C1 TTFT proof (canonical order → prefix cache)
 
-**Status:** `READY` (GPU, 90 min)  
+**Status:** **PASS** (2026-10-24) — `artifacts/product-order-ttft-2026-10-24/`  
 **Depends on:** Part A shim PASS · Part B quality PASS  
 **Not a PIC reopen.**
+
+## Result
+
+| Mode | warm p50 | contains |
+|---|---:|---:|
+| shuffled | 95.6 ms | 1.0 |
+| frequency | 53.6 ms | 1.0 |
+
+Speedup **1.79×** · `pass_heuristic: true` (Colab A100, vLLM + `--enable-prefix-caching`).
+
 
 ## One question
 

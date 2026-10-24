@@ -54,5 +54,9 @@ Pre-reg: `Docs/pre-reg/pre-reg-product-canonical-order.md`.
 
 ## Live path
 
-See [`live-shim.md`](live-shim.md) — `cw-serve-order` OpenAI-compatible shim with
-rolling `FrequencyPrior`. Quality bar still PARKED (GPU).
+See [`live-shim.md`](live-shim.md) — `cw-serve-order` + rolling `FrequencyPrior`.
+
+Evidence banked:
+- G0 sim prefix-hit lift (`artifacts/product-canonical-order-2026-10-24/`)
+- Needle quality PASS (`artifacts/product-order-quality-2026-10-24/`)
+- **Live TTFT C1 PASS 1.79×** (`artifacts/product-order-ttft-2026-10-24/`)
