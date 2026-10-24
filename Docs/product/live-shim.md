@@ -62,3 +62,13 @@ Pre-reg: `Docs/pre-reg/pre-reg-product-live-shim.md` Part B — **PASS**
 (2026-10-24, frequency contains 1.0 on needle suite). Default
 `CW_CHUNK_ORDER=by_frequency_desc` is OK for this bar; still not a claim about
 arbitrary RAG relevance tradeoffs.
+
+## Live C1 latency proof (required for “product works”)
+
+Sim lift + needle quality are not enough. Measure warm TTFT with prefix caching:
+
+- Pre-reg: `Docs/pre-reg/pre-reg-product-live-ttft.md`
+- Colab: `Docs/product/colab-order-ttft.md`
+- Harness: `scripts/product/eval_order_ttft.py`
+
+Until that PASSes, do **not** claim live C1 amplification — only sim + quality.

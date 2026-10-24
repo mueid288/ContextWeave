@@ -20,7 +20,7 @@ Optional R4 EPIC fidelity GPU only if owner asks.
 ## Resume
 
 1. Stay research-archived — **default**  
-2. Product desk: live shim + order-quality **PASS**; ship/integrate as needed  
+2. Product desk: shim+quality PASS; **next = live TTFT proof** (`cw-order-ttft`)  
 3. New research pre-reg only for a **different** thesis  
 
 Demo: `cw-plan-demo --json`  

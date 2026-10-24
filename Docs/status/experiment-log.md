@@ -3,7 +3,7 @@
 ## Current verdict (update when it changes)
 
 - **Research:** **ARCHIVED** — `Docs/status/closeout-phase0-1.md`
-- **Product desk:** canonical-order A/B **PASS** + live shim **PASS** (Part A+B); default `by_frequency_desc` OK on needle suite
+- **Product desk:** shim+quality PASS; **live TTFT C1 proof READY** (must run to claim real latency win)
 - G0 provisional PASS · G2/H3 FAIL · H4 MFU consistency only · FP conformance only
 - Planner: **C1 else C0** + prefer frequency chunk order upstream
 - Phase 2 / ResolventKV: **closed**; Colab idle
@@ -782,6 +782,16 @@ a real partner trace. Literature vs harness quality gap remains **unresolved**.
 - Artifacts: `artifacts/product-order-quality-2026-10-24/`.
 - Decision: frequency order cleared needle quality bar → default OK for shim.
 - Supersedes: Part B READY / PARKED
+
+## 2026-10-24 — Product live TTFT proof READY (CPU harness)
+
+- **Status:** `VALID` (desk; GPU not started)
+- Missing claim until banked: **real** warm TTFT win with `--enable-prefix-caching`.
+- Pre-reg `Docs/pre-reg/pre-reg-product-live-ttft.md`; harness
+  `scripts/product/eval_order_ttft.py`; Colab `Docs/product/colab-order-ttft.md`.
+- E2E mock-upstream unit test for shim forward path.
+- Next: `cw-order-ttft` ≤90 min → bank → PASS/FAIL.
+- Supersedes: “product complete” without live C1 latency evidence
 
 ## Template for future entries
 
