@@ -76,6 +76,22 @@ def _sort_key(
     raise ValueError(f"unsupported mode for sort: {mode}")
 
 
+def ordered_document_indices(
+    document_ids: list[str],
+    mode: ChunkOrderMode = "natural",
+    *,
+    freq: Mapping[str, int] | None = None,
+) -> list[int]:
+    """Stable permutation of indices for ``document_ids`` under ``mode``."""
+    if mode == "natural":
+        return list(range(len(document_ids)))
+    if mode not in CHUNK_ORDER_MODES:
+        raise ValueError(f"unknown chunk order mode: {mode}")
+    indexed = list(enumerate(document_ids))
+    indexed.sort(key=lambda t: _sort_key(str(t[1]), mode, freq))
+    return [i for i, _ in indexed]
+
+
 def reorder_chunks(
     row: dict[str, Any],
     mode: ChunkOrderMode = "natural",

@@ -1,0 +1,50 @@
+# Live product path: canonical-order shim
+
+**CPU shim** that reorders RAG documents before they hit a chat model, so native
+prefix cache (C1) can hit more often. Optional forward to any OpenAI-compatible
+upstream (vLLM on a GPU host).
+
+Quality vs relevance order is **not** validated yet (see Part B of
+`Docs/pre-reg/pre-reg-product-live-shim.md`).
+
+## One-shot (no server)
+
+```bash
+cat > /tmp/req.json <<'EOF'
+{
+  "model": "mistral",
+  "messages": [{"role": "user", "content": "What is the city?"}],
+  "cw_documents": [
+    {"document_id": "rare", "content": "..."},
+    {"document_id": "hot", "content": "..."}
+  ],
+  "cw_chunk_order": "by_frequency_desc"
+}
+EOF
+cw-serve-order --reorder-json /tmp/req.json --cold-start-n 0
+```
+
+## Server (dry-run or upstream)
+
+```bash
+# Dry-run on laptop (rewrites only; fake completion)
+cw-serve-order --port 8080
+
+# On GPU host, point at vLLM OpenAI server
+CW_UPSTREAM_URL=http://127.0.0.1:8000 cw-serve-order --host 0.0.0.0 --port 8080
+```
+
+Endpoints:
+
+| Path | Role |
+|---|---|
+| `GET /health` | prior stats |
+| `POST /v1/cw/reorder` | rewrite only |
+| `POST /v1/chat/completions` | rewrite + forward (or dry-run) |
+
+Client fields: `cw_documents`, `cw_chunk_order`. Response / rewrite includes `cw_meta`.
+
+## Cold start
+
+Until `CW_COLD_START_N` observations (default 32), `by_frequency_desc` falls back
+to `by_doc_id` natural sort.

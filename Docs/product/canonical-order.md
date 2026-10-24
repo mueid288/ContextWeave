@@ -51,3 +51,8 @@ Primary: `share_prefix_cached` lift and `post_prefix_prefill_tokens` reduction
 absorbing recurrence into C1 can lower `share_recurring_non_prefix`.
 
 Pre-reg: `Docs/pre-reg/pre-reg-product-canonical-order.md`.
+
+## Live path
+
+See [`live-shim.md`](live-shim.md) — `cw-serve-order` OpenAI-compatible shim with
+rolling `FrequencyPrior`. Quality bar still PARKED (GPU).

@@ -3,7 +3,7 @@
 ## Current verdict (update when it changes)
 
 - **Research:** **ARCHIVED** — `Docs/status/closeout-phase0-1.md`
-- **Product desk:** canonical chunk-order **PASS** (`by_frequency_desc` C1 amplification) — `Docs/product/canonical-order.md`
+- **Product desk:** canonical-order A/B **PASS** + live shim Part A **PASS** (`cw-serve-order`); quality Part B PARKED
 - G0 provisional PASS · G2/H3 FAIL · H4 MFU consistency only · FP conformance only
 - Planner: **C1 else C0** + prefer frequency chunk order upstream
 - Phase 2 / ResolventKV: **closed**; Colab idle
@@ -756,6 +756,15 @@ a real partner trace. Literature vs harness quality gap remains **unresolved**.
 - Module: `contextweave.trace_analysis.chunk_order`; CLI `--compare-chunk-order`.
 - Artifacts: `artifacts/product-canonical-order-2026-10-24/`. Quality **unverified**.
 - Supersedes: “R7 not run”; product desk idle
+
+## 2026-10-24 — Product live shim Part A PASS (CPU)
+
+- **Status:** `VALID`
+- Pre-reg `Docs/pre-reg/pre-reg-product-live-shim.md` Part A.
+- `FrequencyPrior` (cold-start → `by_doc_id`); `apply_chat_documents`;
+  stdlib proxy `cw-serve-order` (dry-run or `CW_UPSTREAM_URL` forward).
+- Docs: `Docs/product/live-shim.md`. Part B quality GPU **PARKED**.
+- Supersedes: “library only, no live path”
 
 ## Template for future entries
 

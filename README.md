@@ -50,6 +50,10 @@ cw-plan-demo --json
 cw-analyze-trace --trace benchmarks/workloads/synthetic_rag_default/trace.jsonl \
   --compare-chunk-order --report /tmp/compare_chunk_order.md
 
+# Live shim (reorder RAG docs; optional upstream vLLM)
+cw-serve-order --reorder-json /path/to/req.json --cold-start-n 0
+# cw-serve-order --port 8080   # or CW_UPSTREAM_URL=http://gpu:8000
+
 # Planner v0 (CPU)
 python -c "from contextweave.planner import plan, RequestView; print(plan(RequestView(has_validated_nonprefix_artifacts=True)).to_dict())"
 ```

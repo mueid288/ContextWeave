@@ -20,8 +20,9 @@ Optional R4 EPIC fidelity GPU only if owner asks.
 ## Resume
 
 1. Stay research-archived — **default**  
-2. Product desk: run/extend canonical-order A/B (CPU)  
+2. Product desk: live shim (`cw-serve-order`); quality Part B when GPU available  
 3. New research pre-reg only for a **different** thesis  
 
 Demo: `cw-plan-demo --json`  
-Compare: `cw-analyze-trace --trace … --compare-chunk-order`
+Compare: `cw-analyze-trace --trace … --compare-chunk-order`  
+Live: `Docs/product/live-shim.md`
