@@ -1,6 +1,6 @@
 # Pre-registration: Live canonical-order shim (CPU) + quality bar (GPU later)
 
-**Status:** Part A **PASS** (desk) · Part B **PARKED** (GPU quality)  
+**Status:** Part A **PASS** · Part B **READY** (GPU, 90 min)  
 **Depends on:** product canonical-order PASS  
 **Not a PIC reopen.**
 
@@ -8,7 +8,6 @@
 
 `FrequencyPrior` + `apply_chat_documents` + `cw-serve-order` (--reorder-json /
 stdlib proxy). Unit tests in `tests/unit/test_live_order.py`. No GPU.
-
 
 ## Part A — Live shim (CPU, this lane)
 
@@ -26,17 +25,44 @@ and a dry-run reorder path that needs no GPU?
 - `cw-serve-order --dry-run` (or `/v1/cw/reorder`) returns ordered docs + rewritten messages
 - cpu_gate green; no torch/vllm on laptop
 
-## Part B — Quality bar (GPU, separate session, 90 min cap)
+## Part B — Quality bar (GPU, 90 min cap) — READY
 
 ### One question
 
-On A100 (or available GPU), needle/multi-doc suite: does `by_frequency_desc`
-keep contains/agree within **≥0.90 of relevance-order C0** at the same scale?
+On a GPU OpenAI server, needle suite (city/year/code): does **frequency** order
+keep `contains_rate ≥ 0.80` **and** `≥ 0.90 × relevance` contains_rate?
+
+Harness: `scripts/product/eval_order_quality.py` (HTTP only; laptop may call remote).
 
 | Outcome | Next |
 |---|---|
 | PASS | Default shim to frequency order |
-| FAIL | Keep shim; default `natural` / relevance; document caveat |
-| Block | Close quality as unverified; shim stays opt-in |
+| FAIL | Keep shim; default relevance/`natural`; document caveat |
+| Block / OOM | One retry smaller model; else close quality unverified |
 
-**Part B is PARKED** until Part A ships and owner starts a GPU session.
+### Fixed
+
+| Item | Value |
+|---|---|
+| Session | `cw-order-quality` |
+| Time cap | **90 min** wall |
+| Server | vLLM OpenAI (`--model mistralai/Mistral-7B-Instruct-v0.2` or Qwen3-8B) |
+| Modes | relevance (oracle order) · natural (answer-last) · frequency (warm prior) |
+| Pass | freq ≥ 0.80 and ≥ 0.90 × relevance |
+| Out | `artifacts/product-order-quality-YYYY-MM-DD/` |
+
+### Procedure (GPU host)
+
+```bash
+# Terminal A — vLLM OpenAI server (example)
+export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
+# start your usual vLLM openai server on :8000
+
+# Terminal B — quality A/B (from repo)
+python scripts/product/eval_order_quality.py \
+  --base-url http://127.0.0.1:8000 \
+  --model mistralai/Mistral-7B-Instruct-v0.2 \
+  --out artifacts/product-order-quality-$(date +%Y-%m-%d)/report.json --json
+```
+
+CPU dry-build (no GPU): `python scripts/product/eval_order_quality.py --base-url x --dry-build`

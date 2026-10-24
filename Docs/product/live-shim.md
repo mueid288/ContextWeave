@@ -48,3 +48,15 @@ Client fields: `cw_documents`, `cw_chunk_order`. Response / rewrite includes `cw
 
 Until `CW_COLD_START_N` observations (default 32), `by_frequency_desc` falls back
 to `by_doc_id` natural sort.
+
+## Part B — quality (GPU)
+
+```bash
+python scripts/product/eval_order_quality.py \
+  --base-url http://127.0.0.1:8000 \
+  --model mistralai/Mistral-7B-Instruct-v0.2 \
+  --out artifacts/product-order-quality/report.json --json
+```
+
+Pre-reg: `Docs/pre-reg/pre-reg-product-live-shim.md` Part B. Until PASS, keep
+frequency order **opt-in**.

@@ -20,7 +20,7 @@ Optional R4 EPIC fidelity GPU only if owner asks.
 ## Resume
 
 1. Stay research-archived — **default**  
-2. Product desk: live shim (`cw-serve-order`); quality Part B when GPU available  
+2. Product desk: live shim live; **next = Part B quality GPU** (`eval_order_quality.py`)  
 3. New research pre-reg only for a **different** thesis  
 
 Demo: `cw-plan-demo --json`  

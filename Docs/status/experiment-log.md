@@ -3,7 +3,7 @@
 ## Current verdict (update when it changes)
 
 - **Research:** **ARCHIVED** — `Docs/status/closeout-phase0-1.md`
-- **Product desk:** canonical-order A/B **PASS** + live shim Part A **PASS** (`cw-serve-order`); quality Part B PARKED
+- **Product desk:** canonical-order A/B **PASS** + live shim Part A **PASS**; quality Part B **READY** (GPU)
 - G0 provisional PASS · G2/H3 FAIL · H4 MFU consistency only · FP conformance only
 - Planner: **C1 else C0** + prefer frequency chunk order upstream
 - Phase 2 / ResolventKV: **closed**; Colab idle
@@ -765,6 +765,14 @@ a real partner trace. Literature vs harness quality gap remains **unresolved**.
   stdlib proxy `cw-serve-order` (dry-run or `CW_UPSTREAM_URL` forward).
 - Docs: `Docs/product/live-shim.md`. Part B quality GPU **PARKED**.
 - Supersedes: “library only, no live path”
+
+## 2026-10-24 — Product order-quality harness READY (CPU)
+
+- **Status:** `VALID` (desk; GPU not started)
+- `scripts/product/eval_order_quality.py`: HTTP A/B relevance vs natural vs
+  frequency; `--dry-build` CPU smoke. Pre-reg Part B **READY**.
+- Next: GPU session `cw-order-quality` ≤90 min → bank report → PASS/FAIL.
+- Supersedes: Part B PARKED
 
 ## Template for future entries
 
