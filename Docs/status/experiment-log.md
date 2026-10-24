@@ -4,7 +4,7 @@
 
 - **Research:** **ARCHIVED** — `Docs/status/closeout-phase0-1.md`
 - **Product v0:** **COMPLETE (scoped)** — `Docs/status/closeout-product-v0.md` (sim + quality + live 1.79×)
-- **Own-RAG demo:** CPU shipped (`cw-rag-demo`); GPU bench pre-reg **READY** — `Docs/product/colab-own-rag-demo.md`
+- **Own-RAG demo:** GPU banked **FAIL latency / PASS functional** — `artifacts/own-rag-demo-2026-10-24/` (p50 freq 357 ms vs shuffled 265 ms; gold 8/10)
 - G0 provisional PASS · G2/H3 FAIL · H4 MFU consistency only · FP conformance only
 - Planner: **C1 else C0** + prefer frequency chunk order upstream
 - Phase 2 / ResolventKV: **closed**; Colab idle
@@ -809,6 +809,17 @@ a real partner trace. Literature vs harness quality gap remains **unresolved**.
 - Wrote `Docs/status/closeout-product-v0.md`. Research + product tracks both
   closed for this phase. No further CW lane without real traffic or new thesis.
 - Supersedes: open-ended product desk treadmill
+
+## 2026-10-24 — Own-RAG demo GPU FAIL latency / PASS functional
+
+- **Status:** `VALID` (pre-reg bar missed; numbers banked)
+- Session `cw-own-rag-demo`; vLLM + prefix caching; Mistral-7B; shim **:18080**.
+- Warm p50: shuffled **265 ms** vs frequency **357 ms** → speedup **0.74**;
+  `pass_heuristic` false; `pass_functional` true (8/10 gold).
+- Artifacts: `artifacts/own-rag-demo-2026-10-24/`.
+- Decision: demo ask path works; C1 latency not shown on this multi-question
+  suite (unlike fixed-prompt TTFT 1.79×). **Stop.** No PIC/EPIC reopen.
+- Supersedes: Own-RAG GPU pre-reg READY
 
 ## Template for future entries
 

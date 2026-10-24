@@ -1,0 +1,21 @@
+# cw-rag-demo bench summary (Colab A100, 2026-10-24)
+# base_url=http://127.0.0.1:18080 model=mistralai/Mistral-7B-Instruct-v0.2
+
+pre_reg: Docs/pre-reg/pre-reg-own-rag-demo.md
+model: mistralai/Mistral-7B-Instruct-v0.2
+base_url: http://127.0.0.1:18080
+k: 3
+warm_trials: 8
+n_questions: 10
+modes: {'shuffled': {'warm_p50_ms': 264.93, 'gold_ok_rate': 1.0}, 'frequency': {'warm_p50_ms': 357.44, 'gold_ok_rate': 1.0}}
+speedup_shuffled_over_frequency: 0.7411969691796946
+pass_heuristic: False
+pass_functional: True
+functional_gold_hits: 8
+functional_gold_checked: 10
+pass_bar: warm p50 shuffled/frequency >= 1.15
+prewarm_observations: 40
+
+# optional smoke
+# cw-rag-demo ask "...uptime..." --base-url http://127.0.0.1:18080
+# → Acme targets 99.9% monthly uptime for the Inference API. wall_ms≈491

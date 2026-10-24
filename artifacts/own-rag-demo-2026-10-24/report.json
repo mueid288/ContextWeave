@@ -1,0 +1,53 @@
+{
+  "pre_reg": "Docs/pre-reg/pre-reg-own-rag-demo.md",
+  "model": "mistralai/Mistral-7B-Instruct-v0.2",
+  "base_url": "http://127.0.0.1:18080",
+  "k": 3,
+  "warm_trials": 8,
+  "n_questions": 10,
+  "modes": {
+    "shuffled": {
+      "warm_ms": [
+        259.72270200009007,
+        261.4662460000545,
+        173.08122299982642,
+        414.6725680002419,
+        185.2240329999404,
+        564.7898840002199,
+        280.24623100009194,
+        268.393493000076
+      ],
+      "warm_p50_ms": 264.92986950006525,
+      "warm_mean_ms": 300.94954750006764,
+      "gold_ok_rate": 1.0,
+      "n_gold_checked": 8
+    },
+    "frequency": {
+      "warm_ms": [
+        479.5886389997577,
+        820.2681909997409,
+        168.56570599975385,
+        797.4964180002644,
+        180.51412600016192,
+        467.52911100020356,
+        247.34124199994767,
+        235.22524300005898
+      ],
+      "warm_p50_ms": 357.4351765000756,
+      "warm_mean_ms": 424.5660844999861,
+      "gold_ok_rate": 1.0,
+      "n_gold_checked": 8
+    }
+  },
+  "speedup_shuffled_over_frequency": 0.7411969691796946,
+  "pass_heuristic": false,
+  "pass_functional": true,
+  "functional_gold_hits": 8,
+  "functional_gold_checked": 10,
+  "pass_bar": "warm p50 shuffled/frequency >= 1.15",
+  "prewarm_observations": 40,
+  "note": "Demo corpus ≠ partner traffic. Requires vLLM --enable-prefix-caching and cw-serve-order upstream. Banked from Colab cw-own-rag-demo; latency FAIL (frequency slower than shuffled on this question suite). Fixed-prompt product TTFT suite remains 1.79× PASS — different protocol (shared docs across trials).",
+  "session": "cw-own-rag-demo",
+  "shim_port": 18080,
+  "corpus": "benchmarks/corpora/sample_docs"
+}

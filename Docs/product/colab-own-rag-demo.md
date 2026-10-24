@@ -114,10 +114,11 @@ cw-rag-demo bench \
 Pass: `speedup_shuffled_over_frequency >= 1.15` (or bank FAIL with numbers).  
 Functional: ≥5 gold substring hits on the question suite.
 
-Optional smoke:
+Optional smoke (same port as the shim — default CLI is `:8080`, which is wrong on Colab):
 
 ```bash
-cw-rag-demo ask "What monthly uptime does Acme target for the Inference API?"
+cw-rag-demo ask "What monthly uptime does Acme target for the Inference API?" \
+  --base-url http://127.0.0.1:18080
 ```
 
 ## Bank + stop
