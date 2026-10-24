@@ -51,18 +51,15 @@ Harness: `scripts/product/eval_order_quality.py` (HTTP only; laptop may call rem
 | Pass | freq ≥ 0.80 and ≥ 0.90 × relevance |
 | Out | `artifacts/product-order-quality-YYYY-MM-DD/` |
 
-### Procedure (GPU host)
+### Procedure (Colab)
+
+Full copy-paste: **`Docs/product/colab-order-quality.md`**
 
 ```bash
-# Terminal A — vLLM OpenAI server (example)
-export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1
-# start your usual vLLM openai server on :8000
-
-# Terminal B — quality A/B (from repo)
-python scripts/product/eval_order_quality.py \
-  --base-url http://127.0.0.1:8000 \
-  --model mistralai/Mistral-7B-Instruct-v0.2 \
-  --out artifacts/product-order-quality-$(date +%Y-%m-%d)/report.json --json
+colab new -s cw-order-quality --gpu A100
+# then cells in Docs/product/colab-order-quality.md
+# bank artifacts/product-order-quality-YYYY-MM-DD/ before:
+colab stop -s cw-order-quality
 ```
 
 CPU dry-build (no GPU): `python scripts/product/eval_order_quality.py --base-url x --dry-build`
