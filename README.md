@@ -3,12 +3,12 @@
 Research harness for a **validity-checked planner** over modular KV-cache reuse
 (prefix, existing PIC/repair methods, or full prefill) for self-hosted LLM inference.
 
-**Status (2026-10-24):** research **ARCHIVED**; product =
-[canonical chunk order](Docs/product/canonical-order.md) +
-[live shim](Docs/product/live-shim.md) — sim lift, quality PASS, **live TTFT 1.79×**.  
-Closeout: [Docs/status/closeout-phase0-1.md](Docs/status/closeout-phase0-1.md) ·
-[pause](Docs/status/pause.md) · [negative results](Docs/Reports/phase01-negative-results.md).  
-Planner: **C1 else C0**; prefer `by_frequency_desc` before assemble.
+**Status (2026-10-24):** research **ARCHIVED**; product v0 **COMPLETE (scoped)** —
+[closeout](Docs/status/closeout-product-v0.md) · [live shim](Docs/product/live-shim.md)
+(sim + quality + **live TTFT 1.79×**).  
+[pause](Docs/status/pause.md) · [research closeout](Docs/status/closeout-phase0-1.md).  
+Planner: **C1 else C0**; prefer `by_frequency_desc` / `cw-serve-order`.
+
 
 **Laptop policy:** never download or run models on this machine. See
 [Docs/runbooks/local-safety.md](Docs/runbooks/local-safety.md). Baseline scripts refuse

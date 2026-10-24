@@ -1,28 +1,25 @@
-# Project pause (archive + product desk)
+# Project status (archive)
 
 **Effective:** 2026-10-24  
-**Research:** **PAUSED / ARCHIVED** — `Docs/status/closeout-phase0-1.md`  
-**Product desk (CPU):** canonical chunk-order C1 amplification —
-`Docs/product/canonical-order.md`  
-**Negative-results report:** `Docs/Reports/phase01-negative-results.md`
+
+| Track | State |
+|---|---|
+| Research (Phase 0/1) | **ARCHIVED** — `Docs/status/closeout-phase0-1.md` |
+| Product v0 (C1 order) | **COMPLETE (scoped)** — `Docs/status/closeout-product-v0.md` |
 
 ## Policy (shipped)
 
-**C1** if exact prefix, else **C0**. Prefer **`by_frequency_desc`** chunk order
-before assembly to raise native prefix hits. Non-prefix PIC only with provenance
-+ build-hash + quality clear (research path closed). C4 refused.
+**C1** if exact prefix, else **C0**. Prefer **`by_frequency_desc`** via
+`cw-serve-order` / `apply_chat_documents` before assemble. Non-prefix PIC path
+stays refused without provenance + quality clear (research closed).
 
-## Frozen (research)
+## Frozen
 
-G2 re-attack, H3 rematches, ResolventKV, FP security red-team without a new thesis.
-Optional R4 EPIC fidelity GPU only if owner asks.
+New PIC/H3/EPIC/ResolventKV lanes. Product hardening only with a real integratee.
 
 ## Resume
 
-1. Stay research-archived — **default**  
-2. Product desk: **complete for scoped claim** (sim + quality + live TTFT 1.79×)  
-3. New research pre-reg only for a **different** thesis  
+1. **Default:** leave the repo; use the shim when you have an upstream  
+2. New research only with a different pre-registered thesis  
 
-Demo: `cw-plan-demo --json`  
-Compare: `cw-analyze-trace --trace … --compare-chunk-order`  
-Live: `Docs/product/live-shim.md`
+Live: `Docs/product/live-shim.md` · Demo: `cw-plan-demo --json`

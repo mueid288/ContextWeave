@@ -3,7 +3,7 @@
 ## Current verdict (update when it changes)
 
 - **Research:** **ARCHIVED** — `Docs/status/closeout-phase0-1.md`
-- **Product desk:** shim + quality + **live C1 TTFT PASS (1.79×)** — intended effect measured
+- **Product v0:** **COMPLETE (scoped)** — `Docs/status/closeout-product-v0.md` (sim + quality + live 1.79×)
 - G0 provisional PASS · G2/H3 FAIL · H4 MFU consistency only · FP conformance only
 - Planner: **C1 else C0** + prefer frequency chunk order upstream
 - Phase 2 / ResolventKV: **closed**; Colab idle
@@ -801,6 +801,13 @@ a real partner trace. Literature vs harness quality gap remains **unresolved**.
 - Artifacts: `artifacts/product-order-ttft-2026-10-24/`.
 - Decision: intended product effect (stable order → native C1) **measured live**.
 - Supersedes: TTFT READY / “sim only”
+
+## 2026-10-24 — Product v0 closeout
+
+- **Status:** `VALID` (project decision)
+- Wrote `Docs/status/closeout-product-v0.md`. Research + product tracks both
+  closed for this phase. No further CW lane without real traffic or new thesis.
+- Supersedes: open-ended product desk treadmill
 
 ## Template for future entries
 
