@@ -4,7 +4,7 @@
 |---|---|
 | [`status/`](status/) | Current project state, experiment log, exit/thesis memos |
 | [`core/`](core/) | Architecture, assumptions, planner, fingerprints, cost, prior-art |
-| [`prd/`](prd/) | Research charter + amendments |
+| [`prd/`](prd/) | Research charter + amendments; [`own_rag_demo_prd.md`](prd/own_rag_demo_prd.md) (next demo handoff) |
 | [`gates/g0/`](gates/g0/) | G0 procedures (corpus replay) |
 | [`gates/g1/`](gates/g1/) | G1 Colab / CacheBlend / EPIC procedures |
 | [`pre-reg/`](pre-reg/) | One-question GPU pre-registrations |
