@@ -10,12 +10,15 @@
 | [`pre-reg/`](pre-reg/) | One-question GPU pre-registrations |
 | [`runbooks/`](runbooks/) | GPU rental, pins, safety, partner ask |
 | [`results/`](results/) | Provisional G0 write-ups |
+| [`Reports/`](Reports/) | Scoped Phase 0/1 negative-results writeup |
 | [`Reviews/`](Reviews/) | External review notes + dispositions |
 | [`Research/`](Research/) | ResolventKV brief + adoption map |
 | [`plans/`](plans/) | Implementation plans |
 | [`archive/`](archive/) | Phase 0 kickoff notes |
 
 **Start here:** [`status/closeout-phase0-1.md`](status/closeout-phase0-1.md) →
-[`status/pause.md`](status/pause.md) → [`status/experiment-log.md`](status/experiment-log.md).
+[`status/pause.md`](status/pause.md) →
+[`Reports/phase01-negative-results.md`](Reports/phase01-negative-results.md) →
+[`status/experiment-log.md`](status/experiment-log.md).
 
 Shipped policy demo (CPU): `cw-plan-demo --json`

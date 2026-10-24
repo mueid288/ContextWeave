@@ -1,8 +1,8 @@
 # Pre-registration: Fingerprint / provenance gate in planner v0
 
-**Status:** **PASS** (2026-10-24) — desk unit tests  
+**Status:** **PASS — implementation conformance (self-authored)** (2026-10-24) — desk unit tests  
 **Depends on:** FR-13 trust module + planner v0  
-**Not G2 / H3 / H4. No new GPU.**
+**Not security evidence. Not G2 / H3 / H4. No new GPU.**
 
 ## Result
 

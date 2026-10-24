@@ -1,0 +1,53 @@
+{
+  "pre_reg": "Docs/pre-reg/pre-reg-h4-mfu.md",
+  "supersedes": "Docs/pre-reg/pre-reg-h4-cost-model.md",
+  "peak_tflops_bf16": 312.0,
+  "mfu_prior": [
+    0.4,
+    0.65
+  ],
+  "effective_tflops_band": [
+    124.80000000000001,
+    202.8
+  ],
+  "suites": [
+    {
+      "suite": "phase1_oracle",
+      "n_c0": 20,
+      "n_tokens": 12000,
+      "measured_mean_c0_s": 1.1475910527999929,
+      "implied_effective_tflops": 179.28750446249668,
+      "implied_mfu": 0.5746394373797971,
+      "in_mfu_prior": true
+    },
+    {
+      "suite": "h3_confirm_seed99",
+      "n_c0": 12,
+      "n_tokens": 12000,
+      "measured_mean_c0_s": 1.129060535000022,
+      "implied_effective_tflops": 182.230030739668,
+      "implied_mfu": 0.5840706113450898,
+      "in_mfu_prior": true
+    },
+    {
+      "suite": "h3_keydev_seed99",
+      "n_c0": 12,
+      "n_tokens": 12000,
+      "measured_mean_c0_s": 1.164955206416683,
+      "implied_effective_tflops": 176.61514783290943,
+      "implied_mfu": 0.5660741917721456,
+      "in_mfu_prior": true
+    },
+    {
+      "suite": "h3_keydev_seed100",
+      "n_c0": 12,
+      "n_tokens": 12000,
+      "measured_mean_c0_s": 1.1631500547499816,
+      "implied_effective_tflops": 176.88924585420372,
+      "implied_mfu": 0.5669527110711657,
+      "in_mfu_prior": true
+    }
+  ],
+  "pass_heuristic": true,
+  "note": "Pass = implied effective TFLOP/s from banked C0 lies in peak\u00d7MFU prior. Old H4 at 450 TFLOP/s was MISSPECIFIED (above peak)."
+}

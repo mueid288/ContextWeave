@@ -1,6 +1,7 @@
 # Pre-registration: EPIC multi-fact quality @ 12k
 
-**Status:** **PASS** (2026-10-23) — banked `artifacts/g1-epic-quality-2026-10-23/`.  
+**Status:** **PASS (order-blind)** — banked `artifacts/g1-epic-quality-2026-10-23/`.  
+**Superseded for non-prefix quality:** Phase 1 oracle (`pre-reg-phase1-oracle.md`) — C3 mean_q **0.70** under chunk-order permutation.  
 **Date written:** 2026-10-23 · **Closed:** 2026-10-23  
 **Depends on:** EPIC@12k latency PASS (`artifacts/g1-epic-12k-2026-10-23/`)  
 **Not a CacheBlend reopen. Not Phase 1.**
@@ -13,7 +14,8 @@
 | year | 2.19× | full+kvlink |
 | code | 1.98× | full+kvlink |
 
-`contains_rate_*` = 1.0; all cases `latency_ok`; `pass_heuristic: true`.
+`contains_rate_*` = 1.0; all cases `latency_ok`; `pass_heuristic: true`.  
+**Caveat:** fixed chunk order (does not permute); not a PIC quality gate for reorder.
 
 ## One question
 

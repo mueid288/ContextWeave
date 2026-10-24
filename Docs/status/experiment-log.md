@@ -3,9 +3,30 @@
 ## Current verdict (update when it changes)
 
 - **Project state:** **PAUSED / ARCHIVED** — see `Docs/status/closeout-phase0-1.md`
-- G0 PASS · G1 EPIC latency PASS · G2/H3/H4 FAIL · FP gate/poison/fault PASS
-- Planner: **C1 else C0**; non-prefix needs provenance + build-hash + quality clear
+- G0 provisional PASS · G1 EPIC latency PASS · G2/H3 FAIL · H4 **MISSPECIFIED→MFU PASS** · FP suites = **implementation conformance (self-authored)**
+- Planner: **C1 else C0** (≈ default prefix-or-prefill; refusal hooks for disabled C3)
 - Phase 2 / ResolventKV: **closed**; Colab idle
+- Scoped writeup: `Docs/Reports/phase01-negative-results.md`
+
+## Final verdict (scoped claims)
+
+On A100-40GB, **Qwen3-8B**, vLLM 0.18 + lmcache 0.4.2 in-process blend (~12k,
+chunk_sep, **4 shims**): reorder reuse engaged partially (BAC **7705**/11520
+cached tokens, CBA ~0); mean TTFT ~**1.10×** vs native miss; quality **0.67** on
+the needle suite (Gate D bac). Report negative **for this config only** — not
+“CacheBlend fails.”
+
+On **Mistral-7B** with EPIC LegoLink-8 **Python overlay** on vLLM 0.7.0 @~12k:
+TTFT **2–3.9×** vs full prefill; C3 mean quality **0.70** (N=20) and **0.50**
+(N=12) on synthetic needles **under reorder**. Order-blind multi-fact quality
+PASS is **superseded** by the oracle for non-prefix quality claims.
+
+Neither order nor (order, fact-type) predictors transferred across filler seeds.
+H4 at 450 TFLOP/s was **misspecified**; measured C0 (~177–182 TFLOP/s) lands in
+peak **312 × MFU 40–65%**. FP poison/fault/planner gates show coded refusal
+behavior only — **not** security validation. G0 never saw a real partner trace.
+Harness discrepancy vs published PIC quality framing remains **unresolved**
+(optional R4 only).
 
 ## 2026-10-11 — Phase 0 harness bootstrap (CPU)
 
@@ -455,6 +476,12 @@
 ## 2026-10-23 — G1 CacheBlend closeout (no recompute sweep)
 
 - **Status:** `VALID` (project decision)
+- **Scope:** this pin only (vLLM 0.18 + lmcache 0.4.2 in-process + shims listed in
+  DIAG #2; Qwen3-8B; ~12k chunk_sep). Do **not** generalize to “CacheBlend fails.”
+- **N:** Gate D bac quality **0.67** (small needle suite; log does not expand case
+  count beyond Gate D artifacts); engagement N=10 TTFT; recompute ratio **not** swept
+- **Shims:** attention import, flashinfer sparse, `ConstantList` lookup,
+  `get_input_embeddings` alias (`a2d90a9`)
 - Applied §6: quality fails when reuse engaged → real quality negative for this
   config; skip optional recompute-ratio curve; do not open ResolventKV / EPIC /
   further pin fishing for G1
@@ -535,13 +562,15 @@
 
 ## 2026-10-23 — EPIC multi-fact quality PASS (Colab A100)
 
-- **Status:** `VALID`
+- **Status:** `VALID` — **order-blind; superseded by Phase 1 oracle** for non-prefix quality
 - Session `cw-epic-quality`; `--suite quality` @ ~12k tokens; Mistral-7B-Instruct-v0.2.
+- **N:** 3 fact cases (city/year/code); fixed chunk order (no permutations); n≥5/case
 - city **3.86×**, year **2.19×**, code **1.98×**; contains_rate full/kvlink **1.0/1.0**;
   all cases latency_ok; `pass_heuristic: true`.
 - Artifacts: `artifacts/g1-epic-quality-2026-10-23/`.
 - Planner C3 notes + conservative ttft (1/1.98) updated. Phase 1 still not opened.
 - Supersedes: quality pre-reg READY; single-gold-only C3 caveat
+- Superseded by: Phase 1 oracle C3 mean_q **0.70** under order permutation (N=20)
 
 ## 2026-10-23 — Phase 1 GO (scoped) + oracle CPU harness
 
@@ -647,16 +676,29 @@
 
 ## 2026-10-24 — H4 cost model FAIL (CPU vs banked)
 
-- **Status:** `VALID`
-- Pre-reg `Docs/pre-reg/pre-reg-h4-cost-model.md`. Default 450 TFLOP/s pred
-  ~457 ms vs C0 ~1.13–1.16 s → rel err **~0.60** on 4 suites; `pass_heuristic:
-  false`. Calibrated ~182 TFLOP/s → seed100 ~2.9% (secondary only).
-- Artifacts: `artifacts/h4-cost-model-2026-10-24/`. **PAUSED.** No partner track.
+- **Status:** `MISSPECIFIED, superseded`
+- Pre-reg `Docs/pre-reg/pre-reg-h4-cost-model.md`. Default **450** TFLOP/s exceeds
+  A100 dense bf16 peak (~312); large error was guaranteed. Pred ~457 ms vs C0
+  ~1.13–1.16 s → rel err **~0.60** on 4 suites. Calibrated ~182 TFLOP/s → seed100
+  ~2.9% (secondary only; same hardware family).
+- Artifacts: `artifacts/h4-cost-model-2026-10-24/`.
 - Supersedes: “H4 untested” in cost_model_8b.md
+- Superseded by: H4 MFU-prior entry below
+
+## 2026-10-24 — H4 MFU-prior PASS (CPU vs banked)
+
+- **Status:** `VALID`
+- Pre-reg `Docs/pre-reg/pre-reg-h4-mfu.md`. Peak **312** TFLOP/s; MFU prior
+  **40–65%** → band **[124.8, 202.8]**. Implied effective TFLOP/s ≈ **177–182**
+  (MFU ~57–58%) on oracle + confirm99 + keydev99/100; all in-band;
+  `pass_heuristic: true`.
+- N: 4 suites × banked C0 means (n_c0 12–20). No new GPU.
+- Artifacts: `artifacts/h4-mfu-2026-10-24/`.
+- Supersedes: misspecified H4 @450
 
 ## 2026-10-24 — FP planner provenance gate PASS (CPU)
 
-- **Status:** `VALID`
+- **Status:** `VALID` — **implementation conformance (self-authored)**; not security evidence
 - Pre-reg `Docs/pre-reg/pre-reg-fp-planner-gate.md`. Non-prefix C3/C4 require
   FR-13 `assert_reuse_allowed` before quality clears. Tests:
   `tests/unit/test_planner_provenance_gate.py`. **PAUSED.**
@@ -664,7 +706,7 @@
 
 ## 2026-10-24 — FP build-context poison suite PASS (CPU)
 
-- **Status:** `VALID`
+- **Status:** `VALID` — **implementation conformance (self-authored)**; not security evidence
 - Pre-reg `Docs/pre-reg/pre-reg-fp-poison-suite.md`. 8/8 attacker-prefix cases
   refused (fingerprint + planner). `request_build_context_hash` wired.
 - Artifacts: `artifacts/fp-poison-2026-10-24/`. **PAUSED.**
@@ -672,7 +714,7 @@
 
 ## 2026-10-24 — FR fault-injection suite PASS + Phase0/1 closeout
 
-- **Status:** `VALID`
+- **Status:** `VALID` — **implementation conformance (self-authored)**; not security evidence
 - Pre-reg `Docs/pre-reg/pre-reg-fp-fault-suite.md`: 7/7 faults refused; control C3 ok.
 - Artifacts: `artifacts/fp-fault-2026-10-24/`. Closeout:
   `Docs/status/closeout-phase0-1.md`. **PAUSED / ARCHIVED.**
@@ -692,16 +734,26 @@
   `v0.1.0-phase01-archive` points at Phase 0/1 closeout. Not a gate reopen.
 - Supersedes: none
 
+## 2026-10-24 — Post-archive review gap fixes (CPU)
+
+- **Status:** `VALID` (desk hygiene; not a gate reopen)
+- Applied review R1–R3 + R5: relabeled H4/FP/EPIC quality/CacheBlend; H4 MFU
+  redo PASS; log template expanded; `Docs/Reports/phase01-negative-results.md`.
+- Stopping rule (R6) unchanged. R4 GPU fidelity and R7 canonical-order **not** run.
+- Supersedes: overstated PASS/FAIL wording in Current verdict
+
 ## Template for future entries
 
 ```
 ## YYYY-MM-DD — <title>
-- Status: VALID | VOIDED | CONFOUNDED | INCONCLUSIVE
+- Status: VALID | VOIDED | CONFOUNDED | INCONCLUSIVE | MISSPECIFIED
 - Hypothesis / gate:
-- Environment (CPU/GPU, drivers, pins):
+- Environment (CPU/GPU, drivers, pins, shims/patches applied):
+- N cases / seeds / chunk orders covered:
 - Engagement evidence: retrieved/cached tokens on reorder (or none)
 - Command:
 - Result:
+- Artifacts collected before stop: yes/no (path)
 - Decision:
 - Supersedes: <entry or none>
 ```

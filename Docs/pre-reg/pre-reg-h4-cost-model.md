@@ -1,7 +1,11 @@
 # Pre-registration: H4 cost model vs measured TTFT
 
-**Status:** **FAIL** (2026-10-24) — `artifacts/h4-cost-model-2026-10-24/`  
+**Status:** **MISSPECIFIED, superseded** (2026-10-24) — `artifacts/h4-cost-model-2026-10-24/`  
+**Superseded by:** `Docs/pre-reg/pre-reg-h4-mfu.md` (peak 312 × MFU 40–65%)  
 **Not a G2 redo. Not H3.**
+
+Default **450** TFLOP/s exceeds A100 dense bf16 peak (~312). Large absolute error
+was guaranteed before data collection; do not cite as “cost model fails.”
 
 ## Result (primary)
 

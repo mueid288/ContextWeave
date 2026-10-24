@@ -5,8 +5,10 @@ Research harness for a **validity-checked planner** over modular KV-cache reuse
 
 **Status (2026-10-24): PAUSED / ARCHIVED** —
 [Docs/status/closeout-phase0-1.md](Docs/status/closeout-phase0-1.md),
-[Docs/status/pause.md](Docs/status/pause.md).  
-G0 PASS · G2/H3/H4 FAIL · FP validity suites PASS. Planner: **C1 else C0**.
+[Docs/status/pause.md](Docs/status/pause.md),
+[Docs/Reports/phase01-negative-results.md](Docs/Reports/phase01-negative-results.md).  
+G0 provisional PASS · G2/H3 FAIL · H4 misspecified→MFU PASS · FP = conformance only.
+Planner: **C1 else C0**.
 
 **Laptop policy:** never download or run models on this machine. See
 [Docs/runbooks/local-safety.md](Docs/runbooks/local-safety.md). Baseline scripts refuse
