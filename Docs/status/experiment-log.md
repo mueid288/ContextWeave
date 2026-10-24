@@ -678,6 +678,13 @@
   `Docs/status/closeout-phase0-1.md`. **PAUSED / ARCHIVED.**
 - Supersedes: open-ended FP micro-suite treadmill as default next
 
+## 2026-10-24 — Shipped policy demo CLI (desk)
+
+- **Status:** `VALID`
+- `cw-plan-demo` / `contextweave.cli.plan_demo`: prints C1/C0/refuse-C3 scenarios
+  for the archived policy. Not a gate reopen.
+- Supersedes: none
+
 ## Template for future entries
 
 ```

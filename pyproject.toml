@@ -29,6 +29,7 @@ cw-import-trace = "contextweave.cli.import_trace:main"
 cw-cost-model = "contextweave.cli.cost_model:main"
 cw-build-corpus-trace = "contextweave.cli.build_corpus_trace:main"
 cw-fingerprint-example = "contextweave.cli.fingerprint_example:main"
+cw-plan-demo = "contextweave.cli.plan_demo:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

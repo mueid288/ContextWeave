@@ -18,3 +18,5 @@ without a new thesis.
 
 1. Stay archived — **default**  
 2. New pre-reg only for a **different** thesis  
+
+Demo (not a research reopen): `cw-plan-demo --json`

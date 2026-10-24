@@ -15,5 +15,7 @@
 | [`plans/`](plans/) | Implementation plans |
 | [`archive/`](archive/) | Phase 0 kickoff notes |
 
-**Start here:** [`status/pause.md`](status/pause.md) →
-[`status/closeout-g2.md`](status/closeout-g2.md) → [`status/experiment-log.md`](status/experiment-log.md).
+**Start here:** [`status/closeout-phase0-1.md`](status/closeout-phase0-1.md) →
+[`status/pause.md`](status/pause.md) → [`status/experiment-log.md`](status/experiment-log.md).
+
+Shipped policy demo (CPU): `cw-plan-demo --json`

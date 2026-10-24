@@ -42,6 +42,9 @@ python scripts/workloads/build_corpus_trace.py --analyze
 # Example FR-01 fingerprint from a model YAML (metadata only)
 python scripts/workloads/fingerprint_example.py --model-config configs/models/qwen3_8b.yaml
 
+# Shipped policy demo (CPU)
+cw-plan-demo --json
+
 # Planner v0 (CPU)
 python -c "from contextweave.planner import plan, RequestView; print(plan(RequestView(has_validated_nonprefix_artifacts=True)).to_dict())"
 ```
@@ -51,7 +54,7 @@ python -c "from contextweave.planner import plan, RequestView; print(plan(Reques
 | Path | Purpose |
 |---|---|
 | [Docs/README.md](Docs/README.md) | Doc folder index |
-| [Docs/status/phase1-go-memo.md](Docs/status/phase1-go-memo.md) | **Phase 1 go** (scoped) |
+| [Docs/status/closeout-phase0-1.md](Docs/status/closeout-phase0-1.md) | **Phase 0/1 closeout** |
 | [Docs/status/pause.md](Docs/status/pause.md) | Current project state |
 | [Docs/status/experiment-log.md](Docs/status/experiment-log.md) | Dated experiment notes |
 | [Docs/status/phase0-exit-decision.md](Docs/status/phase0-exit-decision.md) | Phase 0 pivot (no Phase 1) |
