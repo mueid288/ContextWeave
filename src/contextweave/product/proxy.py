@@ -16,11 +16,17 @@ from urllib.request import Request, urlopen
 from contextweave.product.frequency import FrequencyPrior
 from contextweave.product.live_order import apply_chat_documents
 
-_PRIOR = FrequencyPrior(
-    cold_start_n=int(os.environ.get("CW_COLD_START_N", "32")),
-)
-_UPSTREAM = os.environ.get("CW_UPSTREAM_URL", "").rstrip("/")
-_DEFAULT_MODE = os.environ.get("CW_CHUNK_ORDER", "by_frequency_desc")
+def _reload_runtime_from_env() -> None:
+    """Refresh process globals from env (call after CLI sets CW_*)."""
+    global _PRIOR, _UPSTREAM, _DEFAULT_MODE
+    _PRIOR = FrequencyPrior(
+        cold_start_n=int(os.environ.get("CW_COLD_START_N", "32")),
+    )
+    _UPSTREAM = os.environ.get("CW_UPSTREAM_URL", "").rstrip("/")
+    _DEFAULT_MODE = os.environ.get("CW_CHUNK_ORDER", "by_frequency_desc")
+
+
+_reload_runtime_from_env()
 
 
 def _read_json(handler: BaseHTTPRequestHandler) -> dict[str, Any]:
@@ -153,10 +159,19 @@ class OrderShimHandler(BaseHTTPRequestHandler):
 
 
 def serve(host: str = "127.0.0.1", port: int = 8080) -> None:
-    httpd = ThreadingHTTPServer((host, port), OrderShimHandler)
+    _reload_runtime_from_env()
+    try:
+        httpd = ThreadingHTTPServer((host, port), OrderShimHandler)
+    except OSError as e:
+        raise SystemExit(
+            f"cw-serve-order failed to bind {host}:{port}: {e}\n"
+            "Is another process using the port? "
+            "Try: pkill -f cw-serve-order; ss -ltnp | grep 8080"
+        ) from e
     print(
         f"cw-serve-order listening on http://{host}:{port} "
-        f"upstream={_UPSTREAM or '(dry-run)'} mode={_DEFAULT_MODE}",
+        f"upstream={_UPSTREAM or '(dry-run)'} mode={_DEFAULT_MODE} "
+        f"cold_start_n={_PRIOR.cold_start_n}",
         flush=True,
     )
     httpd.serve_forever()

@@ -78,10 +78,17 @@ OOM → `--max-model-len 4096`, smaller `-k`, or shorter `--chunk-chars`.
 ```bash
 source /content/cw-venv/bin/activate
 pkill -f 'cw-serve-order|serve_order' || true
-CW_UPSTREAM_URL=http://127.0.0.1:8000 CW_COLD_START_N=0 \
-  nohup cw-serve-order --host 127.0.0.1 --port 8080 \
+sleep 1
+
+# Prefer CLI flags (env alone can race with import-time config)
+nohup cw-serve-order \
+  --host 127.0.0.1 --port 8080 \
+  --upstream http://127.0.0.1:8000 \
+  --cold-start-n 0 \
   > /tmp/cw-serve-order.log 2>&1 &
-curl -sf http://127.0.0.1:8080/health
+sleep 2
+cat /tmp/cw-serve-order.log
+curl -sf http://127.0.0.1:8080/health || (echo FAIL; tail -n 40 /tmp/cw-serve-order.log; exit 1)
 ```
 
 ## Index + bench

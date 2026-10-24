@@ -72,9 +72,14 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(out, indent=2))
         return 0
 
-    from contextweave.product.proxy import serve
+    from contextweave.product import proxy as proxy_mod
 
-    serve(host=args.host, port=args.port)
+    proxy_mod._reload_runtime_from_env()
+    try:
+        proxy_mod.serve(host=args.host, port=args.port)
+    except KeyboardInterrupt:
+        print("cw-serve-order stopped", flush=True)
+        return 0
     return 0
 
 
