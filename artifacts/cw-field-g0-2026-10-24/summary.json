@@ -1,0 +1,35 @@
+{
+  "ok": false,
+  "base_url": "http://127.0.0.1:8787",
+  "n_traces": 30,
+  "n_users": 5,
+  "health": {
+    "ok": true,
+    "db_ok": true
+  },
+  "g0": {
+    "gate": "FAIL",
+    "passed": false,
+    "requests": 30,
+    "rationale": "G0 FAIL: median chunk 250 < 512. Marked provisional.",
+    "detail": {
+      "passed": false,
+      "provisional": true,
+      "share_recurring_non_prefix": 0.31221229352829677,
+      "median_chunk_length": 250.0,
+      "threshold_share": 0.3,
+      "threshold_median_chunk": 512.0,
+      "rationale": "G0 FAIL: median chunk 250 < 512. Marked provisional.",
+      "working_set_hit_share": 0.31221229352829677,
+      "working_set_budget_gb": 128.0,
+      "require_working_set": true
+    }
+  },
+  "paths": {
+    "raw": "artifacts/cw-field-g0-2026-10-24/partner_v1.jsonl",
+    "imported": "artifacts/cw-field-g0-2026-10-24/trace.jsonl",
+    "report": "artifacts/cw-field-g0-2026-10-24/g0_report.md",
+    "metrics": "artifacts/cw-field-g0-2026-10-24/g0_metrics.json"
+  },
+  "note": "ok mirrors Gate G0. Provisional synthetic tokens from partner_v1. Raise --min-traces/--min-users for real multi-user evidence."
+}

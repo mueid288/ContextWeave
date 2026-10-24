@@ -1,0 +1,12 @@
+{
+  "source": "/home/harborsoft/Mueid/ContextWeave/artifacts/cw-field-g0-2026-10-24/partner_v1.jsonl",
+  "output": "/home/harborsoft/Mueid/ContextWeave/artifacts/cw-field-g0-2026-10-24/trace.jsonl",
+  "format": "partner_v1",
+  "rows_in": 30,
+  "rows_out": 30,
+  "synthetic_token_rows": 30,
+  "text_approx_rows": 0,
+  "errors": [],
+  "provisional_g0": true,
+  "notes": "CPU-only import. No model tokenization."
+}
