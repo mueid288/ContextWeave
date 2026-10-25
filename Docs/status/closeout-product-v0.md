@@ -37,6 +37,23 @@ vs per-request shuffle with prefix caching; needle answers preserved in the qual
 **Cannot claim:** production multi-tenant product; arbitrary RAG relevance parity;
 partner-trace G0; PIC/C3 wins.
 
+## Field follow-up (2026-10-25) — closed
+
+Real traffic via cw-field + provisional field G0 PASS
+(`artifacts/cw-field-g0-2026-10-25-field`). Layer 1 order A/B on that trace:
+`by_frequency_desc` vs `natural` → **+5.64 pp** `share_prefix_cached`, **8.2%**
+post-prefix cut (`artifacts/product-field-order-ab-2026-10-25/`). Clears desk ≥2 pp
+bar; does **not** clear pre-reg ≥10 pp bar. **Layer 2 TTFT skipped.**
+
+**Decision:** keep frequency order as cw-field default (already shipped). No live
+field TTFT claim. No further product lane required for this question.
+
+**Can claim (add):** on banked field retrieves (N=27), frequency order lifts
+simulated prefix-cache share ~5.6 pp vs natural.
+
+**Still cannot claim:** field warm TTFT win; final (non-provisional) partner G0.
+
 ## Default next
 
-**Stop.** Integrate only when you have real traffic. No new CW research lane.
+**Stop.** Frequency default on cw-field; CW product v0 evidence set is closed for
+order-on-field until someone explicitly opens Layer 2 GPU.

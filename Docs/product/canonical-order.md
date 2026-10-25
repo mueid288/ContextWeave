@@ -60,3 +60,7 @@ Evidence banked:
 - G0 sim prefix-hit lift (`artifacts/product-canonical-order-2026-10-24/`)
 - Needle quality PASS (`artifacts/product-order-quality-2026-10-24/`)
 - **Live TTFT C1 PASS 1.79×** (`artifacts/product-order-ttft-2026-10-24/`)
+- Field retrieve A/B (CPU): **+5.64 pp** prefix share vs natural
+  (`artifacts/product-field-order-ab-2026-10-25/`) — desk PASS, pre-reg FAIL;
+  Layer 2 TTFT not run. Plan: [`field-order-ab.md`](field-order-ab.md).
+- cw-field keeps `by_frequency_desc` as default (soft integrate).

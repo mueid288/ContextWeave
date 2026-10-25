@@ -29,3 +29,10 @@ Synthetic partner_v1 tokens → not final.
 ## Keep
 
 Prefer `cw-field-g0-2026-10-25-field` as the cited bank. Older FAIL / smoke runs are ladder history only.
+
+## Product follow-up (closed)
+
+Field order A/B Layer 1: `artifacts/product-field-order-ab-2026-10-25/` — frequency
+**+5.64 pp** prefix share vs natural (desk PASS, pre-reg FAIL). **Layer 2 skipped;**
+cw-field keeps frequency default. See `Docs/product/field-order-ab.md` and
+`Docs/status/closeout-product-v0.md`.
