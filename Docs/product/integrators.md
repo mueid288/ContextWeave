@@ -91,6 +91,11 @@ as the product score (C1 can absorb recurrence into the prefix).
 | Stable doc ids across requests | Random ids every call |
 | Enough traffic to leave cold start (`CW_COLD_START_N`, default 32) | Tiny N stuck in cold `by_doc_id` fallback |
 
+## Dogfood on cw-field
+
+Live A/B (natural vs frequency) against the homeserver app:
+[`cw-field-kit-dogfood.md`](cw-field-kit-dogfood.md).
+
 ## Next after a positive desk lift
 
 Reproduce warm TTFT on your stack (harness pattern:
