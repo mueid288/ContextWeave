@@ -4,8 +4,11 @@
 prefix cache (C1) can hit more often. Optional forward to any OpenAI-compatible
 upstream (vLLM on a GPU host).
 
-Quality vs relevance order is **not** validated yet (see Part B of
-`Docs/pre-reg/pre-reg-product-live-shim.md`).
+**Integrators:** [`integrators.md`](integrators.md) · **Claims:** [`CLAIMS.md`](CLAIMS.md)
+
+Needle quality on the banked suite: PASS (Part B of
+`Docs/pre-reg/pre-reg-product-live-shim.md`). Arbitrary RAG relevance parity is
+still **not** claimed.
 
 ## One-shot (no server)
 

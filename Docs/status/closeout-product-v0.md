@@ -55,5 +55,7 @@ simulated prefix-cache share ~5.6 pp vs natural.
 
 ## Default next
 
-**Stop.** Frequency default on cw-field; CW product v0 evidence set is closed for
-order-on-field until someone explicitly opens Layer 2 GPU.
+**Shipped as evaluation kit (2026-10-25):** tag `v0.2.0-c1-kit` — see
+`Docs/status/ship-v0.2-c1-kit.md`, `Docs/product/CLAIMS.md`,
+`Docs/product/integrators.md`. Frequency remains cw-field default. Layer 2 GPU
+field TTFT only if a lab asks for a live latency claim.

@@ -1,7 +1,8 @@
 # Product: Canonical chunk order (C1 amplification)
 
-**Status:** desk utility (CPU). Research PIC / C3 remains archived.  
-**Quality:** unverified — reordering can change answers via position bias.
+**Status:** v0.2 evaluation kit (`v0.2.0-c1-kit`). Research PIC / C3 archived.  
+**Start here:** [`integrators.md`](integrators.md) · [`CLAIMS.md`](CLAIMS.md)  
+**Quality:** position bias vs relevance order is a real tradeoff — see claims.
 
 ## What it does
 
