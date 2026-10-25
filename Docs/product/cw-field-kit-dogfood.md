@@ -1,10 +1,11 @@
 # Dogfood C1 kit on cw-field
 
-Prove the v0.2 kit policy on the live app: **frequency** (default) vs **natural**
+Prove the v0.2 kit on the live app: **frequency** (default) vs **natural**
 (BM25 order, no C1 reorder). Measure with `cw-analyze-trace --compare-chunk-order`.
 
-cw-field already implements the same frequency prior as the kit. `ORDER_MODE`
-switches arms; traces log `meta.order_mode`.
+cw-field **imports the real kit** (`from contextweave.product import FrequencyPrior,
+reorder_documents`), pinned to Git tag `v0.2.0-c1-kit`. `ORDER_MODE` switches arms;
+traces log `meta.order_mode`. Health shows `contextweave` + `cw_c1_kit`.
 
 ## Homeserver — deploy
 
