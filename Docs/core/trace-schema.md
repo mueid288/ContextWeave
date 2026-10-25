@@ -41,7 +41,8 @@ Already canonical — validated and copied (or lightly filled).
 {
   "request_id": "2026-10-11T12:00:00Z#42",
   "query_type": "synthesis",
-  "prefix_token_ids": [1, 2, 3],
+  "prefix_token_count": 256,
+  "prefix_content_hash": "sha256:system-prompt...",
   "chunks": [
     {
       "document_id": "policy-v3",
@@ -53,15 +54,21 @@ Already canonical — validated and copied (or lightly filled).
       "token_ids": [10, 11, 12]
     }
   ],
-  "query_token_ids": [100, 101],
+  "query_token_count": 12,
+  "segments_canonical": false,
   "timestamp": "2026-10-11T12:00:00Z"
 }
 ```
+
+Hash/count exporters (e.g. **cw-field**) may omit real `token_ids` and send counts + hashes instead. Prefer `prefix_token_ids` / `query_token_ids` when the serving stack logged them.
 
 Rules:
 
 - Prefer real `token_ids` when the serving stack logged them.
 - If only `content_hash` + `token_count` exist, the importer synthesizes a **stable** token sequence from the hash so recurrence still works. Mark meta `token_ids_synthetic: true`.
+- **`prefix_content_hash` (or `prefix_id`)** is required for honest prefix-cache metrics when using `prefix_token_count`. Salting synthetic prefixes on `request_id` alone makes every ask look like a cold prefix.
+- Set **`segments_canonical: true`** only when segment lengths already include §H boundary-then-pad. cw-field emits `false` (char/4 approx). Default on import is `false`.
+- `query_type`: `synthesis` only when ≥2 distinct documents; else `lookup`.
 - Do **not** put raw prompt text in shared repos without partner approval. Prefer hashes + counts.
 
 ### Format `text_approx` (last resort)

@@ -156,7 +156,22 @@ def normalize_row(
         qtype = row.get("query_type") or "lookup"
         prefix = list(row.get("prefix_token_ids") or [])
         if not prefix and row.get("prefix_token_count"):
-            prefix = _stable_tokens_from_hash(f"prefix:{rid}", int(row["prefix_token_count"]), salt=1)
+            # Prefer stable prefix identity (shared system prompt) over request_id,
+            # which destroyed native prefix-cache metrics for cw-field traces.
+            prefix_key = (
+                row.get("prefix_content_hash")
+                or row.get("prefix_id")
+                or row.get("prefix_hash")
+            )
+            if prefix_key:
+                prefix = _stable_tokens_from_hash(
+                    f"prefix:{prefix_key}", int(row["prefix_token_count"]), salt=1
+                )
+            else:
+                prefix = _stable_tokens_from_hash(
+                    f"prefix:{rid}", int(row["prefix_token_count"]), salt=1
+                )
+                flags["prefix_identity_unknown"] = True
             flags["token_ids_synthetic"] = True
         query = list(row.get("query_token_ids") or [])
         if not query and row.get("query_token_count"):
@@ -181,8 +196,12 @@ def normalize_row(
                 # so recurrence detection works across reordered documents.
                 chunks.append(_stable_tokens_from_hash(key, n, salt=0))
                 flags["token_ids_synthetic"] = True
-        # Path C / partner_v1 token_counts are already boundary-then-pad segment sizes.
-        already = bool(row.get("segments_canonical", True))
+        # Default False: cw-field char/4 counts are NOT §H boundary-then-pad.
+        # Path C / honest partners must set segments_canonical=True explicitly.
+        if "segments_canonical" in row:
+            already = bool(row.get("segments_canonical"))
+        else:
+            already = False
         canon = _as_canonical(
             request_id=rid,
             query_type=qtype,
@@ -253,10 +272,12 @@ def import_trace_file(
     *,
     format_name: str = "auto",
     chars_per_token: float = 4.0,
+    strict: bool = False,
 ) -> ImportStats:
     stats = ImportStats(format_name=format_name)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     detected: set[str] = set()
+    prefix_unknown = 0
 
     with output_path.open("w", encoding="utf-8") as out:
         for lineno, line in enumerate(iter_jsonl(input_path), start=1):
@@ -277,6 +298,8 @@ def import_trace_file(
                 stats.synthetic_token_rows += 1
             if flags["text_approx"]:
                 stats.text_approx_rows += 1
+            if flags.get("prefix_identity_unknown"):
+                prefix_unknown += 1
             out.write(json.dumps(canon) + "\n")
             stats.rows_out += 1
 
@@ -284,6 +307,16 @@ def import_trace_file(
         stats.format_name = next(iter(detected))
     elif detected:
         stats.format_name = "mixed:" + ",".join(sorted(detected))
+
+    if strict and stats.errors:
+        raise TraceImportError(
+            f"strict import: {len(stats.errors)} row error(s); "
+            f"rows_out={stats.rows_out}/{stats.rows_in}"
+        )
+    if strict and stats.rows_out < stats.rows_in:
+        raise TraceImportError(
+            f"strict import: dropped rows ({stats.rows_out}/{stats.rows_in})"
+        )
 
     meta_path = output_path.parent / "import_meta.json"
     meta_path.write_text(
@@ -296,6 +329,7 @@ def import_trace_file(
                 "rows_out": stats.rows_out,
                 "synthetic_token_rows": stats.synthetic_token_rows,
                 "text_approx_rows": stats.text_approx_rows,
+                "prefix_identity_unknown_rows": prefix_unknown,
                 "errors": stats.errors,
                 "provisional_g0": stats.text_approx_rows > 0 or stats.synthetic_token_rows > 0,
                 "notes": "CPU-only import. No model tokenization.",

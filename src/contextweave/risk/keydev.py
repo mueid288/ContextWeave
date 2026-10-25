@@ -11,10 +11,14 @@ from dataclasses import dataclass
 
 def mean_one_minus_cosine(
     pairs: list[tuple[list[float], list[float]]],
-) -> float:
-    """Mean 1−cos over vector pairs; empty ⇒ 0.0 (treat as safe)."""
+) -> float | None:
+    """Mean 1−cos over vector pairs; empty / no valid pairs ⇒ None (unknown).
+
+    Callers must treat None as fail-closed for C3 (see ``predict_c3_quality_fail``).
+    Never return 0.0 for "no data" — that looks like a perfect safe score.
+    """
     if not pairs:
-        return 0.0
+        return None
     total = 0.0
     n = 0
     for a, b in pairs:
@@ -27,11 +31,11 @@ def mean_one_minus_cosine(
             continue
         total += 1.0 - (dot / (na * nb))
         n += 1
-    return total / n if n else 0.0
+    return total / n if n else None
 
 
 def predict_c3_quality_fail(score: float | None, threshold: float) -> bool:
-    """True ⇒ refuse C3. Unknown score ⇒ refuse (fail-closed)."""
+    """True ⇒ refuse C3. Unknown score (None) ⇒ refuse (fail-closed)."""
     if score is None:
         return True
     return float(score) >= float(threshold)

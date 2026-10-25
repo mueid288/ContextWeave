@@ -37,7 +37,8 @@ python scripts/workloads/import_trace.py \
 
 # cw-field live pull → import → G0 (needs cw-field up + ADMIN_TOKEN)
 # export CW_FIELD_URL=http://127.0.0.1:8787 CW_FIELD_ADMIN_TOKEN=...
-# summary.ok mirrors Gate G0; raise --min-traces/--min-users for real evidence
+# summary.ok requires G0 PASS + non-provisional import (or --allow-provisional-ok).
+# Defaults: --min-traces 50 / --min-users 2.
 cw-field-g0
 # or: python scripts/workloads/cw_field_pipeline.py
 

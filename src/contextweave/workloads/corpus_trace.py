@@ -241,8 +241,10 @@ def generate_partner_requests(
     cfg: CorpusTraceConfig,
 ) -> Iterator[dict[str, Any]]:
     rng = random.Random(cfg.seed)
-    weights = _zipf_weights(len(chunks), cfg.popularity_alpha)
+    # Shuffle indices before Zipf weights so popularity ≠ sorted path / doc-id order.
     ids = list(range(len(chunks)))
+    rng.shuffle(ids)
+    weights = _zipf_weights(len(ids), cfg.popularity_alpha)
     recent: list[int] = []
     # Prefix segment includes trailing boundary then pad (Gemini_3 §1.1).
     boundary_len = len(cfg.chunking_config().boundary_token_ids)
@@ -304,6 +306,8 @@ def generate_partner_requests(
             "query_token_ids": query,
             "timestamp": f"corpus-replay-{i:06d}",
             "source": "corpus_replay",
+            # Path C pads boundary+block into token_count — already §H-canonical.
+            "segments_canonical": True,
         }
 
 

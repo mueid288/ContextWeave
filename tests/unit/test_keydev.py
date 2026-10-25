@@ -43,10 +43,32 @@ def test_mean_one_minus_cosine_identical_is_zero():
     assert mean_one_minus_cosine([(v, v)]) == 0.0
 
 
+def test_mean_one_minus_cosine_empty_is_unknown():
+    assert mean_one_minus_cosine([]) is None
+
+
 def test_predict_fail_closed_on_none():
     assert predict_c3_quality_fail(None, 0.1) is True
     assert predict_c3_quality_fail(0.05, 0.1) is False
     assert predict_c3_quality_fail(0.2, 0.1) is True
+
+
+def test_planner_keydev_none_refuses_c3():
+    rec, ns = _prov()
+    d = plan(
+        RequestView(
+            has_validated_nonprefix_artifacts=True,
+            keydev_score=None,
+            keydev_threshold=0.5,
+            provenance=rec,
+            request_trust=ns,
+        )
+    )
+    assert d.chosen != ConfigId.C3_EPIC
+    assert (
+        ReasonCode.QUALITY_RISK_EXCEEDS_POLICY.value
+        in d.discarded[ConfigId.C3_EPIC.value]
+    )
 
 
 def test_fit_threshold_separates_scores():

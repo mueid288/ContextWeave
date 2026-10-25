@@ -53,12 +53,17 @@ def reorder_documents(
     *,
     prior: FrequencyPrior | None = None,
     observe: bool = True,
+    effective_mode: str | None = None,
 ) -> list[DocumentChunk]:
-    """Reorder RAG documents; optionally update ``prior`` after ordering."""
+    """Reorder RAG documents; optionally update ``prior`` after ordering.
+
+    Pass ``effective_mode`` when the caller already resolved cold/warm so
+    ``cw_mode_effective`` cannot disagree with the sort under concurrency.
+    """
     chunks = _as_chunks(documents)
     if not chunks:
         return []
-    effective = resolve_mode(mode, prior)
+    effective = effective_mode if effective_mode is not None else resolve_mode(mode, prior)
     freq = None if prior is None else prior.as_mapping()
     order = ordered_document_indices(
         [c.document_id for c in chunks],
@@ -109,7 +114,11 @@ def apply_chat_documents(
 
     effective = resolve_mode(mode, prior)
     ordered = reorder_documents(
-        docs_raw, mode, prior=prior, observe=observe
+        docs_raw,
+        mode,
+        prior=prior,
+        observe=observe,
+        effective_mode=effective,
     )
     block = format_documents_block(ordered)
     messages = list(out.get("messages") or [])

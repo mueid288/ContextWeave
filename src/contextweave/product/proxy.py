@@ -16,14 +16,26 @@ from urllib.request import Request, urlopen
 from contextweave.product.frequency import FrequencyPrior
 from contextweave.product.live_order import apply_chat_documents
 
+_PRIOR: FrequencyPrior
+_UPSTREAM: str
+_DEFAULT_MODE: str
+_ALLOW_DRY_RUN: bool = False
+
+
 def _reload_runtime_from_env() -> None:
     """Refresh process globals from env (call after CLI sets CW_*)."""
-    global _PRIOR, _UPSTREAM, _DEFAULT_MODE
+    global _PRIOR, _UPSTREAM, _DEFAULT_MODE, _ALLOW_DRY_RUN
     _PRIOR = FrequencyPrior(
         cold_start_n=int(os.environ.get("CW_COLD_START_N", "32")),
     )
     _UPSTREAM = os.environ.get("CW_UPSTREAM_URL", "").rstrip("/")
     _DEFAULT_MODE = os.environ.get("CW_CHUNK_ORDER", "by_frequency_desc")
+    _ALLOW_DRY_RUN = (os.environ.get("CW_ALLOW_DRY_RUN") or "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
 
 
 _reload_runtime_from_env()
@@ -112,7 +124,20 @@ class OrderShimHandler(BaseHTTPRequestHandler):
             )
             meta = rewritten.get("cw_meta")
             if not _UPSTREAM:
-                # Dry live path: return rewrite only (no model).
+                # Refuse to look like a real completion unless explicitly allowed.
+                if not _ALLOW_DRY_RUN:
+                    _send_json(
+                        self,
+                        503,
+                        {
+                            "error": (
+                                "CW_UPSTREAM_URL is not set. "
+                                "Set CW_ALLOW_DRY_RUN=1 for rewrite-only dry-run."
+                            ),
+                            "cw_meta": meta,
+                        },
+                    )
+                    return
                 _send_json(
                     self,
                     200,

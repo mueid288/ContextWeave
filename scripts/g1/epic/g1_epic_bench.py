@@ -134,12 +134,14 @@ def _layer0_seam_keydev(
     start_offset: list[int],
     old_kvs: list,
     seam_tokens: int,
-) -> float:
+) -> float | None:
     """Mean (1−cos) Layer-0 at doc seams from **isolated** collected keys.
 
     No extra ``generate`` — joint prefix+seam probes IMA on EPIC Path A when
     ``old_kvs`` is live. Score = mean discontinuity between the token before
     each doc chunk and the first ``seam_tokens`` isolated keys of that chunk.
+
+    Empty seams ⇒ None (unknown), never 0.0 (which looks "safe" to the planner).
     """
     del llm  # API symmetry with callers; unused (CPU-side on collected tensors)
     import torch.nn.functional as F
@@ -160,7 +162,7 @@ def _layer0_seam_keydev(
             cur = k_iso[b + t].flatten().unsqueeze(0)
             diffs.append(float(1.0 - F.cosine_similarity(prev, cur).item()))
     if not diffs:
-        return 0.0
+        return None
     return float(sum(diffs) / len(diffs))
 
 
@@ -219,7 +221,7 @@ def _collect_and_link(
     for chunk in token_ids:
         start_offset.append(start_offset[-1] + len(chunk))
 
-    keydev = 0.0
+    keydev: float | None = None
     if return_keydev:
         keydev = _layer0_seam_keydev(
             llm,

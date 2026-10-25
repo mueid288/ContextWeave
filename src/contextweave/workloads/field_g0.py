@@ -99,14 +99,31 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--min-traces",
         type=int,
-        default=int(os.environ.get("CW_FIELD_MIN_TRACES", "1")),
-        help="Refuse to bank below this many traces (default 1; raise for real runs)",
+        default=int(os.environ.get("CW_FIELD_MIN_TRACES", "50")),
+        help="Refuse to bank below this many traces (default 50; set CW_FIELD_MIN_TRACES=1 for toys)",
     )
     parser.add_argument(
         "--min-users",
         type=int,
-        default=int(os.environ.get("CW_FIELD_MIN_USERS", "1")),
-        help="Refuse to treat as multi-user evidence below this many user_ids",
+        default=int(os.environ.get("CW_FIELD_MIN_USERS", "2")),
+        help="Refuse multi-user evidence below this many user_ids (default 2)",
+    )
+    parser.add_argument(
+        "--allow-provisional-ok",
+        action="store_true",
+        help="Allow summary.ok=true on provisional/synthetic token imports (default: ok=false while provisional)",
+    )
+    parser.add_argument(
+        "--strict-import",
+        action="store_true",
+        default=True,
+        help="Fail if any partner_v1 rows are dropped on import (default on)",
+    )
+    parser.add_argument(
+        "--no-strict-import",
+        action="store_false",
+        dest="strict_import",
+        help="Allow partial imports (legacy)",
     )
     parser.add_argument(
         "--repo-root",
@@ -183,7 +200,27 @@ def main(argv: list[str] | None = None) -> int:
         print(f"below --min-users ({n_users} < {args.min_users})", file=__import__("sys").stderr)
         return 1
 
-    stats = import_trace_file(raw, imported, format_name="partner_v1")
+    try:
+        stats = import_trace_file(
+            raw, imported, format_name="partner_v1", strict=bool(args.strict_import)
+        )
+    except Exception as exc:  # noqa: BLE001 — TraceImportError or IO
+        summary_path.write_text(
+            json.dumps(
+                {
+                    "ok": False,
+                    "reason": "import_strict_failed",
+                    "n_traces": n,
+                    "error": str(exc),
+                    "health": health,
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        print(f"import failed: {exc}", file=__import__("sys").stderr)
+        return 1
     if stats.rows_out < 1:
         summary_path.write_text(
             json.dumps(
@@ -232,9 +269,23 @@ def main(argv: list[str] | None = None) -> int:
         encoding="utf-8",
     )
 
+    import_meta_path = imported.parent / "import_meta.json"
+    provisional = True
+    if import_meta_path.is_file():
+        try:
+            provisional = bool(
+                json.loads(import_meta_path.read_text(encoding="utf-8")).get(
+                    "provisional_g0", True
+                )
+            )
+        except json.JSONDecodeError:
+            provisional = True
+    # Bank ok only when G0 passes AND (non-provisional OR explicitly allowed).
+    bank_ok = bool(g0.passed) and (not provisional or bool(args.allow_provisional_ok))
     gate = "PASS" if g0.passed else "FAIL"
     summary = {
-        "ok": bool(g0.passed),
+        "ok": bank_ok,
+        "provisional_g0": provisional,
         "base_url": args.base_url,
         "n_traces": n,
         "n_users": n_users,
@@ -253,14 +304,20 @@ def main(argv: list[str] | None = None) -> int:
             "metrics": str(metrics_json.relative_to(args.repo_root)),
         },
         "note": (
-            "ok mirrors Gate G0. Provisional synthetic tokens from partner_v1. "
-            "Raise --min-traces/--min-users for real multi-user evidence."
+            "ok is true only when Gate G0 passes and import is non-provisional "
+            "(or --allow-provisional-ok). Synthetic partner_v1 tokens stay provisional."
         ),
     }
+    if g0.passed and provisional and not args.allow_provisional_ok:
+        summary["reason"] = "provisional_not_bankable"
     summary_path.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(summary, indent=2))
     print(f"\nArtifacts: {art}")
-    return 0 if g0.passed else 2
+    if not g0.passed:
+        return 2
+    if provisional and not args.allow_provisional_ok:
+        return 3
+    return 0
 
 
 if __name__ == "__main__":

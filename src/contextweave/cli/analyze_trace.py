@@ -123,6 +123,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Mark G0 as final (real trace). Default is provisional.",
     )
     parser.add_argument(
+        "--allow-provisional-final",
+        action="store_true",
+        help="Allow --final even when sibling import_meta.json has provisional_g0=true",
+    )
+    parser.add_argument(
         "--chunk-order",
         choices=list(CHUNK_ORDER_MODES),
         default="natural",
@@ -161,6 +166,21 @@ def main(argv: list[str] | None = None) -> int:
             args.metrics_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
             print(f"Wrote metrics: {args.metrics_json}")
         return 0 if payload["pass_heuristic_frequency"] else 3
+
+    if args.final and not args.allow_provisional_final:
+        meta_path = Path(args.trace).resolve().parent / "import_meta.json"
+        if meta_path.is_file():
+            try:
+                meta = json.loads(meta_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                meta = {}
+            if meta.get("provisional_g0"):
+                print(
+                    "Refusing --final: import_meta.json has provisional_g0=true "
+                    "(synthetic/approx tokens). Use --allow-provisional-final to override.",
+                    file=sys.stderr,
+                )
+                return 4
 
     metrics = analyze_trace(
         args.trace,

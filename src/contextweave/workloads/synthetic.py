@@ -136,6 +136,8 @@ def generate_trace(cfg: SyntheticWorkloadConfig) -> Iterator[TraceRequest]:
     corpus = _build_corpus(rng, cfg)
     prefixes = _build_prefix_templates(cfg)
     doc_ids = list(corpus.keys())
+    # Decouple Zipf popularity from lexicographic doc-id order (Gemini_4 trap).
+    rng.shuffle(doc_ids)
     weights = _zipf_weights(len(doc_ids), cfg.popularity_alpha)
 
     # Track recent doc picks for reuse-distance shaping.
