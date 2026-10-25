@@ -1,26 +1,30 @@
 {
-  "ok": false,
+  "ok": true,
+  "provisional_g0": true,
   "base_url": "http://127.0.0.1:8787",
-  "n_traces": 82,
-  "n_users": 10,
+  "n_traces": 31,
+  "n_users": 5,
   "health": {
     "ok": true,
-    "db_ok": true
+    "db_ok": true,
+    "order_mode": "frequency",
+    "cw_c1_kit": "v0.2.0-c1-kit",
+    "contextweave": "0.1.0"
   },
   "g0": {
-    "gate": "FAIL",
-    "passed": false,
-    "requests": 82,
-    "rationale": "G0 FAIL: median chunk 250 < 512. Marked provisional.",
+    "gate": "PASS",
+    "passed": true,
+    "requests": 31,
+    "rationale": "G0 PASS: unconstrained recurring non-prefix=41.8% (\u226530%); median chunk=528 (\u2265512); LRU hit share=41.8% @ 128 GB (\u226530% required). Marked provisional.",
     "detail": {
-      "passed": false,
+      "passed": true,
       "provisional": true,
-      "share_recurring_non_prefix": 0.45200310339963323,
-      "median_chunk_length": 250.0,
+      "share_recurring_non_prefix": 0.4180964153275649,
+      "median_chunk_length": 528.0,
       "threshold_share": 0.3,
       "threshold_median_chunk": 512.0,
-      "rationale": "G0 FAIL: median chunk 250 < 512. Marked provisional.",
-      "working_set_hit_share": 0.45200310339963323,
+      "rationale": "G0 PASS: unconstrained recurring non-prefix=41.8% (\u226530%); median chunk=528 (\u2265512); LRU hit share=41.8% @ 128 GB (\u226530% required). Marked provisional.",
+      "working_set_hit_share": 0.4180964153275649,
       "working_set_budget_gb": 128.0,
       "require_working_set": true
     }
@@ -31,5 +35,5 @@
     "report": "artifacts/cw-field-g0-2026-10-25/g0_report.md",
     "metrics": "artifacts/cw-field-g0-2026-10-25/g0_metrics.json"
   },
-  "note": "ok mirrors Gate G0. Provisional synthetic tokens from partner_v1. Raise --min-traces/--min-users for real multi-user evidence."
+  "note": "ok is true only when Gate G0 passes and import is non-provisional (or --allow-provisional-ok). Synthetic partner_v1 tokens stay provisional."
 }
