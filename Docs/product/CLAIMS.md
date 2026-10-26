@@ -29,7 +29,20 @@ hits the prefix cache — fewer repeated tokens, lower warm TTFT.
 - Parity with relevance-first RAG ranking for arbitrary corpora  
 - Benefit without engine **prefix caching** enabled  
 - Production multi-tenant product or “drops into any foundation model weights”  
-- PIC / non-prefix KV reuse (research archived)
+- PIC / non-prefix KV reuse as a shipped product  
+- Control-plane / planner wins (Gate R1 not banked yet)
+
+---
+
+## Future (not claimable)
+
+**Direction:** fail-closed reuse **control plane** — fingerprints, quality margin,
+refuse, choose among C0 / C1-order+prefix / C3-LMCache-blend.
+See [control-plane-north-star.md](control-plane-north-star.md) and
+[../plans/2026-10-26-revolutionary-product-thesis.md](../plans/2026-10-26-revolutionary-product-thesis.md).
+
+Until Gate **R1** passes and this section is rewritten into **Can claim**, treat
+all control-plane language as intent only.
 
 ---
 

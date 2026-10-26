@@ -50,4 +50,16 @@ field evidence (`artifacts/cw-field-g0-2026-10-25-field/`): N=27, gate PASS,
 - **M2** — stand up prefix-caching stack; timed natural vs frequency; bank `product-field-order-ttft-*`.
 - **M3** — release `0.2.0` with trusted publishing.
 
-Do **not** reopen PIC / planner research ([ARCHIVE.md](ARCHIVE.md)).
+## Control plane track (approved 2026-10-26)
+
+Thesis: [../plans/2026-10-26-revolutionary-product-thesis.md](../plans/2026-10-26-revolutionary-product-thesis.md).  
+Archive reopen policy: [ARCHIVE.md](ARCHIVE.md).
+
+| ID | Gap | Done looks like | Status |
+|----|-----|-----------------|--------|
+| R0 | Thesis + docs | Plan approved; north star; CLAIMS future section | **Done** |
+| R1 | Oracle upside on LMCache C3 + C1 + C0 | Banked `artifacts/r1-oracle-*` with `r1_pass` | **Open** — CPU analyzer shipped; GPU collect pending |
+| R2 | Fingerprints + plan API | Library + fault suite; 0 silent invalid reuse | Blocked on R1 |
+| R3 | Engine provider + field plan UI | Partner-usable quality_margin | Blocked on R2 |
+
+C1 tracks M1–M3 remain optional and orthogonal.

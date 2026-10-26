@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "contextweave"
 version = "0.2.0"
-description = "Canonical Order C1 kit: frequency-stable RAG chunk order for native prefix-cache amplification"
+description = "C1 order kit + Gate R1 oracle analysis toward a fail-closed reuse control plane"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
@@ -29,6 +29,7 @@ cw-import-trace = "contextweave.cli.import_trace:main"
 cw-build-corpus-trace = "contextweave.cli.build_corpus_trace:main"
 cw-serve-order = "contextweave.cli.serve_order:main"
 cw-field-g0 = "contextweave.cli.cw_field_g0:main"
+cw-r1-oracle = "contextweave.cli.r1_oracle:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

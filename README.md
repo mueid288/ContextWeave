@@ -12,9 +12,12 @@ hits on multi-query workloads.
 | Live shim | [Docs/product/live-shim.md](Docs/product/live-shim.md) |
 | Field dogfood (cw-field) | [Docs/product/cw-field-kit-dogfood.md](Docs/product/cw-field-kit-dogfood.md) |
 | Ship note | [Docs/status/ship-v0.2-c1-kit.md](Docs/status/ship-v0.2-c1-kit.md) |
+| Control plane (north star) | [Docs/product/control-plane-north-star.md](Docs/product/control-plane-north-star.md) |
+| Gate R1 harness | [Docs/plans/2026-10-26-r1-oracle-harness.md](Docs/plans/2026-10-26-r1-oracle-harness.md) |
 
-**Not** a multi-tenant SaaS · **Not** cw-field itself · Research Phase 0/1 is
-archived ([Docs/status/ARCHIVE.md](Docs/status/ARCHIVE.md)).
+**Not** a multi-tenant SaaS · **Not** cw-field itself.  
+**Approved direction:** fail-closed reuse control plane (R1 open). Phase 0/1
+evidence stays archived ([Docs/status/ARCHIVE.md](Docs/status/ARCHIVE.md)).
 
 **Laptop policy:** never download or run models here —
 [Docs/runbooks/local-safety.md](Docs/runbooks/local-safety.md).
@@ -62,16 +65,20 @@ Trace format: [Docs/product/trace-schema.md](Docs/product/trace-schema.md).
 
 ```text
 src/contextweave/product/   C1 library + live shim
+src/contextweave/oracle/    Gate R1 CPU upside (no model load)
 src/contextweave/trace_analysis/  metrics + chunk-order compare
 src/contextweave/workloads/ import, field_g0, synthetic/corpus
-Docs/product/               CLAIMS, integrators, dogfood
+Docs/product/               CLAIMS, integrators, dogfood, north star
+Docs/plans/                 Thesis + R1 harness
 artifacts/                  Banked claim evidence only
 scripts/workloads/          G0 + field pipeline wrappers
 scripts/product/            Claim reproduction evals
+scripts/r1/                 GPU collect notes (collector TBD)
 ```
 
 ## Gates (honest)
 
 - **Product C1:** scoped COMPLETE — see CLAIMS + READINESS.
 - **Field G0:** provisional PASS banked (`artifacts/cw-field-g0-2026-10-25-field/`).
-- **Research G1/G2 / PIC:** archived — do not reopen without a new thesis.
+- **Control plane:** thesis approved; Gate R1 open (CPU `cw-r1-oracle`; GPU collect pending).
+- **Research G1/G2 / EPIC:** archived negative evidence — do not reuse as R1 proof.

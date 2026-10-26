@@ -19,15 +19,20 @@
 | Field Layer 2 live TTFT | **Missing** | Explicit non-goal this tag |
 | PyPI publish | **Missing** | Explicit non-goal |
 | Own-RAG warm ≥1.15× | **Not met** | FAIL banked (`artifacts/own-rag-demo-2026-10-24/`); harness removed |
-| Multi-tenant SaaS / PIC planner | **Out of scope** | Research archived |
+| Multi-tenant SaaS | **Out of scope** | — |
+| Control plane (planner) | **R0 done / R1 open** | Thesis approved; oracle CPU ready; GPU collect pending |
 
 ## Verdict
 
-The **evaluation kit is ready for lab outbound**: clone → CLAIMS → integrators →
+The **C1 evaluation kit is ready for lab outbound**: clone → CLAIMS → integrators →
 measure on *their* prefix-caching stack.
 
+**Product north star (approved):** fail-closed reuse control plane —
+[control-plane-north-star.md](control-plane-north-star.md). Next falsification:
+Gate **R1** ([../plans/2026-10-26-r1-oracle-harness.md](../plans/2026-10-26-r1-oracle-harness.md)).
+
 It is **not** a production SaaS, **not** “final G0”, and **not** proven on live
-field TTFT. Default next: outbound; open Layer 2 or PyPI only on explicit ask.
+field TTFT. C1 outbound and R1 can proceed in parallel.
 
 ## Integrator checklist
 
