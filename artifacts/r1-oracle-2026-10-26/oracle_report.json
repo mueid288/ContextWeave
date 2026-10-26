@@ -1,0 +1,268 @@
+{
+  "n_requests": 40,
+  "configs_seen": [
+    "C0",
+    "C1",
+    "C3"
+  ],
+  "best_fixed_config": "C1",
+  "best_fixed_mean_quality": 0.9,
+  "best_fixed_p95_ttft_ms": 138.871995000045,
+  "oracle_mean_quality": 0.925,
+  "oracle_p95_ttft_ms": 138.43426399989767,
+  "quality_upside_points": 2.500000000000002,
+  "ttft_reduction_fraction": 0.0031520466034004047,
+  "g2_quality_pass": false,
+  "g2_ttft_pass": false,
+  "g2_pass": false,
+  "r1_quality_pass": true,
+  "r1_ttft_pass": false,
+  "r1_gate_need_pass": false,
+  "r1_pass": false,
+  "c0_mean_quality": 0.8,
+  "oracle_vs_c0_quality_points": 12.5,
+  "gate_need_slices": [],
+  "per_request_oracle": [
+    {
+      "request_id": "r0",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 52.725882000004276
+    },
+    {
+      "request_id": "r1",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 162.56107300000622
+    },
+    {
+      "request_id": "r10",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 76.25876900010553
+    },
+    {
+      "request_id": "r11",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 137.8720489999523
+    },
+    {
+      "request_id": "r12",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 125.59628199983308
+    },
+    {
+      "request_id": "r13",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 51.38994999992974
+    },
+    {
+      "request_id": "r14",
+      "config": "C0",
+      "quality": 1.0,
+      "ttft_ms": 137.87001800005783
+    },
+    {
+      "request_id": "r15",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 51.13175599990427
+    },
+    {
+      "request_id": "r16",
+      "config": "C1",
+      "quality": 0.0,
+      "ttft_ms": 162.3903159998008
+    },
+    {
+      "request_id": "r17",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 51.53986599998461
+    },
+    {
+      "request_id": "r18",
+      "config": "C1",
+      "quality": 0.0,
+      "ttft_ms": 138.18660100014313
+    },
+    {
+      "request_id": "r19",
+      "config": "C0",
+      "quality": 1.0,
+      "ttft_ms": 52.56426200003261
+    },
+    {
+      "request_id": "r2",
+      "config": "C0",
+      "quality": 1.0,
+      "ttft_ms": 52.36904499997763
+    },
+    {
+      "request_id": "r20",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 137.73303899984057
+    },
+    {
+      "request_id": "r21",
+      "config": "C0",
+      "quality": 1.0,
+      "ttft_ms": 137.81807000009394
+    },
+    {
+      "request_id": "r22",
+      "config": "C0",
+      "quality": 1.0,
+      "ttft_ms": 64.4682219999595
+    },
+    {
+      "request_id": "r23",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 137.8643729999567
+    },
+    {
+      "request_id": "r24",
+      "config": "C0",
+      "quality": 1.0,
+      "ttft_ms": 64.40085899998849
+    },
+    {
+      "request_id": "r25",
+      "config": "C0",
+      "quality": 1.0,
+      "ttft_ms": 138.18420899997363
+    },
+    {
+      "request_id": "r26",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 52.17497900002854
+    },
+    {
+      "request_id": "r27",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 137.91904000004251
+    },
+    {
+      "request_id": "r28",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 52.132319999827814
+    },
+    {
+      "request_id": "r29",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 137.7565150000919
+    },
+    {
+      "request_id": "r3",
+      "config": "C0",
+      "quality": 1.0,
+      "ttft_ms": 137.59521699989818
+    },
+    {
+      "request_id": "r30",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 50.9479720001309
+    },
+    {
+      "request_id": "r31",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 64.36507099988376
+    },
+    {
+      "request_id": "r32",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 125.50469699999667
+    },
+    {
+      "request_id": "r33",
+      "config": "C0",
+      "quality": 1.0,
+      "ttft_ms": 64.41936100009116
+    },
+    {
+      "request_id": "r34",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 64.14863300005891
+    },
+    {
+      "request_id": "r35",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 125.53888000002189
+    },
+    {
+      "request_id": "r36",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 51.016966000133834
+    },
+    {
+      "request_id": "r37",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 125.66318499989393
+    },
+    {
+      "request_id": "r38",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 137.9256620000433
+    },
+    {
+      "request_id": "r39",
+      "config": "C0",
+      "quality": 1.0,
+      "ttft_ms": 52.276656999993065
+    },
+    {
+      "request_id": "r4",
+      "config": "C1",
+      "quality": 0.0,
+      "ttft_ms": 137.94207799992364
+    },
+    {
+      "request_id": "r5",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 138.22312500019507
+    },
+    {
+      "request_id": "r6",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 137.90332900020985
+    },
+    {
+      "request_id": "r7",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 137.96094899998934
+    },
+    {
+      "request_id": "r8",
+      "config": "C0",
+      "quality": 1.0,
+      "ttft_ms": 138.43426399989767
+    },
+    {
+      "request_id": "r9",
+      "config": "C1",
+      "quality": 1.0,
+      "ttft_ms": 51.95254299997032
+    }
+  ],
+  "notes": "R1 bars: Docs/plans/2026-10-26-r1-oracle-harness.md. G2 fields retained for archived EPIC trial replay only."
+}

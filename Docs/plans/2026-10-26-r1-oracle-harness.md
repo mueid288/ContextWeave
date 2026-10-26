@@ -1,8 +1,9 @@
 # R1 — Oracle harness (control-plane falsification)
 
 **Parent:** [2026-10-26-revolutionary-product-thesis.md](2026-10-26-revolutionary-product-thesis.md)  
-**Status:** Ready to run on **rented GPU** (laptop: CPU analysis only — [local-safety.md](../runbooks/local-safety.md))  
-**Differs from failed G2 (2026-10-23):** that study used **EPIC LegoLink** on needle-style reorder; C3 quality collapsed → best fixed = C0, oracle upside 0. R1 uses **LMCache CacheBlend** + **Zipfian multi-hop RAG** + **feasible C1 order+prefix**.
+**Status:** C0/C1 smoke **banked** (`artifacts/r1-oracle-2026-10-26/`); Gate R1 **not opened** — C3 blocked on current LMCache+vLLM pin (see artifact README).  
+Laptop: CPU analysis only — [local-safety.md](../runbooks/local-safety.md).  
+**Differs from failed G2 (2026-10-23):** that study used **EPIC LegoLink** on needle-style reorder; C3 quality collapsed → best fixed = C0, oracle upside 0. R1 targets **LMCache CacheBlend** + **Zipfian multi-hop RAG** + **feasible C1 order+prefix**.
 
 ---
 
