@@ -45,6 +45,23 @@ def test_collect_dry_workload(tmp_path: Path):
     assert all("slice_id" in row for row in rows)
 
 
+def test_prompt_for_uses_document_chunk_attrs():
+    sys.path.insert(0, str(REPO / "scripts" / "r1"))
+    import collect_oracle_http as collect
+    import workload as w
+    from contextweave.product.frequency import FrequencyPrior
+
+    reqs = w.generate_requests(n=2, seed=1, filler_chars=40)
+    prior = FrequencyPrior(cold_start_n=0)
+    rng = __import__("random").Random(0)
+    for mode in ("C0", "C1", "C3"):
+        prompt = collect._prompt_for(
+            reqs[0], mode=mode, prior=prior, rng=rng, salt="t"
+        )
+        assert "Question:" in prompt
+        assert reqs[0].document_ids[0] in prompt
+
+
 def test_collect_blocks_without_allow(tmp_path: Path):
     out = tmp_path / "t.jsonl"
     env = {**__import__("os").environ, "PYTHONPATH": str(REPO / "src")}

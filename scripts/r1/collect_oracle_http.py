@@ -134,7 +134,7 @@ def _prompt_for(
             prior=None,
             observe=False,
         )
-        ordered = [c["document_id"] for c in chunks]
+        ordered = [c.document_id for c in chunks]
         body = r1_workload.format_prompt(req, ordered)
         # Break prefix match so C0 cannot ride the warm cache.
         return f"[salt:{salt}]\n\n{body}"
@@ -142,14 +142,14 @@ def _prompt_for(
         chunks = reorder_documents(
             docs, "by_frequency_desc", prior=prior, observe=True
         )
-        ordered = [c["document_id"] for c in chunks]
+        ordered = [c.document_id for c in chunks]
         return r1_workload.format_prompt(req, ordered)
     if mode == "C3":
         # Same textual order as C1; blend server is expected to reuse non-prefix KV.
         chunks = reorder_documents(
             docs, "by_frequency_desc", prior=prior, observe=False
         )
-        ordered = [c["document_id"] for c in chunks]
+        ordered = [c.document_id for c in chunks]
         return r1_workload.format_prompt(req, ordered)
     raise ValueError(mode)
 
