@@ -2,6 +2,7 @@
 
 Session: **`cw-r1-oracle`** · GPU: **A100** · wall budget: **120 min**  
 Harness: [../plans/2026-10-26-r1-oracle-harness.md](../plans/2026-10-26-r1-oracle-harness.md)  
+**C3 pin first:** [../plans/2026-10-26-r1-c3-pin.md](../plans/2026-10-26-r1-c3-pin.md) — do **not** use vLLM 0.32 + LMCache 0.5.6.  
 Laptop policy: [../runbooks/local-safety.md](../runbooks/local-safety.md)
 
 **C0/C1** need vLLM with **prefix caching**. **C3** needs a second LMCache

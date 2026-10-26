@@ -58,7 +58,7 @@ Archive reopen policy: [ARCHIVE.md](ARCHIVE.md).
 | ID | Gap | Done looks like | Status |
 |----|-----|-----------------|--------|
 | R0 | Thesis + docs | Plan approved; north star; CLAIMS future section | **Done** |
-| R1 | Oracle upside on LMCache C3 + C1 + C0 | Banked `artifacts/r1-oracle-*` with `r1_pass` | **Blocked** — C0/C1 smoke banked (`artifacts/r1-oracle-2026-10-26/`); C3 serve fatals on lmcache 0.5.6 + vllm 0.32 (`IndexError` dim 4); no `r1_pass` |
+| R1 | Oracle upside on LMCache C3 + C1 + C0 | Banked `artifacts/r1-oracle-*` with `r1_pass` | **Blocked → pinned re-run** — C0/C1 smoke banked; C3 failed on 0.32/0.5.6; next: [../plans/2026-10-26-r1-c3-pin.md](../plans/2026-10-26-r1-c3-pin.md) (C3-A offline smoke on vLLM 0.18 + LMCache 0.4.2) |
 | R2 | Fingerprints + plan API | Library + fault suite; 0 silent invalid reuse | Blocked on R1 |
 | R3 | Engine provider + field plan UI | Partner-usable quality_margin | Blocked on R2 |
 
