@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "contextweave"
 version = "0.2.0"
-description = "Canonical Order C1 kit: frequency-stable RAG chunk order for native prefix-cache amplification (plus archived research harness)"
+description = "Canonical Order C1 kit: frequency-stable RAG chunk order for native prefix-cache amplification"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
@@ -20,16 +20,13 @@ dev = [
 ]
 # Intentionally omitted: torch, vllm, lmcache, transformers.
 # Do NOT add a [gpu] extra that installs them into the laptop venv.
-# Install ML stacks only on a rented GPU host (Docs/local-safety.md).
+# Install ML stacks only on a rented GPU host (Docs/runbooks/local-safety.md).
 
 [project.scripts]
 cw-analyze-trace = "contextweave.cli.analyze_trace:main"
 cw-generate-workload = "contextweave.cli.generate_workload:main"
 cw-import-trace = "contextweave.cli.import_trace:main"
-cw-cost-model = "contextweave.cli.cost_model:main"
 cw-build-corpus-trace = "contextweave.cli.build_corpus_trace:main"
-cw-fingerprint-example = "contextweave.cli.fingerprint_example:main"
-cw-plan-demo = "contextweave.cli.plan_demo:main"
 cw-serve-order = "contextweave.cli.serve_order:main"
 cw-rag-demo = "contextweave.cli.rag_demo:main"
 cw-field-g0 = "contextweave.cli.cw_field_g0:main"

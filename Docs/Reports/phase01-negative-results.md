@@ -1,9 +1,10 @@
 # ContextWeave Phase 0/1 — Scoped negative-results report
 
-**Tag:** `v0.1.0-phase01-archive`  
+**Archive:** tag `v0.1.1-phase01-full` / branch `archive/phase0-1-research`
+(see [Docs/status/ARCHIVE.md](../status/ARCHIVE.md)).  
 **Date:** 2026-10-24 (revised same day)  
 **Scope:** Synthetic needle / multi-fact suites on Colab A100-40GB. Not a claim about
-CacheBlend or EPIC in general, nor about real RAG traffic.
+CacheBlend or EPIC in general, nor about real RAG traffic. Tombstone only on `main`.
 
 ## 1. Setup and stacks
 

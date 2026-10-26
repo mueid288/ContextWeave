@@ -1,25 +1,24 @@
-# Docs
+# Docs index
 
-| Folder | Contents |
+**Start here (product):**
+
+1. [product/CLAIMS.md](product/CLAIMS.md) — what you may / may not say  
+2. [product/READINESS.md](product/READINESS.md) — kit readiness scorecard  
+3. [product/integrators.md](product/integrators.md) — 10-minute integrate path  
+4. [product/live-shim.md](product/live-shim.md) — `cw-serve-order`  
+5. [product/cw-field-kit-dogfood.md](product/cw-field-kit-dogfood.md) — live field traffic  
+
+**Also useful**
+
+| Doc | Role |
 |---|---|
-| [`status/`](status/) | Current project state, experiment log, exit/thesis memos |
-| [`core/`](core/) | Architecture, assumptions, planner, fingerprints, cost, prior-art |
-| [`prd/`](prd/) | Research charter + amendments; [`own_rag_demo_prd.md`](prd/own_rag_demo_prd.md) (next demo handoff) |
-| [`gates/g0/`](gates/g0/) | G0 procedures (corpus replay) |
-| [`gates/g1/`](gates/g1/) | G1 Colab / CacheBlend / EPIC procedures |
-| [`pre-reg/`](pre-reg/) | One-question GPU pre-registrations |
-| [`runbooks/`](runbooks/) | GPU rental, pins, safety, partner ask |
-| [`results/`](results/) | Provisional G0 write-ups |
-| [`Reports/`](Reports/) | Scoped Phase 0/1 negative-results writeup |
-| [`product/`](product/) | Canonical-order C1 amplification (CPU product desk) |
-| [`Reviews/`](Reviews/) | External review notes + dispositions |
-| [`Research/`](Research/) | ResolventKV brief + adoption map |
-| [`plans/`](plans/) | Implementation plans |
-| [`archive/`](archive/) | Phase 0 kickoff notes |
+| [product/canonical-order.md](product/canonical-order.md) | Order policy rationale |
+| [product/trace-schema.md](product/trace-schema.md) | partner_v1 / canonical JSONL |
+| [product/field-order-ab.md](product/field-order-ab.md) | Field Layer 1 A/B |
+| [status/ship-v0.2-c1-kit.md](status/ship-v0.2-c1-kit.md) | Ship note |
+| [status/ARCHIVE.md](status/ARCHIVE.md) | Where Phase 0/1 research went |
+| [runbooks/local-safety.md](runbooks/local-safety.md) | No model load on laptop |
+| [prd/own_rag_demo_prd.md](prd/own_rag_demo_prd.md) | Own-corpus demo PRD |
+| [Reports/phase01-negative-results.md](Reports/phase01-negative-results.md) | Research tombstone |
 
-**Start here:** [`status/pause.md`](status/pause.md) →
-[`status/closeout-product-v0.md`](status/closeout-product-v0.md) →
-[`status/closeout-phase0-1.md`](status/closeout-phase0-1.md) →
-[`product/live-shim.md`](product/live-shim.md).
-
-Shipped policy demo (CPU): `cw-plan-demo --json`
+Colab notes under `product/colab-*.md` reproduce banked claim suites.

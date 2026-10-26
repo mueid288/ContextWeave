@@ -1,8 +1,0 @@
-# NOTE: This config is not yet consumed by any CLI entry point.
-# Intended for future use with cw-analyze-trace --gate-config.
-# See MAJ-10 in the project review for details.
-gate: G0
-threshold_share_recurring_non_prefix: 0.30
-threshold_median_chunk_tokens: 512
-workload_config: configs/workloads/synthetic_rag_default.yaml
-provisional: true

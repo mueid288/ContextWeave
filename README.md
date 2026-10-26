@@ -2,27 +2,27 @@
 
 **Product (v0.2):** Canonical Order **C1** evaluation kit — reorder retrieved RAG
 chunks so shared documents form a stable prefix, raising native **prefix-cache**
-hits and cutting repeated prefill on multi-query workloads.
+hits on multi-query workloads.
 
 | Start | Link |
 |---|---|
 | Claims (can / cannot) | [Docs/product/CLAIMS.md](Docs/product/CLAIMS.md) |
-| Integrator guide (10 min) | [Docs/product/integrators.md](Docs/product/integrators.md) |
-| Live shim (`cw-serve-order`) | [Docs/product/live-shim.md](Docs/product/live-shim.md) |
+| Readiness | [Docs/product/READINESS.md](Docs/product/READINESS.md) |
+| Integrator guide | [Docs/product/integrators.md](Docs/product/integrators.md) |
+| Live shim | [Docs/product/live-shim.md](Docs/product/live-shim.md) |
+| Field dogfood (cw-field) | [Docs/product/cw-field-kit-dogfood.md](Docs/product/cw-field-kit-dogfood.md) |
 | Ship note | [Docs/status/ship-v0.2-c1-kit.md](Docs/status/ship-v0.2-c1-kit.md) |
 
-**Tag:** `v0.2.0-c1-kit` · Policy: prefer `by_frequency_desc`.
+**Not** a multi-tenant SaaS · **Not** cw-field itself · Research Phase 0/1 is
+archived ([Docs/status/ARCHIVE.md](Docs/status/ARCHIVE.md)).
 
-Research PIC / Phase 0–1 is **archived** ([closeout](Docs/status/closeout-phase0-1.md)).
-Product desk closeout: [Docs/status/closeout-product-v0.md](Docs/status/closeout-product-v0.md).
-
-**Laptop policy:** never download or run models on this machine. See
+**Laptop policy:** never download or run models here —
 [Docs/runbooks/local-safety.md](Docs/runbooks/local-safety.md).
 
 ## Quick start — C1 kit (CPU)
 
 ```bash
-git checkout v0.2.0-c1-kit   # or main at/after that tag
+git checkout main
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
@@ -35,68 +35,43 @@ print(reorder_documents(
     'by_frequency_desc', prior=prior))
 "
 
-# Measure order A/B on a trace
+# Measure order A/B (regenerate trace first if missing)
+cw-generate-workload --config configs/workloads/synthetic_rag_default.yaml
 cw-analyze-trace --trace benchmarks/workloads/synthetic_rag_default/trace.jsonl \
   --compare-chunk-order --report /tmp/compare_chunk_order.md
 
-# OpenAI-compatible reorder shim (optional upstream)
+# OpenAI-compatible reorder shim
 cw-serve-order --reorder-json /path/to/req.json --cold-start-n 0
-# CW_UPSTREAM_URL=http://gpu:8000 cw-serve-order --port 8080
+# Dry-run chat completions need: CW_ALLOW_DRY_RUN=1
+# With GPU upstream: CW_UPSTREAM_URL=http://gpu:8000 cw-serve-order --port 8080
 ```
 
-Full integrator path: [Docs/product/integrators.md](Docs/product/integrators.md).
+## Field dogfood
 
-## Research / demand tooling (secondary)
+Pull live `partner_v1` from [cw-field](https://github.com/mueid288/cw-field-traffic-app),
+import, Gate G0 (provisional on synthetic tokens):
 
 ```bash
-# Synthetic G0
-python scripts/workloads/generate_workload.py --config configs/workloads/synthetic_rag_default.yaml
-python scripts/workloads/analyze_trace.py --trace benchmarks/workloads/synthetic_rag_default/trace.jsonl \
-  --report benchmarks/reports/g0_synthetic_rag_default.md \
-  --cache-budget-gb 128 --require-working-set
-
-# Import partner_v1
-python scripts/workloads/import_trace.py \
-  --input benchmarks/trace_analysis/examples/partner_v1_sample.jsonl \
-  --out benchmarks/workloads/imported_sample/trace.jsonl \
-  --analyze --report benchmarks/reports/g0_imported_sample.md
-
-# cw-field live pull → G0 (dogfood app; not the lab kit)
-# export CW_FIELD_URL=http://127.0.0.1:8787 CW_FIELD_ADMIN_TOKEN=...
-cw-field-g0
-
-cw-plan-demo --json
-cw-rag-demo index   # own-corpus demo; see Docs/product/colab-own-rag-demo.md
+export CW_FIELD_URL=http://127.0.0.1:8787 CW_FIELD_ADMIN_TOKEN=…
+cw-field-g0 --allow-provisional-ok   # local; omit allow for bankable ok=false
 ```
 
-## Docs & scripts
-
-| Path | Purpose |
-|---|---|
-| [Docs/product/CLAIMS.md](Docs/product/CLAIMS.md) | **Outbound claims** |
-| [Docs/product/integrators.md](Docs/product/integrators.md) | **Lab integrate guide** |
-| [Docs/product/](Docs/product/) | C1 product docs |
-| [Docs/status/](Docs/status/) | Closeouts, ship notes, pause |
-| [Docs/prd/](Docs/prd/) | Research charter (archive context) |
-| [scripts/workloads/](scripts/workloads/) | G0 CPU CLIs |
-| [artifacts/](artifacts/) | Banked evidence |
+Trace format: [Docs/product/trace-schema.md](Docs/product/trace-schema.md).
 
 ## Layout
 
 ```text
-configs/           model and workload YAML
-Docs/              product/, status/, core/, gates/, pre-reg/, …
-src/contextweave/  product/ (C1) + research packages
-benchmarks/        generated traces, reports
-scripts/           workloads/, product/, g1/, …
-tests/             unit tests (CPU)
-artifacts/         banked evidence
+src/contextweave/product/   C1 library + shim + rag_demo
+src/contextweave/trace_analysis/  metrics + chunk-order compare
+src/contextweave/workloads/ import, field_g0, synthetic/corpus
+Docs/product/               CLAIMS, integrators, dogfood
+artifacts/                  Banked claim evidence only
+scripts/workloads/          G0 + field pipeline wrappers
+scripts/product/            Claim reproduction evals
 ```
 
 ## Gates (honest)
 
-- **G0:** provisional PASS on synthetic / corpus paths; **provisional partner-field PASS**
-  banked (`artifacts/cw-field-g0-2026-10-25-field/`). Not final tokenizer G0.
-- **G1:** CacheBlend closed; EPIC@12k PASS (historical).
-- **G2 / G3:** not opened.
-- **Product C1:** scoped COMPLETE — TTFT suite + field desk A/B; see CLAIMS.
+- **Product C1:** scoped COMPLETE — see CLAIMS + READINESS.
+- **Field G0:** provisional PASS banked (`artifacts/cw-field-g0-2026-10-25-field/`).
+- **Research G1/G2 / PIC:** archived — do not reopen without a new thesis.

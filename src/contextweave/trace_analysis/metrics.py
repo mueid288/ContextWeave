@@ -9,8 +9,8 @@ import json
 import math
 import statistics
 
-from contextweave.fingerprints.schema import hash_token_ids
 from contextweave.tokenization.boundaries import ChunkingConfig, canonicalize_segment_tokens
+from contextweave.trace_analysis.hashing import hash_token_ids
 from contextweave.trace_analysis.prefix_cache import PrefixCacheSimulator
 from contextweave.trace_analysis.working_set import (
     WorkingSetConfig,

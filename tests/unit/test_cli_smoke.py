@@ -1,4 +1,4 @@
-"""Smoke tests for ContextWeave CLI entry points."""
+"""Smoke tests for ContextWeave C1 / field CLI entry points."""
 from pathlib import Path
 import subprocess
 import sys
@@ -6,105 +6,43 @@ import sys
 from contextweave.cli import (
     analyze_trace,
     build_corpus_trace,
-    cost_model,
-    fingerprint_example,
     generate_workload,
     import_trace,
 )
 
 
-def test_analyze_trace_help():
+def _help_ok(module: str) -> None:
     result = subprocess.run(
-        [sys.executable, "-m", "contextweave.cli.analyze_trace", "--help"],
+        [sys.executable, "-m", module, "--help"],
         capture_output=True,
         text=True,
     )
     assert result.returncode == 0
     assert "usage" in result.stdout.lower() or "usage" in result.stderr.lower()
+
+
+def test_analyze_trace_help():
+    _help_ok("contextweave.cli.analyze_trace")
 
 
 def test_generate_workload_help():
-    result = subprocess.run(
-        [sys.executable, "-m", "contextweave.cli.generate_workload", "--help"],
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0
-    assert "usage" in result.stdout.lower() or "usage" in result.stderr.lower()
+    _help_ok("contextweave.cli.generate_workload")
 
 
 def test_import_trace_help():
-    result = subprocess.run(
-        [sys.executable, "-m", "contextweave.cli.import_trace", "--help"],
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0
-    assert "usage" in result.stdout.lower() or "usage" in result.stderr.lower()
-
-
-def test_cost_model_help():
-    result = subprocess.run(
-        [sys.executable, "-m", "contextweave.cli.cost_model", "--help"],
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0
-    assert "usage" in result.stdout.lower() or "usage" in result.stderr.lower()
+    _help_ok("contextweave.cli.import_trace")
 
 
 def test_build_corpus_trace_help():
-    result = subprocess.run(
-        [sys.executable, "-m", "contextweave.cli.build_corpus_trace", "--help"],
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0
-    assert "usage" in result.stdout.lower() or "usage" in result.stderr.lower()
+    _help_ok("contextweave.cli.build_corpus_trace")
 
 
-def test_fingerprint_example_help():
-    result = subprocess.run(
-        [sys.executable, "-m", "contextweave.cli.fingerprint_example", "--help"],
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0
-    assert "usage" in result.stdout.lower() or "usage" in result.stderr.lower()
+def test_serve_order_help():
+    _help_ok("contextweave.cli.serve_order")
 
 
-def test_cost_model_arg_parsing(tmp_path: Path):
-    report_file = tmp_path / "report.md"
-    json_file = tmp_path / "report.json"
-    code = cost_model.main(
-        [
-            "--lengths",
-            "1000,2000",
-            "--repair-fraction",
-            "0.10",
-            "--report",
-            str(report_file),
-            "--json",
-            str(json_file),
-        ]
-    )
-    assert code == 0
-    assert report_file.exists()
-    assert json_file.exists()
-
-
-def test_fingerprint_example_arg_parsing(tmp_path: Path, repo_root: Path):
-    out_file = tmp_path / "fingerprint.json"
-    code = fingerprint_example.main(
-        [
-            "--model-config",
-            str(repo_root / "configs" / "models" / "qwen3_8b.yaml"),
-            "--out",
-            str(out_file),
-        ]
-    )
-    assert code == 0
-    assert out_file.exists()
+def test_field_g0_help():
+    _help_ok("contextweave.cli.cw_field_g0")
 
 
 def test_generate_workload_arg_parsing(tmp_path: Path, repo_root: Path):
@@ -145,7 +83,6 @@ def test_import_trace_arg_parsing(tmp_path: Path, repo_root: Path):
 
 
 def test_analyze_trace_arg_parsing(tmp_path: Path, repo_root: Path):
-    # First produce a canonical trace to analyze
     trace_file = tmp_path / "imported_for_analysis.jsonl"
     import_trace.main(
         [

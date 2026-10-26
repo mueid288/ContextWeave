@@ -238,7 +238,7 @@ top‑k, does frequency-stable order via `cw-serve-order` achieve warm p50 speed
 4. CPU: `cw-rag-demo ask` against dry-run shim (`cw-serve-order` without upstream)  
 5. CPU: bench dry-build + HTTP client  
 6. Colab runbook; owner runs GPU; agent banks artifacts + updates pre-reg PASS/FAIL  
-7. Update `Docs/status/pause.md` / experiment-log with one entry — **then stop**
+7. Update ship/readiness notes if claims change — **then stop**
 
 Do **not** start GPU until steps 1–5 pass `cpu_gate`.
 
