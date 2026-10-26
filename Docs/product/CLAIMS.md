@@ -18,12 +18,14 @@ hits the prefix cache — fewer repeated tokens, lower warm TTFT.
 | On banked live field retrieves (N=27), frequency lifts simulated `share_prefix_cached` by **~5.6 pp** vs natural and cuts post-prefix tokens ~8% | `artifacts/product-field-order-ab-2026-10-25/` |
 | Live multi-user field traffic shows provisional Gate G0 PASS (reuse exists) | `artifacts/cw-field-g0-2026-10-25-field/` |
 | Desk G0-sim prefix-hit lift for canonical order | `artifacts/product-canonical-order-2026-10-24/` |
+| Kit dogfood Layer 1 (scoped): on the **frequency-arm** imported trace (N=15, provisional tokens), counterfactual `--compare-chunk-order` shows frequency vs natural **~+17 pp** `share_prefix_cached` — not a live cross-arm TTFT or G0 claim | `artifacts/product-kit-dogfood-2026-10-26/` |
 
 ## Cannot claim
 
 - Universal token reduction on all prompts / all workloads  
 - Field **live** warm TTFT win (Layer 2 not run)  
 - Final (non-provisional) partner-trace G0 / real tokenizer IDs  
+- Kit dogfood as a live head-to-head win of served frequency vs served natural (the +17 pp row is **sim reorder** on one arm’s imported trace; G0 on those arms **FAIL**ed median chunk)  
 - Parity with relevance-first RAG ranking for arbitrary corpora  
 - Benefit without engine **prefix caching** enabled  
 - Production multi-tenant product or “drops into any foundation model weights”  

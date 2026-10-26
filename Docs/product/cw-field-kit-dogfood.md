@@ -5,12 +5,18 @@ Prove the v0.2 kit on the live app: **frequency** (default) vs **natural**
 
 cw-field **imports the real kit** (`from contextweave.product import FrequencyPrior,
 reorder_documents, resolve_mode`), pinned to a **commit SHA** (not a floating tag).
-`ORDER_MODE` switches arms; traces log `meta.order_mode` **and**
+The UI has a **per-session Natural | Frequency toggle** (order proof panel). For
+**banked** ops A/B arms below, still wipe traces and set env `ORDER_MODE` so the
+whole arm is homogeneous. Traces log `meta.order_mode` **and**
 `meta.order_mode_effective` (cold frequency → `by_doc_id`). Health shows
 `contextweave` + `cw_c1_kit: "v0.2.0-c1-kit"`.
 
-For short seed arms, set `COLD_START_N=0` so frequency is actually warm; otherwise
-filter A/B on `order_mode_effective`, not `order_mode` alone.
+cw-field defaults `COLD_START_N=0` for the invite showcase (warm frequency). For
+ops arms that must exercise cold→`by_doc_id`, set `COLD_START_N=32` on the
+server. Otherwise filter A/B on `order_mode_effective`, not `order_mode` alone.
+`/health` reports `order_mode_env` (default) and `order_mode_session` only when
+the request includes a logged-in cookie — do not treat bare `/health` as the UI
+toggle.
 
 **Never** run `cw-analyze-trace` on raw `partner_v1.jsonl` (silent zero metrics).
 Always use the **imported** `trace.jsonl`.
@@ -25,6 +31,11 @@ docker compose up -d --build web
 curl -sS http://127.0.0.1:8787/health
 # expect: "order_mode":"frequency","cw_c1_kit":"v0.2.0-c1-kit","contextweave":"0.2.0"
 ```
+
+**Local HTTP dogfood:** Compose sets `COOKIE_SECURE=1` (tunnel/HTTPS). On plain
+`http://127.0.0.1`, session cookies will not stick unless you override, e.g.
+`docker-compose.override.yml` with `COOKIE_SECURE: "0"` (keep override local /
+gitignored). Banked evidence: `artifacts/product-kit-dogfood-2026-10-26/`.
 
 ## Arm A — natural (control)
 

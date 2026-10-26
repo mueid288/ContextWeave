@@ -1,0 +1,13 @@
+{
+  "source": "/Users/apple/Code/Context Weave/artifacts/cw-field-g0-kit-frequency/partner_v1.jsonl",
+  "output": "/Users/apple/Code/Context Weave/artifacts/cw-field-g0-kit-frequency/trace.jsonl",
+  "format": "partner_v1",
+  "rows_in": 15,
+  "rows_out": 15,
+  "synthetic_token_rows": 15,
+  "text_approx_rows": 0,
+  "prefix_identity_unknown_rows": 0,
+  "errors": [],
+  "provisional_g0": true,
+  "notes": "CPU-only import. No model tokenization."
+}

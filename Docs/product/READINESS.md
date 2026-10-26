@@ -14,10 +14,11 @@
 | Lab quality claim (needle) | **Ready (scoped)** | `artifacts/product-order-quality-2026-10-24/` |
 | Field sim A/B (~5.6 pp prefix share) | **Ready (desk bar)** | Pre-reg ≥10 pp not met; soft-keep frequency |
 | Field G0 dogfood pipeline | **Ready** | Provisional synthetic tokens |
+| Kit dogfood Layer 1 (sim on frequency arm) | **Ready (scoped)** | `product-kit-dogfood-2026-10-26/` (+17 pp counterfactual; N=15; G0 FAIL) |
 | Field G0 final / real tokenizer IDs | **Missing** | Explicit non-claim |
 | Field Layer 2 live TTFT | **Missing** | Explicit non-goal this tag |
 | PyPI publish | **Missing** | Explicit non-goal |
-| Own-RAG warm ≥1.15× | **Not met** | FAIL banked (`artifacts/own-rag-demo-2026-10-24/`) |
+| Own-RAG warm ≥1.15× | **Not met** | FAIL banked (`artifacts/own-rag-demo-2026-10-24/`); harness removed |
 | Multi-tenant SaaS / PIC planner | **Out of scope** | Research archived |
 
 ## Verdict
@@ -36,9 +37,17 @@ field TTFT. Default next: outbound; open Layer 2 or PyPI only on explicit ask.
 4. A/B with `cw-analyze-trace --compare-chunk-order` on a real replay.  
 5. Do not claim wins without that measurement.
 
+## Prioritized gaps
+
+See [../status/gaps.md](../status/gaps.md) for definitions and gated tracks (M1 final
+G0, M2 Layer 2 TTFT, M3 PyPI). Soft honesty gaps (own-RAG FAIL, desk-only field
+A/B) stay documented there too.
+
 ## Owner checklist (this repo)
 
 - [x] Product surface minimized on `main`  
 - [x] Research on archive tag/branch  
 - [x] CLAIMS + ship note current  
-- [ ] Optional: PyPI / Layer 2 when requested  
+- [x] Gap memo (`Docs/status/gaps.md`)  
+- [x] Live kit dogfood Layer 1 banked  
+- [ ] Optional: PyPI / Layer 2 / final G0 when requested (M1/M2/M3 — see gaps.md)  

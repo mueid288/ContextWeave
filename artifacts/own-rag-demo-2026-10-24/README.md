@@ -4,7 +4,7 @@ Session: `cw-own-rag-demo`
 Stack: vLLM OpenAI + `--enable-prefix-caching`, `mistralai/Mistral-7B-Instruct-v0.2`  
 Shim: `cw-serve-order` on **:18080** (Colab `:8080` is system `node`)  
 Corpus: `benchmarks/corpora/sample_docs` (53 chunks)  
-Harness: `cw-rag-demo bench --warm-trials 8`
+Harness (removed from `main`): was `cw-rag-demo bench --warm-trials 8`
 
 | Mode | warm p50 | gold_ok (warm) |
 |---|---:|---:|

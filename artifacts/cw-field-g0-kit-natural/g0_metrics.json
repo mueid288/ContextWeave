@@ -1,0 +1,72 @@
+{
+  "metrics": {
+    "num_requests": 15,
+    "total_prefill_tokens": 13337,
+    "prefix_cached_tokens": 8000,
+    "post_prefix_prefill_tokens": 5337,
+    "uncovered_prefix_tokens": 96,
+    "recurring_non_prefix_tokens": 1024,
+    "unique_first_seen_chunk_tokens": 4080,
+    "query_tokens": 137,
+    "chunk_popularity": {
+      "contextweave_post_archive_review::chunk-012": 10,
+      "contextweave-deep-review-v2::chunk-029": 2,
+      "contextweave_post_archive_review::chunk-007": 3,
+      "contextweave_post_archive_review::chunk-013": 1,
+      "contextweave-deep-review-v2::chunk-024": 1,
+      "contextweave-deep-review-v2::chunk-001": 4,
+      "contextweave_post_archive_review::chunk-011": 2,
+      "contextweave_post_archive_review::chunk-008": 2,
+      "contextweave_post_archive_review::chunk-000": 9,
+      "contextweave_post_archive_review::chunk-004": 3,
+      "contextweave-deep-review-v2::chunk-005": 3,
+      "contextweave_post_archive_review::chunk-001": 2,
+      "contextweave_post_archive_review::chunk-009": 1,
+      "contextweave_post_archive_review::chunk-003": 1,
+      "contextweave-deep-review-v2::chunk-022": 1,
+      "contextweave_post_archive_review::chunk-010": 1
+    },
+    "lookup_requests": 5,
+    "synthesis_requests": 10,
+    "context_buckets": {
+      "<8k": 15
+    },
+    "working_set": {
+      "budget_gb": 128.0,
+      "bytes_per_token": 131072.0,
+      "policy": "lru",
+      "post_prefix_prefill_tokens": 5337,
+      "post_prefix_chunk_tokens": 5104,
+      "hit_tokens": 1024,
+      "miss_tokens": 4080,
+      "admit_tokens": 4080,
+      "evictions": 0,
+      "unique_chunks_touched": 16,
+      "peak_bytes": 534773760.0,
+      "final_bytes": 534773760.0,
+      "hit_share_of_post_prefix": 0.19186809068765223,
+      "hit_share_of_post_prefix_chunks": 0.2006269592476489
+    },
+    "prefix_cache_budget_tokens": 183105,
+    "prefix_cache_evictions": 0,
+    "share_prefix_cached": 0.5998350453625253,
+    "share_recurring_non_prefix": 0.19186809068765223,
+    "median_chunk_length": 256.0,
+    "synthesis_fraction": 0.6666666666666666,
+    "frac_requests_above_8k": 0.0,
+    "frac_requests_above_32k": 0.0,
+    "frac_requests_above_100k": 0.0
+  },
+  "g0": {
+    "passed": false,
+    "provisional": true,
+    "share_recurring_non_prefix": 0.19186809068765223,
+    "median_chunk_length": 256.0,
+    "threshold_share": 0.3,
+    "threshold_median_chunk": 512.0,
+    "rationale": "G0 FAIL: unconstrained share 19.2% < 30%; median chunk 256 < 512; working-set hit share 19.2% < 30% (budget=128 GB). Marked provisional.",
+    "working_set_hit_share": 0.19186809068765223,
+    "working_set_budget_gb": 128.0,
+    "require_working_set": true
+  }
+}

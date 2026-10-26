@@ -1,0 +1,39 @@
+{
+  "ok": false,
+  "provisional_g0": true,
+  "base_url": "http://127.0.0.1:8787",
+  "n_traces": 15,
+  "n_users": 1,
+  "health": {
+    "ok": true,
+    "db_ok": true,
+    "order_mode": "natural",
+    "cw_c1_kit": "v0.2.0-c1-kit",
+    "contextweave": "0.2.0"
+  },
+  "g0": {
+    "gate": "FAIL",
+    "passed": false,
+    "requests": 15,
+    "rationale": "G0 FAIL: unconstrained share 19.2% < 30%; median chunk 256 < 512; working-set hit share 19.2% < 30% (budget=128 GB). Marked provisional.",
+    "detail": {
+      "passed": false,
+      "provisional": true,
+      "share_recurring_non_prefix": 0.19186809068765223,
+      "median_chunk_length": 256.0,
+      "threshold_share": 0.3,
+      "threshold_median_chunk": 512.0,
+      "rationale": "G0 FAIL: unconstrained share 19.2% < 30%; median chunk 256 < 512; working-set hit share 19.2% < 30% (budget=128 GB). Marked provisional.",
+      "working_set_hit_share": 0.19186809068765223,
+      "working_set_budget_gb": 128.0,
+      "require_working_set": true
+    }
+  },
+  "paths": {
+    "raw": "artifacts/cw-field-g0-kit-natural/partner_v1.jsonl",
+    "imported": "artifacts/cw-field-g0-kit-natural/trace.jsonl",
+    "report": "artifacts/cw-field-g0-kit-natural/g0_report.md",
+    "metrics": "artifacts/cw-field-g0-kit-natural/g0_metrics.json"
+  },
+  "note": "ok is true only when Gate G0 passes and import is non-provisional (or --allow-provisional-ok). Synthetic partner_v1 tokens stay provisional."
+}

@@ -61,7 +61,7 @@ Trace format: [Docs/product/trace-schema.md](Docs/product/trace-schema.md).
 ## Layout
 
 ```text
-src/contextweave/product/   C1 library + shim + rag_demo
+src/contextweave/product/   C1 library + live shim
 src/contextweave/trace_analysis/  metrics + chunk-order compare
 src/contextweave/workloads/ import, field_g0, synthetic/corpus
 Docs/product/               CLAIMS, integrators, dogfood

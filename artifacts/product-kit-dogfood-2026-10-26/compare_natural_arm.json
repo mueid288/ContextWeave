@@ -1,0 +1,106 @@
+{
+  "trace": "artifacts/cw-field-g0-kit-natural/trace.jsonl",
+  "n_requests": 15,
+  "n_multi_doc": 15,
+  "overall": {
+    "natural": {
+      "num_requests": 15,
+      "share_prefix_cached": 0.5998350453625253,
+      "prefix_cached_tokens": 8000,
+      "total_prefill_tokens": 13337,
+      "post_prefix_prefill_tokens": 5337,
+      "share_recurring_non_prefix": 0.19186809068765223,
+      "working_set_hit_share": 0.19186809068765223
+    },
+    "by_doc_id": {
+      "num_requests": 15,
+      "share_prefix_cached": 0.5230561595561221,
+      "prefix_cached_tokens": 6976,
+      "total_prefill_tokens": 13337,
+      "post_prefix_prefill_tokens": 6361,
+      "share_recurring_non_prefix": 0.3219619556673479,
+      "working_set_hit_share": 0.3219619556673479
+    },
+    "by_sha256_doc_id": {
+      "num_requests": 15,
+      "share_prefix_cached": 0.5614456024593237,
+      "prefix_cached_tokens": 7488,
+      "total_prefill_tokens": 13337,
+      "post_prefix_prefill_tokens": 5849,
+      "share_recurring_non_prefix": 0.26260899299025475,
+      "working_set_hit_share": 0.26260899299025475
+    },
+    "by_frequency_desc": {
+      "num_requests": 15,
+      "share_prefix_cached": 0.6190297668141261,
+      "prefix_cached_tokens": 8256,
+      "total_prefill_tokens": 13337,
+      "post_prefix_prefill_tokens": 5081,
+      "share_recurring_non_prefix": 0.15115134815981107,
+      "working_set_hit_share": 0.15115134815981107
+    }
+  },
+  "multi_doc": {
+    "natural": {
+      "num_requests": 15,
+      "share_prefix_cached": 0.5998350453625253,
+      "prefix_cached_tokens": 8000,
+      "total_prefill_tokens": 13337,
+      "post_prefix_prefill_tokens": 5337,
+      "share_recurring_non_prefix": 0.19186809068765223,
+      "working_set_hit_share": 0.19186809068765223
+    },
+    "by_doc_id": {
+      "num_requests": 15,
+      "share_prefix_cached": 0.5230561595561221,
+      "prefix_cached_tokens": 6976,
+      "total_prefill_tokens": 13337,
+      "post_prefix_prefill_tokens": 6361,
+      "share_recurring_non_prefix": 0.3219619556673479,
+      "working_set_hit_share": 0.3219619556673479
+    },
+    "by_sha256_doc_id": {
+      "num_requests": 15,
+      "share_prefix_cached": 0.5614456024593237,
+      "prefix_cached_tokens": 7488,
+      "total_prefill_tokens": 13337,
+      "post_prefix_prefill_tokens": 5849,
+      "share_recurring_non_prefix": 0.26260899299025475,
+      "working_set_hit_share": 0.26260899299025475
+    },
+    "by_frequency_desc": {
+      "num_requests": 15,
+      "share_prefix_cached": 0.6190297668141261,
+      "prefix_cached_tokens": 8256,
+      "total_prefill_tokens": 13337,
+      "post_prefix_prefill_tokens": 5081,
+      "share_recurring_non_prefix": 0.15115134815981107,
+      "working_set_hit_share": 0.15115134815981107
+    }
+  },
+  "deltas_vs_natural": {
+    "by_doc_id": {
+      "overall_share_prefix_cached_pp": -7.6778885806403245,
+      "overall_post_prefix_reduction_pct": -19.18680906876522,
+      "multi_doc_share_prefix_cached_pp": -7.6778885806403245,
+      "multi_doc_post_prefix_reduction_pct": -19.18680906876522,
+      "note_recurrence": null
+    },
+    "by_sha256_doc_id": {
+      "overall_share_prefix_cached_pp": -3.8389442903201565,
+      "overall_post_prefix_reduction_pct": -9.593404534382621,
+      "multi_doc_share_prefix_cached_pp": -3.8389442903201565,
+      "multi_doc_post_prefix_reduction_pct": -9.593404534382621,
+      "note_recurrence": null
+    },
+    "by_frequency_desc": {
+      "overall_share_prefix_cached_pp": 1.9194721451600838,
+      "overall_post_prefix_reduction_pct": 4.796702267191311,
+      "multi_doc_share_prefix_cached_pp": 1.9194721451600838,
+      "multi_doc_post_prefix_reduction_pct": 4.796702267191311,
+      "note_recurrence": "Recurrence absorbed into native prefix cache (C1)"
+    }
+  },
+  "pass_heuristic_frequency": false,
+  "pass_bar": "by_frequency_desc: \u2265+10pp share_prefix_cached (overall or multi-doc) OR \u226520% multi-doc post_prefix reduction"
+}

@@ -28,7 +28,6 @@ cw-generate-workload = "contextweave.cli.generate_workload:main"
 cw-import-trace = "contextweave.cli.import_trace:main"
 cw-build-corpus-trace = "contextweave.cli.build_corpus_trace:main"
 cw-serve-order = "contextweave.cli.serve_order:main"
-cw-rag-demo = "contextweave.cli.rag_demo:main"
 cw-field-g0 = "contextweave.cli.cw_field_g0:main"
 
 [tool.setuptools.packages.find]
