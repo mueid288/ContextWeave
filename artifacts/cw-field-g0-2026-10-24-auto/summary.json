@@ -1,5 +1,5 @@
 {
-  "ok": true,
+  "ok": false,
   "base_url": "http://127.0.0.1:8787",
   "n_traces": 3,
   "health": {
@@ -22,5 +22,6 @@
     "imported": "artifacts/cw-field-g0-2026-10-24-auto/trace.jsonl",
     "report": "artifacts/cw-field-g0-2026-10-24-auto/g0_report.md"
   },
-  "note": "Provisional until N is large and median chunk / recurrence clear bars."
+  "note": "Provisional until N is large and median chunk / recurrence clear bars. Corrected 2026-10-26: ok must not bank provisional/FAIL.",
+  "reason": "g0_fail"
 }

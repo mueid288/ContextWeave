@@ -1,0 +1,106 @@
+{
+  "trace": "artifacts/kit-live-check-2026-10-25/partner_v1.jsonl",
+  "n_requests": 31,
+  "n_multi_doc": 0,
+  "overall": {
+    "natural": {
+      "num_requests": 31,
+      "share_prefix_cached": 0.0,
+      "prefix_cached_tokens": 0,
+      "total_prefill_tokens": 0,
+      "post_prefix_prefill_tokens": 0,
+      "share_recurring_non_prefix": 0.0,
+      "working_set_hit_share": 0.0
+    },
+    "by_doc_id": {
+      "num_requests": 31,
+      "share_prefix_cached": 0.0,
+      "prefix_cached_tokens": 0,
+      "total_prefill_tokens": 0,
+      "post_prefix_prefill_tokens": 0,
+      "share_recurring_non_prefix": 0.0,
+      "working_set_hit_share": 0.0
+    },
+    "by_sha256_doc_id": {
+      "num_requests": 31,
+      "share_prefix_cached": 0.0,
+      "prefix_cached_tokens": 0,
+      "total_prefill_tokens": 0,
+      "post_prefix_prefill_tokens": 0,
+      "share_recurring_non_prefix": 0.0,
+      "working_set_hit_share": 0.0
+    },
+    "by_frequency_desc": {
+      "num_requests": 31,
+      "share_prefix_cached": 0.0,
+      "prefix_cached_tokens": 0,
+      "total_prefill_tokens": 0,
+      "post_prefix_prefill_tokens": 0,
+      "share_recurring_non_prefix": 0.0,
+      "working_set_hit_share": 0.0
+    }
+  },
+  "multi_doc": {
+    "natural": {
+      "num_requests": 0,
+      "share_prefix_cached": 0.0,
+      "prefix_cached_tokens": 0,
+      "total_prefill_tokens": 0,
+      "post_prefix_prefill_tokens": 0,
+      "share_recurring_non_prefix": 0.0,
+      "working_set_hit_share": null
+    },
+    "by_doc_id": {
+      "num_requests": 0,
+      "share_prefix_cached": 0.0,
+      "prefix_cached_tokens": 0,
+      "total_prefill_tokens": 0,
+      "post_prefix_prefill_tokens": 0,
+      "share_recurring_non_prefix": 0.0,
+      "working_set_hit_share": null
+    },
+    "by_sha256_doc_id": {
+      "num_requests": 0,
+      "share_prefix_cached": 0.0,
+      "prefix_cached_tokens": 0,
+      "total_prefill_tokens": 0,
+      "post_prefix_prefill_tokens": 0,
+      "share_recurring_non_prefix": 0.0,
+      "working_set_hit_share": null
+    },
+    "by_frequency_desc": {
+      "num_requests": 0,
+      "share_prefix_cached": 0.0,
+      "prefix_cached_tokens": 0,
+      "total_prefill_tokens": 0,
+      "post_prefix_prefill_tokens": 0,
+      "share_recurring_non_prefix": 0.0,
+      "working_set_hit_share": null
+    }
+  },
+  "deltas_vs_natural": {
+    "by_doc_id": {
+      "overall_share_prefix_cached_pp": 0.0,
+      "overall_post_prefix_reduction_pct": 0.0,
+      "multi_doc_share_prefix_cached_pp": 0.0,
+      "multi_doc_post_prefix_reduction_pct": 0.0,
+      "note_recurrence": null
+    },
+    "by_sha256_doc_id": {
+      "overall_share_prefix_cached_pp": 0.0,
+      "overall_post_prefix_reduction_pct": 0.0,
+      "multi_doc_share_prefix_cached_pp": 0.0,
+      "multi_doc_post_prefix_reduction_pct": 0.0,
+      "note_recurrence": null
+    },
+    "by_frequency_desc": {
+      "overall_share_prefix_cached_pp": 0.0,
+      "overall_post_prefix_reduction_pct": 0.0,
+      "multi_doc_share_prefix_cached_pp": 0.0,
+      "multi_doc_post_prefix_reduction_pct": 0.0,
+      "note_recurrence": null
+    }
+  },
+  "pass_heuristic_frequency": false,
+  "pass_bar": "by_frequency_desc: \u2265+10pp share_prefix_cached (overall or multi-doc) OR \u226520% multi-doc post_prefix reduction"
+}

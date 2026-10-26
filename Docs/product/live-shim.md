@@ -30,8 +30,9 @@ cw-serve-order --reorder-json /tmp/req.json --cold-start-n 0
 ## Server (dry-run or upstream)
 
 ```bash
-# Dry-run on laptop (rewrites only; fake completion)
-cw-serve-order --port 8080
+# Dry-run on laptop (rewrites only; fake completion).
+# Without CW_ALLOW_DRY_RUN, /v1/chat/completions returns HTTP 503.
+CW_ALLOW_DRY_RUN=1 cw-serve-order --port 8080
 
 # On GPU host, point at vLLM OpenAI server
 CW_UPSTREAM_URL=http://127.0.0.1:8000 cw-serve-order --host 0.0.0.0 --port 8080

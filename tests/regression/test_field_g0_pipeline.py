@@ -68,6 +68,45 @@ def test_below_min_traces(tmp_path: Path):
     assert summary["reason"] == "below_min_traces"
 
 
+def test_provisional_pass_not_bankable_without_allow(tmp_path: Path):
+    """Synthetic partner_v1 can G0-PASS but must not set summary.ok without allow."""
+    art_root = tmp_path / "repo"
+    (art_root / "artifacts").mkdir(parents=True)
+    tag = "unit-prov"
+    art = art_root / "artifacts" / f"cw-field-g0-{tag}"
+    art.mkdir(parents=True)
+    raw = art / "partner_v1.jsonl"
+    # Large chunks → median ≥ 512 → G0 PASS, still synthetic/provisional.
+    lines = [
+        json.dumps(_partner_line("u1", chunk_chars=2200)),
+        json.dumps(_partner_line("u2", chunk_chars=2200)),
+    ]
+    raw.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    code = field_g0.main(
+        [
+            "--skip-download",
+            "--repo-root",
+            str(art_root),
+            "--tag",
+            tag,
+            "--min-traces",
+            "1",
+            "--min-users",
+            "1",
+            "--token",
+            "unused",
+            # no --allow-provisional-ok
+        ]
+    )
+    assert code == 3
+    summary = json.loads((art / "summary.json").read_text(encoding="utf-8"))
+    assert summary["g0"]["gate"] == "PASS"
+    assert summary["ok"] is False
+    assert summary["reason"] == "provisional_not_bankable"
+    assert summary.get("provisional_g0") is True
+
+
 def test_pipeline_ok_false_on_g0_fail(tmp_path: Path):
     art_root = tmp_path / "repo"
     (art_root / "artifacts").mkdir(parents=True)

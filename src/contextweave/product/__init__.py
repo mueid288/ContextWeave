@@ -5,6 +5,7 @@ from contextweave.product.live_order import (
     DocumentChunk,
     apply_chat_documents,
     reorder_documents,
+    resolve_mode,
 )
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "FrequencyPrior",
     "apply_chat_documents",
     "reorder_documents",
+    "resolve_mode",
 ]

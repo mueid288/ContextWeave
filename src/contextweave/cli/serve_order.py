@@ -2,8 +2,8 @@
 
 Examples::
 
-  # Dry-run (no upstream): reorder only
-  cw-serve-order --port 8080
+  # Dry-run (no upstream): reorder only — requires explicit allow
+  CW_ALLOW_DRY_RUN=1 cw-serve-order --port 8080
 
   # Forward to a GPU OpenAI server
   CW_UPSTREAM_URL=http://127.0.0.1:8000 cw-serve-order --port 8080

@@ -1,6 +1,7 @@
 {
-  "ok": true,
+  "ok": false,
   "provisional_g0": true,
+  "reason": "provisional_not_bankable",
   "base_url": "http://127.0.0.1:8787",
   "n_traces": 31,
   "n_users": 5,
@@ -9,13 +10,13 @@
     "db_ok": true,
     "order_mode": "frequency",
     "cw_c1_kit": "v0.2.0-c1-kit",
-    "contextweave": "0.1.0"
+    "contextweave": "0.2.0"
   },
   "g0": {
     "gate": "PASS",
     "passed": true,
     "requests": 31,
-    "rationale": "G0 PASS: unconstrained recurring non-prefix=41.8% (\u226530%); median chunk=528 (\u2265512); LRU hit share=41.8% @ 128 GB (\u226530% required). Marked provisional.",
+    "rationale": "G0 PASS: unconstrained recurring non-prefix=41.8% (≥30%); median chunk=528 (≥512); LRU hit share=41.8% @ 128 GB (≥30% required). Marked provisional.",
     "detail": {
       "passed": true,
       "provisional": true,
@@ -23,7 +24,7 @@
       "median_chunk_length": 528.0,
       "threshold_share": 0.3,
       "threshold_median_chunk": 512.0,
-      "rationale": "G0 PASS: unconstrained recurring non-prefix=41.8% (\u226530%); median chunk=528 (\u2265512); LRU hit share=41.8% @ 128 GB (\u226530% required). Marked provisional.",
+      "rationale": "G0 PASS: unconstrained recurring non-prefix=41.8% (≥30%); median chunk=528 (≥512); LRU hit share=41.8% @ 128 GB (≥30% required). Marked provisional.",
       "working_set_hit_share": 0.4180964153275649,
       "working_set_budget_gb": 128.0,
       "require_working_set": true
@@ -35,5 +36,5 @@
     "report": "artifacts/cw-field-g0-2026-10-25/g0_report.md",
     "metrics": "artifacts/cw-field-g0-2026-10-25/g0_metrics.json"
   },
-  "note": "ok is true only when Gate G0 passes and import is non-provisional (or --allow-provisional-ok). Synthetic partner_v1 tokens stay provisional."
+  "note": "ok is true only when Gate G0 passes and import is non-provisional (or --allow-provisional-ok). Synthetic partner_v1 tokens stay provisional. Corrected 2026-10-26: was wrongly banked ok:true under --allow-provisional-ok."
 }

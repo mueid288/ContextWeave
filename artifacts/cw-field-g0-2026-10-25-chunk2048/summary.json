@@ -1,5 +1,5 @@
 {
-  "ok": true,
+  "ok": false,
   "base_url": "http://127.0.0.1:8787",
   "n_traces": 3,
   "n_users": 1,
@@ -31,5 +31,6 @@
     "report": "artifacts/cw-field-g0-2026-10-25-chunk2048/g0_report.md",
     "metrics": "artifacts/cw-field-g0-2026-10-25-chunk2048/g0_metrics.json"
   },
-  "note": "ok mirrors Gate G0. Provisional synthetic tokens from partner_v1. Raise --min-traces/--min-users for real multi-user evidence."
+  "note": "ok mirrors Gate G0. Provisional synthetic tokens from partner_v1. Raise --min-traces/--min-users for real multi-user evidence. Corrected 2026-10-26: ok must not bank provisional/FAIL.",
+  "reason": "provisional_not_bankable"
 }

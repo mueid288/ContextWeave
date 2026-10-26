@@ -18,8 +18,8 @@ source .venv/bin/activate
 cw-rag-demo index
 cw-rag-demo retrieve "What monthly uptime does Acme target?"
 cw-rag-demo bench --dry-build
-# ask against local dry-run shim (no GPU):
-cw-serve-order --port 8080 --cold-start-n 0 &
+# ask against local dry-run shim (no GPU; CW_ALLOW_DRY_RUN required):
+CW_ALLOW_DRY_RUN=1 cw-serve-order --port 8080 --cold-start-n 0 &
 cw-rag-demo ask "What monthly uptime does Acme target for the Inference API?"
 ```
 
