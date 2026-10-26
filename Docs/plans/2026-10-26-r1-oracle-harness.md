@@ -76,14 +76,16 @@ Bank `pip freeze`, trials, report under `artifacts/r1-oracle-YYYY-MM-DD/` **befo
 
 ---
 
-## 5. CPU deliverables on `main` (this batch)
+## 5. Deliverables on `main`
 
 | Item | Purpose |
 |---|---|
 | `src/contextweave/oracle/` | Oracle vs best-fixed upside (no model load) |
 | `cw-r1-oracle` CLI | Analyze banked trials against Gate R1 |
-| Unit tests | Synthetic trials: pass/fail frontier math |
-| This runbook | GPU collect still TODO until `scripts/r1/collect_*` lands |
+| `scripts/r1/collect_oracle_http.py` | GPU HTTP collect (C0/C1 + optional C3 URL) |
+| `scripts/r1/workload.py` | Zipfian lookup/synthesis prompts |
+| [colab-r1-oracle.md](../product/colab-r1-oracle.md) | Colab procedure |
+| Unit tests | Synthetic trials + dry-workload + safety gate |
 
 ---
 

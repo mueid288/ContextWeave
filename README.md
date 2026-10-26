@@ -14,6 +14,7 @@ hits on multi-query workloads.
 | Ship note | [Docs/status/ship-v0.2-c1-kit.md](Docs/status/ship-v0.2-c1-kit.md) |
 | Control plane (north star) | [Docs/product/control-plane-north-star.md](Docs/product/control-plane-north-star.md) |
 | Gate R1 harness | [Docs/plans/2026-10-26-r1-oracle-harness.md](Docs/plans/2026-10-26-r1-oracle-harness.md) |
+| Colab R1 collect | [Docs/product/colab-r1-oracle.md](Docs/product/colab-r1-oracle.md) |
 
 **Not** a multi-tenant SaaS · **Not** cw-field itself.  
 **Approved direction:** fail-closed reuse control plane (R1 open). Phase 0/1

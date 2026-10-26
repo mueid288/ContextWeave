@@ -1,13 +1,32 @@
-# R1 GPU collect (not on laptop)
+# R1 — Gate oracle collect
 
-CPU analysis: `cw-r1-oracle --input trials.jsonl --report out.json`
+| Piece | Role |
+|---|---|
+| `workload.py` | Zipfian lookup/synthesis requests (CPU) |
+| `collect_oracle_http.py` | GPU HTTP collect → JSONL + oracle report |
+| `cw-r1-oracle` | CPU re-analysis of banked trials |
 
-GPU collector `collect_oracle_lmcache.py` is **not** checked in yet. Until it is:
+## Laptop (allowed)
 
-1. Rent a GPU host ([Docs/runbooks/local-safety.md](../../Docs/runbooks/local-safety.md)).
-2. Install vLLM + LMCache with prefix caching + CacheBlend.
-3. Emit JSONL rows: `request_id`, `config` ∈ {C0,C1,C3}, `quality`, `ttft_ms`,
-   optional `slice_id`, `feasible`.
-4. Copy trials to this repo and run `cw-r1-oracle`.
+```bash
+python scripts/r1/collect_oracle_http.py --dry-workload --n-requests 40 \
+  --out /tmp/r1_workload.json
+cw-r1-oracle --input path/to/oracle_trials.jsonl --report /tmp/r1.json --json
+pytest tests/unit/test_r1_workload.py tests/unit/test_oracle_upside.py -q
+```
 
-See [Docs/plans/2026-10-26-r1-oracle-harness.md](../../Docs/plans/2026-10-26-r1-oracle-harness.md).
+## GPU / Colab
+
+Follow [Docs/product/colab-r1-oracle.md](../../Docs/product/colab-r1-oracle.md).
+
+```bash
+export CONTEXTWEAVE_ALLOW_MODEL_LOAD=1   # GPU host only
+python scripts/r1/collect_oracle_http.py \
+  --base-url http://127.0.0.1:8000 \
+  --c3-base-url http://127.0.0.1:8001 \
+  --out artifacts/r1-oracle-WIP/oracle_trials.jsonl \
+  --report artifacts/r1-oracle-WIP/oracle_report.json
+```
+
+Do **not** install torch/vllm/lmcache on the laptop
+([Docs/runbooks/local-safety.md](../../Docs/runbooks/local-safety.md)).
