@@ -121,6 +121,7 @@ def _prompt_for(
     prior: FrequencyPrior,
     rng: random.Random,
     salt: str,
+    blend_special_str: str = " # # ",
 ) -> str:
     docs = [
         {"document_id": d, "content": req.bodies[d]} for d in req.document_ids
@@ -145,12 +146,14 @@ def _prompt_for(
         ordered = [c.document_id for c in chunks]
         return r1_workload.format_prompt(req, ordered)
     if mode == "C3":
-        # Same textual order as C1; blend server is expected to reuse non-prefix KV.
+        # Frequency order + blend separators so LMCache can split/reuse chunks.
         chunks = reorder_documents(
             docs, "by_frequency_desc", prior=prior, observe=False
         )
         ordered = [c.document_id for c in chunks]
-        return r1_workload.format_prompt(req, ordered)
+        return r1_workload.format_prompt(
+            req, ordered, blend_special_str=blend_special_str
+        )
     raise ValueError(mode)
 
 
@@ -179,7 +182,23 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="CPU only: write workload JSON and exit (no HTTP)",
     )
+    p.add_argument(
+        "--only-configs",
+        default="",
+        help="Comma list to measure (e.g. C3). Default: C0,C1,C3",
+    )
+    p.add_argument(
+        "--blend-special-str",
+        default=" # # ",
+        help="Separator inserted between docs for C3 CacheBlend prompts",
+    )
     args = p.parse_args(argv)
+    only = {
+        c.strip().upper()
+        for c in (args.only_configs or "").split(",")
+        if c.strip()
+    }
+    configs = [c for c in ("C0", "C1", "C3") if not only or c in only]
 
     if args.dry_workload:
         reqs = r1_workload.generate_requests(
@@ -212,7 +231,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print(
         f"r1 collect model={args.model} n={args.n_requests} runs={args.runs} "
-        f"c3={'yes' if c3_url else 'skip'} base={args.base_url}",
+        f"configs={configs} c3={'yes' if c3_url else 'skip'} base={args.base_url}",
         flush=True,
     )
 
@@ -224,7 +243,7 @@ def main(argv: list[str] | None = None) -> int:
         reorder_documents(docs, "by_frequency_desc", prior=prior, observe=True)
 
     for req in reqs:
-        for mode in ("C0", "C1", "C3"):
+        for mode in configs:
             if mode == "C3" and not c3_url:
                 trials.append(
                     {
@@ -241,7 +260,12 @@ def main(argv: list[str] | None = None) -> int:
                 continue
             salt = f"{req.request_id}-{mode}-{rng.randrange(1 << 30)}"
             prompt = _prompt_for(
-                req, mode=mode, prior=prior, rng=rng, salt=salt
+                req,
+                mode=mode,
+                prior=prior,
+                rng=rng,
+                salt=salt,
+                blend_special_str=args.blend_special_str,
             )
             url = c3_url if mode == "C3" else args.base_url
             try:

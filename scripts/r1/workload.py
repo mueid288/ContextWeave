@@ -97,11 +97,18 @@ def generate_requests(
     return reqs
 
 
-def format_prompt(req: R1Request, ordered_ids: Sequence[str]) -> str:
+def format_prompt(
+    req: R1Request,
+    ordered_ids: Sequence[str],
+    *,
+    blend_special_str: str | None = None,
+) -> str:
+    """Build the user prompt. For CacheBlend, pass ``blend_special_str`` (e.g. ``" # # "``)."""
     blocks = []
     for did in ordered_ids:
         blocks.append(f"### {did}\n{req.bodies[did]}")
-    return "\n\n".join(blocks) + f"\n\nQuestion: {req.question}"
+    sep = blend_special_str if blend_special_str is not None else "\n\n"
+    return sep.join(blocks) + f"{sep}Question: {req.question}"
 
 
 def quality_contains(text: str, gold: str) -> float:
